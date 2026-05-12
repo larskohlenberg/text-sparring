@@ -22,6 +22,10 @@ Bitte:
    und die neue Handoff-Datei,
    aktualisiere state.md (Dran-Feld, Verlauf, ggf. neue Runde
    anlegen, falls ich gerade Synthese erledigt habe und Runde < 10).
+   Wenn state.md `Step-Ausführung: subagent` zeigt, erzeuge zuerst
+   einen isolierten Step-Kontext unter `sparring/context/` und delegiere
+   den Schritt an einen frischen Subagent/Worker, falls dein Tool das
+   unterstützt. Der Subagent darf state.md nicht aktualisieren.
 4. Starte danach den Wait-Loop:
    bash sparring/watch_loop.sh "{OTHER_NAME}"
 5. Reagiere auf Exit-Codes:
@@ -48,6 +52,9 @@ In diesem Fall:
    einen Output (These / Antithese / Synthese je nach Rolle laut
    state.md) plus einen separaten Übergabeimpuls für den nächsten
    Agenten. Keine Meta-Kommentare im Hauptoutput.
+   Wenn der Zustand einen Subagent-Modus beschreibt, behandle ihn als
+   Kontextisolations-Wunsch. Ohne lokalen Datei- und Subagent-Zugriff
+   bleibst du im semi-manuellen Modus.
    Mein Name in der Challenge ist "{OTHER_NAME}".
    ```
 

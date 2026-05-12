@@ -122,6 +122,26 @@ Regeln:
 
 ---
 
+## Ausführungsmodus
+
+Das Sparring kann Schritte inline oder in isolierten Subagent-Kontexten ausführen. Die aktive Einstellung steht in `sparring/state.md`:
+
+- `Ausführungsmodus` ist die User-Wahl: `Auto`, `Subagent` oder `Inline`.
+- `Step-Ausführung` ist die tatsächliche Umsetzung im aktuellen Tool: `subagent` oder `inline`.
+
+Im Subagent-Modus erzeugt die Hauptsession vor jedem Schritt eine Datei unter `sparring/context/round_NN_step_M_prompt.md`. Der Subagent/Worker/Workstream erhält nur diesen Step-Kontext und schreibt nur die dort genannten Output-Dateien.
+
+Wichtig:
+
+- Nur die Hauptsession aktualisiert `state.md`.
+- Nur die Hauptsession legt neue Runden an.
+- Nur die Hauptsession startet den Wait-Loop.
+- Subagents dürfen keine Orchestrierung übernehmen.
+- Wenn `Ausführungsmodus: Subagent` gesetzt ist und ein Tool keine Subagents starten kann, muss der Agent stoppen und den User fragen. Kein stiller Fallback.
+- Bei `Ausführungsmodus: Auto` darf ein Agent auf inline zurückfallen, wenn keine Subagent-Ausführung verfügbar ist.
+
+---
+
 ## Rotationsplan (Vollrotation)
 
 Jede Rolle wird über 10 Runden gleich oft von beiden Agenten besetzt (5×5).

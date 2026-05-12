@@ -9,6 +9,8 @@ Versionierung nach [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 - Separate `*_handoff.md`-Dateien pro Schritt, damit Agenten dem nächsten Schritt gezielte Prüf- und Schärfimpulse mitgeben können.
+- Initialer `Ausführungsmodus` (`Auto`, `Subagent`, `Inline`) mit gespeicherter tatsächlicher `Step-Ausführung` in `state.md`.
+- `step_context.md.tpl` als Vorlage für isolierte Subagent-Step-Kontexte.
 
 ## [0.1.0] - 2026-05-12
 

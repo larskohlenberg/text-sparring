@@ -18,6 +18,8 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach 10 
 
 **Übergabeimpulse**: Jeder Schritt erzeugt neben seinem Hauptoutput eine kurze `*_handoff.md`-Datei. Darin markiert der aktuelle Agent 1–3 konkrete Prüf- oder Schärfpunkte für den nächsten Agenten. Die Haupttexte bleiben dadurch sauber, während der nächste Schritt trotzdem gezielter an Spannung, Risiko oder ungenutztem Potenzial weiterarbeiten kann.
 
+**Subagent-Modus**: Für lange Sparrings ist ein isolierter Step-Kontext empfohlen. Die Hauptsession orchestriert nur noch: Sie liest `state.md`, erzeugt einen kleinen Prompt unter `sparring/context/`, delegiert den aktuellen Schritt an einen frischen Subagent/Worker/Workstream, prüft die erwarteten Output-Dateien und aktualisiert danach `state.md`.
+
 ## Was das Besondere ist
 
 - **Harness-agnostisch**: Funktioniert mit lokalen Agenten, die Dateizugriff haben, und semi-manuell auch mit webbasierten Chat-Tools.
@@ -35,6 +37,7 @@ dein-projekt/
     ├── state.md                       ← Aktueller Status (einzige Wahrheit)
     ├── watch_loop.sh                  ← Pure-Bash Polling
     ├── chatgpt_codex_instructions.md  ← Beispiel-Anweisung für einen zweiten Agent
+    ├── context/                       ← isolierte Step-Kontexte für Subagent-Ausführung
     └── rounds/
         ├── round_01/
         │   ├── artifact.md            ← Ausgangstext
@@ -75,7 +78,7 @@ Du in Agent A: "Starte ein Text-Sparring über draft.md"
 ```
 
 Agent A:
-- Fragt nach: zweiter Agent (Name + Tool), dein Name im Sparring
+- Fragt nach: zweiter Agent (Name + Tool), dein Name im Sparring und Ausführungsmodus
 - Legt `sparring/` an und erzeugt die Projektdateien für das Sparring
 - Ergänzt, falls passend, eine Tool-spezifische Startanweisung
 - Erledigt **Schritt 1 (These) in Runde 1** plus Übergabeimpuls
@@ -114,6 +117,13 @@ Standard-Werte im Skill (können in `state.md` pro Projekt überschrieben werden
 | `POLL_SEC` | `30` | Wie oft `watch_loop.sh` `state.md` prüft (Sekunden) |
 | `MAX_WAIT_MIN` | `30` | Max. Wartezeit bevor Timeout-Alarm |
 | Anzahl Runden | `10` | Fest in Rotationsplan, nicht parametrisiert |
+| `Ausführungsmodus` | `Auto` | `Auto`, `Subagent` oder `Inline`; wird in `state.md` gespeichert |
+
+### Ausführungsmodi
+
+- `Auto`: Subagent-Ausführung verwenden, wenn das aktuelle Tool sie erkennbar unterstützt; sonst inline.
+- `Subagent`: Jeden Schritt in einem frischen Subagent/Worker/Workstream ausführen. Wenn das Tool das nicht kann, stoppt der Agent und fragt nach.
+- `Inline`: Der aktive Agent erledigt seine Schritte direkt in der Hauptsession.
 
 ## Voraussetzungen
 

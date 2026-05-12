@@ -8,6 +8,8 @@
 **Status:** waiting_for_output
 **Dran:** {AGENT_A}
 **Rolle in diesem Schritt:** These
+**Ausführungsmodus:** {EXECUTION_MODE}
+**Step-Ausführung:** {STEP_EXECUTION}
 
 **Nächster Schritt nach dir:** {AGENT_B} übernimmt Antithese in Runde 1
 

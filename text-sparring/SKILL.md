@@ -27,6 +27,10 @@ Stelle dem User exakt diese Fragen — eine nach der anderen, kompakt:
 1. **Welchen Text soll ich sparren?** Erwarte einen Dateipfad (z. B. `draft.md`, `texte/kapitel_03.md`).
 2. **Welches zweite Tool kommt rein?** Optionen: `Codex CLI`, `ChatGPT (Web)`, `Cowork`, `andere Claude Code Session`. Frag nach dem Namen, wie er später in `state.md` referenziert werden soll (z. B. "Codex", "GPT-5").
 3. **Mein eigener Name im Sparring?** Default: `Claude`. Akzeptiere Abweichungen.
+4. **Ausführungsmodus?** Default: `Auto`. Optionen:
+   - `Auto`: Subagent/Worker/Workstream verwenden, wenn das aktuelle Tool das erkennbar unterstützt; sonst inline.
+   - `Subagent`: jeden Schritt in einem frischen Subagent-Kontext ausführen. Wenn das aktuelle Tool das nicht kann, stoppen und den User fragen.
+   - `Inline`: Schritte direkt in der Hauptsession ausführen.
 
 ### Schritt 2: Scaffolding anlegen
 
@@ -38,6 +42,7 @@ sparring/
 ├── state.md
 ├── watch_loop.sh
 ├── chatgpt_codex_instructions.md
+├── context/
 └── rounds/
     └── round_01/
         └── artifact.md          ← Kopie des Ausgangstexts
@@ -46,9 +51,10 @@ sparring/
 Vorgehen:
 
 - Lies `templates/CHALLENGE.md.tpl` und ersetze die Platzhalter mit den konkreten Agent-Namen und dem unten beschriebenen Rotationsplan. Schreibe das Ergebnis nach `sparring/CHALLENGE.md`.
-- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/state.md`. Setze den initialen Status auf: Runde 1, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**.
+- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/state.md`. Setze den initialen Status auf: Runde 1, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**. Setze `Ausführungsmodus` auf die User-Wahl (`Auto`, `Subagent` oder `Inline`) und `Step-Ausführung` auf die tatsächlich gewählte Umsetzung für dieses Tool (`subagent` oder `inline`).
 - Kopiere `templates/watch_loop.sh` 1:1 nach `sparring/watch_loop.sh`. Mache sie nicht ausführbar — sie wird mit `bash watch_loop.sh ...` aufgerufen.
 - Lies `templates/chatgpt_codex_instructions.md`, befülle die Platzhalter mit dem Projektpfad und dem Namen des zweiten Agents, schreibe nach `sparring/chatgpt_codex_instructions.md`.
+- Lege `sparring/context/` an. Nutze `templates/step_context.md.tpl` später als Vorlage für Schritt-Kontexte im Subagent-Modus.
 - Kopiere den vom User benannten Ausgangstext nach `sparring/rounds/round_01/artifact.md`.
 
 ### Schritt 3: CLAUDE.md erweitern (nur wenn du Claude bist)
@@ -78,9 +84,11 @@ Diese Verteilung ist exakt ausbalanciert: jeder Agent macht jede Rolle genau 5×
 
 Schreibe sie in `state.md` mit den echten Namen statt A/B.
 
-### Schritt 5: Schritt 1 (These der Runde 1) selbst erledigen
+### Schritt 5: Schritt 1 (These der Runde 1) erledigen
 
-Lies `sparring/rounds/round_01/artifact.md` und produziere die These gemäß den Regeln in `CHALLENGE.md`. Schreibe nach `sparring/rounds/round_01/step_1_thesis.md` und den Übergabeimpuls nach `sparring/rounds/round_01/step_1_handoff.md`.
+Wenn `Step-Ausführung: subagent` gilt: Erzeuge zuerst `sparring/context/round_01_step_1_prompt.md` aus `templates/step_context.md.tpl`, beauftrage einen frischen Subagent/Worker/Workstream mit genau diesem Kontext, warte auf Abschluss und prüfe, dass `step_1_thesis.md` und `step_1_handoff.md` existieren.
+
+Wenn `Step-Ausführung: inline` gilt: Lies `sparring/rounds/round_01/artifact.md` und produziere die These gemäß den Regeln in `CHALLENGE.md`. Schreibe nach `sparring/rounds/round_01/step_1_thesis.md` und den Übergabeimpuls nach `sparring/rounds/round_01/step_1_handoff.md`.
 
 ### Schritt 6: state.md aktualisieren
 
@@ -107,10 +115,19 @@ Lies `sparring/state.md` vollständig. Identifiziere:
 - Wer der Initiator ist
 - Welche Runde und welcher Schritt aktuell offen ist
 - Welche Rolle du in diesem Schritt hast
+- Welcher `Ausführungsmodus` und welche `Step-Ausführung` gelten
 
 Falls `Dran:` nicht **dich** zeigt: melde *"Im laufenden Sparring ist gerade {OTHER} dran, nicht ich. Soll ich trotzdem in den Wait-Loop gehen und warten, bis ich dran bin?"* — auf User-Bestätigung dann Schritt 4 (Wait-Loop) ohne vorherige Arbeit.
 
 ### Schritt 2: Deinen Schritt erledigen
+
+Wenn `Ausführungsmodus: Subagent` gesetzt ist und du keinen Subagent/Worker/Workstream starten kannst: Stoppe und frage den User. Kein stiller Fallback auf inline.
+
+Wenn `Ausführungsmodus: Auto` gesetzt ist: Verwende Subagent-Ausführung, wenn dein aktuelles Tool das erkennbar unterstützt; sonst verwende inline. Aktualisiere `Step-Ausführung` in `state.md`, falls deine tatsächliche Umsetzung von der gespeicherten abweicht.
+
+Wenn `Step-Ausführung: subagent` gilt: Erzeuge vor dem Schritt eine Kontextdatei in `sparring/context/round_NN_step_M_prompt.md`, beauftrage einen frischen Subagent/Worker/Workstream mit genau diesem Kontext und prüfe danach, dass die erwarteten Output-Dateien geschrieben wurden. Der Subagent darf `state.md` nicht aktualisieren, keine neue Runde anlegen und keinen Wait-Loop starten.
+
+Wenn `Step-Ausführung: inline` gilt: Erledige den Schritt direkt in der Hauptsession.
 
 - **These**: Lies `rounds/round_NN/artifact.md` und, falls `NN > 1`, den Übergabeimpuls der Vorrunde (`rounds/round_{NN-1}/step_3_handoff.md`). Schreibe nach `step_1_thesis.md` und `step_1_handoff.md`.
 - **Antithese**: Lies `rounds/round_NN/step_1_thesis.md`, `step_1_handoff.md` und `artifact.md` als Bezug. Schreibe nach `step_2_antithesis.md` und `step_2_handoff.md`.
@@ -151,6 +168,7 @@ Der Bash-Loop blockiert und beendet sich mit drei möglichen Exit-Codes. Reagier
 - **state.md ist die einzige Wahrheit** — vor jeder Aktion erneut lesen. Kein Caching im Kopf.
 - **Niemals Schritte überspringen** oder mehrere Schritte in einer Aktivierung erledigen. Pro Aufwachen genau ein Schritt, dann zurück in den Loop.
 - **Hauptoutput und Übergabe trennen** — These/Synthese bleiben reine Textfassungen; Prüfimpulse gehören ausschließlich in `*_handoff.md`.
+- **Subagenten nur für Step-Arbeit** — Subagents schreiben ausschließlich die erwarteten Output-Dateien. Nur die Hauptsession aktualisiert `state.md`, legt neue Runden an und startet den Wait-Loop.
 - **Bei Konflikten**: Wenn state.md inkonsistent wirkt (z. B. Verlauf sagt Schritt 2 fertig, aber Datei fehlt), melde es dem User statt zu raten.
 
 ## Dateien in diesem Skill
@@ -161,6 +179,7 @@ Der Bash-Loop blockiert und beendet sich mit drei möglichen Exit-Codes. Reagier
 | `templates/state.md.tpl` | Status-Datei mit Platzhaltern |
 | `templates/claude_md_snippet.md` | Anhang für CLAUDE.md im Projekt |
 | `templates/chatgpt_codex_instructions.md` | Instructions für den zweiten Agent (Custom Instructions o. Ä.) |
+| `templates/step_context.md.tpl` | Vorlage für isolierte Subagent-Step-Kontexte |
 | `templates/watch_loop.sh` | Bash-Polling-Script, pure POSIX |
 | `templates/round_artifact.md.tpl` | (Reserve, derzeit ungenutzt — Ausgangstext wird direkt kopiert) |
 
