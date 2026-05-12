@@ -4,9 +4,12 @@
 
 Erledige genau Runde {ROUND}, Schritt {STEP}: {ROLE}.
 
-## Sparring Artifact
+## Sparring
 
-Siehe `sparring/artifact.md`.
+- **Sparring-Name:** {SPARRING_NAME}
+- **Sparring-Pfad:** {SPARRING_PATH}
+
+Siehe `{SPARRING_PATH}/artifact.md`.
 
 **Artifact-Typ:** {ARTIFACT_TYPE}
 **Sparring-Typ:** {RESOLVED_SPARRING_TYPE}
@@ -15,7 +18,7 @@ Siehe `sparring/artifact.md`.
 
 ## Rolle
 
-Arbeite strikt nach der Rollen-Definition für **{ROLE}** in `sparring/CHALLENGE.md`.
+Arbeite strikt nach der Rollen-Definition für **{ROLE}** in `{SPARRING_PATH}/CHALLENGE.md`.
 
 ## Input-Dateien
 
@@ -28,7 +31,7 @@ Arbeite strikt nach der Rollen-Definition für **{ROLE}** in `sparring/CHALLENGE
 ## Grenzen
 
 - Schreibe nur die genannten Output-Dateien.
-- Aktualisiere nicht `sparring/state.md`.
+- Aktualisiere nicht `{SPARRING_PATH}/state.md`.
 - Lege keine neue Runde an.
 - Starte keinen Wait-Loop.
 - Halte Hauptoutput und Übergabeimpuls getrennt.

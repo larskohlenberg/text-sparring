@@ -1,5 +1,7 @@
 # Text-Sparring — Regelwerk
 
+**Sparring-Name:** {SPARRING_NAME}
+**Sparring-Pfad:** {SPARRING_PATH}
 **Initiator (Agent A):** {AGENT_A}
 **Zweiter Agent (Agent B):** {AGENT_B}
 **Gesamtrunden:** {TOTAL_ROUNDS}
@@ -18,7 +20,7 @@ Es geht **nicht um einen Gewinner**. Es geht um akkumulierte Qualität durch Wid
 
 ## Sparring-Gegenstand
 
-Der konkrete Gegenstand steht in `sparring/artifact.md` und zusätzlich in `sparring/state.md`.
+Der konkrete Gegenstand steht in `{SPARRING_PATH}/artifact.md` und zusätzlich in `{SPARRING_PATH}/state.md`.
 
 - `Artifact-Typ: file` bedeutet: Die Arbeitsfassung ist eine einzelne Datei (`artifact.md`, `step_1_thesis.md`, `step_3_synthesis.md`).
 - `Artifact-Typ: directory` bedeutet: Die Arbeitsfassung ist ein Verzeichnis (`artifact/`, `step_1_thesis/`, `step_3_synthesis/`).
@@ -150,13 +152,13 @@ Regeln:
 
 ## Ausführungsmodus
 
-Das Sparring kann Schritte inline oder in isolierten Subagent-Kontexten ausführen. Die aktive Einstellung steht in `sparring/state.md`:
+Das Sparring kann Schritte inline oder in isolierten Subagent-Kontexten ausführen. Die aktive Einstellung steht in `{SPARRING_PATH}/state.md`:
 
 - `Ausführungsmodus` ist die User-Wahl: `Auto`, `Subagent` oder `Inline`.
 - `Step-Ausführung` ist die tatsächliche Umsetzung im aktuellen Tool: `subagent` oder `inline`.
 - `Subagent-Qualität` ist die Qualitäts-Policy für Step-Subagents: `Inherit`, `Balanced`, `High` oder `Role-based`.
 
-Im Subagent-Modus erzeugt die Hauptsession vor jedem Schritt eine Datei unter `sparring/context/round_NN_step_M_prompt.md`. Der Subagent/Worker/Workstream erhält nur diesen Step-Kontext und schreibt nur die dort genannten Output-Dateien.
+Im Subagent-Modus erzeugt die Hauptsession vor jedem Schritt eine Datei unter `{SPARRING_PATH}/context/round_NN_step_M_prompt.md`. Der Subagent/Worker/Workstream erhält nur diesen Step-Kontext und schreibt nur die dort genannten Output-Dateien.
 
 Wichtig:
 
@@ -193,7 +195,7 @@ Der Rotationsplan ist als 10-Runden-Muster definiert. Wenn weniger als 10 Runden
 ## Datei-Layout pro Runde
 
 ```
-sparring/rounds/round_NN/
+{SPARRING_PATH}/rounds/round_NN/
 ├── artifact.md|artifact/   ← Ausgangsartefakt dieser Runde
 ├── step_1_thesis.md|/      ← These (von Agent gemäß Plan)
 ├── step_1_handoff.md       ← Übergabeimpuls an die Antithese
@@ -203,7 +205,7 @@ sparring/rounds/round_NN/
 └── step_3_handoff.md       ← Übergabeimpuls an die nächste Runde
 ```
 
-Nach der letzten Runde wird `step_3_synthesis.md` beziehungsweise `step_3_synthesis/` zusätzlich nach `sparring/FINAL_ARTIFACT.md` oder `sparring/FINAL_ARTIFACT/` kopiert.
+Nach der letzten Runde wird `step_3_synthesis.md` beziehungsweise `step_3_synthesis/` zusätzlich nach `{SPARRING_PATH}/FINAL_ARTIFACT.md` oder `{SPARRING_PATH}/FINAL_ARTIFACT/` kopiert.
 
 ---
 

@@ -1,5 +1,8 @@
 # Challenge State
 
+**Sparring-Name:** {SPARRING_NAME}
+**Sparring-Pfad:** {SPARRING_PATH}
+
 **Initiator (Agent A):** {AGENT_A}
 **Zweiter Agent (Agent B):** {AGENT_B}
 

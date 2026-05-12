@@ -38,28 +38,36 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der
 
 ## Architektur
 
+Mehrere Sparrings im selben Projekt sind möglich. Sie liegen als benannte Unterordner im gemeinsamen `sparring/`-Container:
+
 ```
 dein-projekt/
 ├── <tool-instructions>                ← optional: Tool-spezifische Startanweisung
 └── sparring/
-    ├── artifact.md                    ← stabile Definition des gechallengten Artefakts
-    ├── CHALLENGE.md                   ← Regelwerk + Rotationsplan
-    ├── state.md                       ← Aktueller Status (einzige Wahrheit)
-    ├── watch_loop.sh                  ← Pure-Bash Polling
-    ├── chatgpt_codex_instructions.md  ← Beispiel-Anweisung für einen zweiten Agent
-    ├── context/                       ← isolierte Step-Kontexte für Subagent-Ausführung
-    └── rounds/
-        ├── round_01/
-        │   ├── artifact.md|artifact/  ← Ausgangsartefakt
-        │   ├── step_1_thesis.md|/
-        │   ├── step_1_handoff.md
-        │   ├── step_2_antithesis.md
-        │   ├── step_2_handoff.md
-        │   ├── step_3_synthesis.md|/  ← wird zum Artefakt der Folgerunde
-        │   └── step_3_handoff.md
-        ├── round_02/...
-        └── round_NN/...
+    ├── readme-v1/                     ← abgeschlossenes Sparring (FINAL_ARTIFACT vorhanden)
+    │   └── ...
+    └── readme-v2/                     ← laufendes Sparring
+        ├── artifact.md                ← stabile Definition des gechallengten Artefakts
+        ├── CHALLENGE.md               ← Regelwerk + Rotationsplan
+        ├── state.md                   ← Aktueller Status (einzige Wahrheit)
+        ├── watch_loop.sh              ← Pure-Bash Polling
+        ├── chatgpt_codex_instructions.md ← Beispiel-Anweisung für einen zweiten Agent
+        ├── context/                   ← isolierte Step-Kontexte für Subagent-Ausführung
+        ├── FINAL_ARTIFACT.md|/        ← nach Abschluss der letzten Runde
+        └── rounds/
+            ├── round_01/
+            │   ├── artifact.md|artifact/  ← Ausgangsartefakt
+            │   ├── step_1_thesis.md|/
+            │   ├── step_1_handoff.md
+            │   ├── step_2_antithesis.md
+            │   ├── step_2_handoff.md
+            │   ├── step_3_synthesis.md|/  ← wird zum Artefakt der Folgerunde
+            │   └── step_3_handoff.md
+            ├── round_02/...
+            └── round_NN/...
 ```
+
+Der Sparring-Name wird im INIT-Interview gewählt und in `state.md` als `Sparring-Name` festgehalten. Bei mehreren aktiven Sparrings erkennt der JOIN-Modus automatisch das gemeinte; ist es mehrdeutig, fragt der Skill nach.
 
 ## Installation
 
@@ -88,8 +96,8 @@ Du in Agent A: "Starte ein Text-Sparring über README.md"
 ```
 
 Agent A:
-- Fragt nach: Artefaktpfad, zweiter Agent (Name + Tool), dein Name im Sparring, Sparring-Typ, Rundenzahl und Ausführungsmodus
-- Legt `sparring/` an und erzeugt die Projektdateien für das Sparring
+- Fragt nach: Artefaktpfad, Sparring-Name, zweiter Agent (Name + Tool), dein Name im Sparring, Sparring-Typ, Rundenzahl und Ausführungsmodus
+- Legt `sparring/<NAME>/` an und erzeugt die Projektdateien für das Sparring
 - Ergänzt, falls passend, eine Tool-spezifische Startanweisung
 - Erledigt **Schritt 1 (These) in Runde 1** plus Übergabeimpuls
 - Geht in den Wait-Loop
@@ -100,15 +108,22 @@ Wechsle zu Agent B im selben Projektverzeichnis. Das kann ein zweiter lokaler Ag
 
 ```
 Du in Agent B: "Steig ins Sparring ein"
+# oder bei mehreren aktiven Sparrings:
+Du in Agent B: "Steig ins Sparring readme-v2 ein"
 ```
 
 Agent B:
-- Liest `sparring/state.md`
+- Erkennt das aktive Sparring (oder fragt bei Mehrdeutigkeit nach)
+- Liest `sparring/<NAME>/state.md`
 - Liest den Übergabeimpuls aus `step_1_handoff.md`
 - Erledigt **Schritt 2 (Antithese) in Runde 1** plus Übergabeimpuls
 - Geht in den Wait-Loop
 
 Ab jetzt läuft alles autonom. Beide Sessions wachen abwechselnd auf, erledigen ihre Schritte, gehen wieder schlafen — bis die gewählte letzte Runde abgeschlossen ist.
+
+### Mehrere Sparrings parallel oder nacheinander
+
+Du kannst auf dasselbe Artefakt mehrere Sparrings legen (z. B. `readme-v1`, `readme-v2`) oder unterschiedliche Artefakte gleichzeitig sparren. Jedes Sparring lebt vollständig in seinem eigenen Unterordner, hat eigenen Watch-Loop, eigenen State und eigenes Finalartefakt. Mehrere Sparring-Snippets in derselben CLAUDE.md sind ausdrücklich erlaubt — sie unterscheiden sich über den `Sparring-Pfad`.
 
 ## Trigger-Phrasen
 
