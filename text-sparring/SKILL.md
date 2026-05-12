@@ -1,11 +1,11 @@
 ---
 name: text-sparring
-description: Set up an autonomous multi-agent text sparring loop where two AI agents (typically Claude + Codex/ChatGPT) iteratively refine a text artifact over 10 rounds using Thesis → Antithesis → Synthesis. Use this skill whenever the user wants two agents to "spar" over a text, mutually challenge or refine a draft, or run a dialectical improvement loop. Trigger on requests like "starte ein Text-Sparring", "lass zwei Agenten meinen Text gegenseitig schärfen", "richte einen dialektischen Loop ein", "set up a text sparring", "I want Claude and Codex to spar on this draft", or any mention of "Text-Sparring", "Agent-Sparring", "Multi-Agent-Refinement". Also trigger when an agent is asked to JOIN an existing sparring ("steig ins Sparring ein", "join the running sparring", "Codex, übernimm Schritt 2"). The skill is harness-agnostic — works in Claude Code, Cowork, and Codex CLI — and requires no external tools beyond bash and standard Unix utilities.
+description: Set up an autonomous multi-agent text sparring loop where two AI agents iteratively refine a text artifact over 10 rounds using Thesis → Antithesis → Synthesis. Use this skill whenever the user wants two agents to "spar" over a text, mutually challenge or refine a draft, or run a dialectical improvement loop. Trigger on requests like "starte ein Text-Sparring", "lass zwei Agenten meinen Text gegenseitig schärfen", "richte einen dialektischen Loop ein", "set up a text sparring", "let two agents spar on this draft", or any mention of "Text-Sparring", "Agent-Sparring", "Multi-Agent-Refinement". Also trigger when an agent is asked to JOIN an existing sparring ("steig ins Sparring ein", "join the running sparring", "übernimm Schritt 2"). The skill is harness-agnostic and requires no external tools beyond bash and standard Unix utilities.
 ---
 
 # Text Sparring
 
-Ein harness-agnostischer Skill zum Aufsetzen und Mitwirken an einem **Text-Sparring zwischen zwei AI-Agenten**. Zwei Agenten (z. B. Claude + Codex) durchlaufen 10 Runden mit den Rollen **These → Antithese → Synthese**, wobei beide Agenten alle Rollen in Vollrotation durchlaufen.
+Ein harness-agnostischer Skill zum Aufsetzen und Mitwirken an einem **Text-Sparring zwischen zwei AI-Agenten**. Zwei Agenten durchlaufen 10 Runden mit den Rollen **These → Antithese → Synthese**, wobei beide Agenten alle Rollen in Vollrotation durchlaufen.
 
 Es geht **nicht ums Gewinnen**, sondern um gegenseitiges Schärfen — wie zwei Sparringspartner im Training. Der Skill kennt keinen Inhalt; er orchestriert nur den **Prozess**. Der zu sparrende Text liegt außerhalb des Skills im Projektverzeichnis.
 
@@ -80,7 +80,7 @@ Schreibe sie in `state.md` mit den echten Namen statt A/B.
 
 ### Schritt 5: Schritt 1 (These der Runde 1) selbst erledigen
 
-Lies `sparring/rounds/round_01/artifact.md` und produziere die These gemäß den Regeln in `CHALLENGE.md`. Schreibe nach `sparring/rounds/round_01/step_1_thesis.md`.
+Lies `sparring/rounds/round_01/artifact.md` und produziere die These gemäß den Regeln in `CHALLENGE.md`. Schreibe nach `sparring/rounds/round_01/step_1_thesis.md` und den Übergabeimpuls nach `sparring/rounds/round_01/step_1_handoff.md`.
 
 ### Schritt 6: state.md aktualisieren
 
@@ -112,9 +112,9 @@ Falls `Dran:` nicht **dich** zeigt: melde *"Im laufenden Sparring ist gerade {OT
 
 ### Schritt 2: Deinen Schritt erledigen
 
-- **These**: Lies `rounds/round_NN/artifact.md`, schreibe nach `step_1_thesis.md`
-- **Antithese**: Lies `rounds/round_NN/step_1_thesis.md` (und `artifact.md` als Bezug), schreibe nach `step_2_antithesis.md`
-- **Synthese**: Lies sowohl `step_1_thesis.md` als auch `step_2_antithesis.md`, schreibe nach `step_3_synthesis.md`
+- **These**: Lies `rounds/round_NN/artifact.md` und, falls `NN > 1`, den Übergabeimpuls der Vorrunde (`rounds/round_{NN-1}/step_3_handoff.md`). Schreibe nach `step_1_thesis.md` und `step_1_handoff.md`.
+- **Antithese**: Lies `rounds/round_NN/step_1_thesis.md`, `step_1_handoff.md` und `artifact.md` als Bezug. Schreibe nach `step_2_antithesis.md` und `step_2_handoff.md`.
+- **Synthese**: Lies `step_1_thesis.md`, `step_2_antithesis.md` und `step_2_handoff.md`. Schreibe nach `step_3_synthesis.md` und `step_3_handoff.md`.
 
 Befolge dabei zwingend die Rollen-Definitionen aus `CHALLENGE.md`.
 
@@ -124,6 +124,7 @@ Befolge dabei zwingend die Rollen-Definitionen aus `CHALLENGE.md`.
 - **Falls du gerade Schritt 3 (Synthese) erledigt hast** UND die aktuelle Runde < 10 ist:
   - Lege `rounds/round_{NN+1}/` an
   - Kopiere `step_3_synthesis.md` nach `rounds/round_{NN+1}/artifact.md`
+  - Belasse `step_3_handoff.md` im abgeschlossenen Rundenordner; die These der nächsten Runde liest ihn dort als Übergabeimpuls.
   - Inkrementiere die Runden-Nummer in `state.md`
   - Setze `Dran:` und Rolle laut Rotationsplan für die neue Runde
 - **Falls du gerade Schritt 3 der Runde 10 erledigt hast**:
@@ -149,6 +150,7 @@ Der Bash-Loop blockiert und beendet sich mit drei möglichen Exit-Codes. Reagier
 - **Nicht den Inhalt bewerten** — der Skill befolgt nur den Prozess. Die Rollen in CHALLENGE.md geben vor, wie zu denken ist (radikal hinterfragen, integrieren ohne Kompromiss usw.). Verlass dich darauf.
 - **state.md ist die einzige Wahrheit** — vor jeder Aktion erneut lesen. Kein Caching im Kopf.
 - **Niemals Schritte überspringen** oder mehrere Schritte in einer Aktivierung erledigen. Pro Aufwachen genau ein Schritt, dann zurück in den Loop.
+- **Hauptoutput und Übergabe trennen** — These/Synthese bleiben reine Textfassungen; Prüfimpulse gehören ausschließlich in `*_handoff.md`.
 - **Bei Konflikten**: Wenn state.md inkonsistent wirkt (z. B. Verlauf sagt Schritt 2 fertig, aber Datei fehlt), melde es dem User statt zu raten.
 
 ## Dateien in diesem Skill

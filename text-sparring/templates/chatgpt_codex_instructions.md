@@ -17,7 +17,9 @@ Bitte:
 1. Lies sparring/state.md vollständig.
 2. Lies sparring/CHALLENGE.md für die Regeln.
 3. Falls "Dran: {OTHER_NAME}" → erledige meinen ausstehenden
-   Schritt strikt nach Rolle, schreibe die Output-Datei,
+   Schritt strikt nach Rolle, lies den passenden Übergabeimpuls
+   (`*_handoff.md`), falls er existiert, schreibe die Output-Datei
+   und die neue Handoff-Datei,
    aktualisiere state.md (Dran-Feld, Verlauf, ggf. neue Runde
    anlegen, falls ich gerade Synthese erledigt habe und Runde < 10).
 4. Starte danach den Wait-Loop:
@@ -44,7 +46,8 @@ In diesem Fall:
    du den aktuellen Zustand als Text-Block, befolgst die Regeln
    aus CHALLENGE.md (die ich dir mitliefere), produzierst exakt
    einen Output (These / Antithese / Synthese je nach Rolle laut
-   state.md) und nichts sonst. Keine Meta-Kommentare im Output.
+   state.md) plus einen separaten Übergabeimpuls für den nächsten
+   Agenten. Keine Meta-Kommentare im Hauptoutput.
    Mein Name in der Challenge ist "{OTHER_NAME}".
    ```
 
@@ -52,8 +55,9 @@ In diesem Fall:
    - aktuellen Inhalt von `sparring/state.md`
    - Inhalt von `sparring/CHALLENGE.md`
    - das relevante Input-File (artifact.md / step_1_thesis.md / step_2_antithesis.md)
+   - den passenden Übergabeimpuls (`*_handoff.md`), falls vorhanden
 
-3. Du nimmst den Output entgegen, speicherst ihn an der richtigen Stelle, aktualisierst state.md selbst und sagst dann **{MY_NAME}** in der anderen Session "weiter".
+3. Du nimmst Hauptoutput und Übergabeimpuls entgegen, speicherst sie an den richtigen Stellen, aktualisierst state.md selbst und sagst dann **{MY_NAME}** in der anderen Session "weiter".
 
 Diese Variante ist semi-automatisch — sie braucht dich als Datei-Botin/Boten zwischen den beiden Tools.
 

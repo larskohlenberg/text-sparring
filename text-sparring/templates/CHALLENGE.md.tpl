@@ -27,13 +27,22 @@ Du bist Autor der Runde. Deine Aufgabe:
 - Lies `artifact.md` als Ausgangspunkt.
 - Produziere die **bestmögliche Version** dieses Textes auf Basis dessen, was du jetzt weißt.
 - Falls dies Runde 1 ist: das ist der erste Vorschlag. Verbessere den Ausgangstext substanziell, aber bleibe in seinem Thema und Geist.
-- Falls dies Runde 2+ ist: `artifact.md` ist die Synthese der Vorrunde — baue darauf auf, nimm sie als Ausgangsbasis, aber verbessere mutig.
+- Falls dies Runde 2+ ist: `artifact.md` ist die Synthese der Vorrunde — baue darauf auf, lies zusätzlich `step_3_handoff.md` aus der Vorrunde, aber verbessere mutig.
 
 Schreibe das Ergebnis nach `step_1_thesis.md` in deinem aktuellen Rundenordner. Kein Kommentar, kein Meta-Text — nur der Text selbst.
 
+Schreibe zusätzlich nach `step_1_handoff.md` einen kurzen Übergabeimpuls für die Antithese:
+
+```markdown
+## Übergabeimpuls
+- Welche Annahme im Text sollte der nächste Agent besonders hart prüfen?
+- Welche Stelle wirkt stark, könnte aber auf falschen Voraussetzungen beruhen?
+- Welche Entscheidung in Ton, Struktur oder Pointe ist absichtlich riskant?
+```
+
 ### Antithese (Schritt 2)
 
-Du bist jetzt **radikaler Zweifler**, nicht Autor.
+Du bist jetzt **radikaler Zweifler**, nicht Autor. Lies `step_1_handoff.md`, falls vorhanden, bevor du prüfst.
 
 Deine einzige Aufgabe: Finde die **drei fundamentalsten Annahmen** in `step_1_thesis.md` und stelle jede davon in Frage. Nicht den Text verbessern. Die Grundlagen erschüttern.
 
@@ -62,9 +71,18 @@ Schreibe das Ergebnis nach `step_2_antithesis.md`. Format:
 - ...
 ```
 
+Schreibe zusätzlich nach `step_2_handoff.md` einen kurzen Übergabeimpuls für die Synthese:
+
+```markdown
+## Übergabeimpuls
+- Welche Kritik muss die Synthese unbedingt ernst nehmen?
+- Welche These darf trotz Kritik nicht vorschnell geopfert werden?
+- Wo liegt die produktive Spannung, aus der eine bessere Fassung entstehen kann?
+```
+
 ### Synthese (Schritt 3)
 
-Du hast jetzt `step_1_thesis.md` (These) und `step_2_antithesis.md` (Antithese).
+Du hast jetzt `step_1_thesis.md` (These), `step_2_antithesis.md` (Antithese) und `step_2_handoff.md` (Übergabeimpuls der Antithese).
 
 Deine Aufgabe ist **nicht Kompromiss**, sondern **Integration**:
 
@@ -77,6 +95,30 @@ Schreibe eine **neue Version des Textes**, die beides trägt. Kein "einerseits /
 Schreibe das Ergebnis nach `step_3_synthesis.md`. Wieder: nur der Text, kein Meta.
 
 **Wichtig**: Diese Datei wird automatisch zum `artifact.md` der nächsten Runde. Schreibe also einen vollständigen, lauffähigen Text — nicht ein Diff oder eine Sammlung von Notizen.
+
+Schreibe zusätzlich nach `step_3_handoff.md` einen kurzen Übergabeimpuls für die nächste Runde:
+
+```markdown
+## Übergabeimpuls
+- Welche neu entstandene Annahme sollte die nächste Runde prüfen?
+- Welche Stelle ist verbessert, aber noch nicht endgültig gelöst?
+- Welche Richtung sollte die nächste These mutig weiterverfolgen?
+```
+
+---
+
+## Übergabeimpulse
+
+Jeder Schritt erzeugt neben seinem Hauptoutput eine separate `*_handoff.md`-Datei. Diese Datei gibt dem nächsten Agenten 1–3 konkrete Prüf- oder Schärfimpulse mit.
+
+Der Übergabeimpuls ist **keine** Anweisung, die Rolle des nächsten Schritts zu verlassen. Er markiert nur Stellen, an denen der Text besonders Spannung, Risiko oder ungenutztes Potenzial enthält. Der nächste Agent liest den passenden Übergabeimpuls vor seinem Schritt und berücksichtigt ihn innerhalb seiner Rolle. Wenn ein Impuls der Rolle widerspricht, gilt die Rolle.
+
+Regeln:
+
+- Maximal 3 Bulletpoints.
+- Keine Meta-Diskussion über den Prozess.
+- Keine höflichen Arbeitsanweisungen.
+- Nur konkrete Prüfimpulse am Text.
 
 ---
 
@@ -105,8 +147,11 @@ Jede Rolle wird über 10 Runden gleich oft von beiden Agenten besetzt (5×5).
 sparring/rounds/round_NN/
 ├── artifact.md             ← Ausgangstext dieser Runde
 ├── step_1_thesis.md        ← These (von Agent gemäß Plan)
+├── step_1_handoff.md       ← Übergabeimpuls an die Antithese
 ├── step_2_antithesis.md    ← Antithese
-└── step_3_synthesis.md     ← Synthese — wird zum artifact.md der Folgerunde
+├── step_2_handoff.md       ← Übergabeimpuls an die Synthese
+├── step_3_synthesis.md     ← Synthese — wird zum artifact.md der Folgerunde
+└── step_3_handoff.md       ← Übergabeimpuls an die nächste Runde
 ```
 
 Nach Runde 10 wird `step_3_synthesis.md` zusätzlich nach `sparring/FINAL_ARTIFACT.md` kopiert.
@@ -126,5 +171,6 @@ Nach Runde 10 wird `step_3_synthesis.md` zusätzlich nach `sparring/FINAL_ARTIFA
 1. **state.md ist die einzige Wahrheit.** Vor jeder Aktion lesen — kein Vertrauen ins eigene Gedächtnis.
 2. **Genau ein Schritt pro Aufwachen.** Nach Erledigung zurück in den Wait-Loop.
 3. **Keine Meta-Kommentare in den Output-Dateien.** Reine Inhalts-Outputs.
-4. **Bei Inkonsistenz**: Stop, frag den User. Nicht raten.
-5. **Rollentreue**: Wenn du als Antithese-Agent versucht bist, "konstruktiv zu sein" — widerstehe. Die Rolle braucht die Schärfe.
+4. **Übergabeimpulse getrennt halten.** Prüfimpulse gehören in `*_handoff.md`, nicht in die Hauptoutput-Dateien.
+5. **Bei Inkonsistenz**: Stop, frag den User. Nicht raten.
+6. **Rollentreue**: Wenn du als Antithese-Agent versucht bist, "konstruktiv zu sein" — widerstehe. Die Rolle braucht die Schärfe.

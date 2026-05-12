@@ -16,6 +16,8 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach 10 
 
 **Vollrotation**: Über die 10 Runden übernimmt jeder Agent jede Rolle (These / Antithese / Synthese) genau 5×. Die Verteilung ist deterministisch und ausbalanciert.
 
+**Übergabeimpulse**: Jeder Schritt erzeugt neben seinem Hauptoutput eine kurze `*_handoff.md`-Datei. Darin markiert der aktuelle Agent 1–3 konkrete Prüf- oder Schärfpunkte für den nächsten Agenten. Die Haupttexte bleiben dadurch sauber, während der nächste Schritt trotzdem gezielter an Spannung, Risiko oder ungenutztem Potenzial weiterarbeiten kann.
+
 ## Was das Besondere ist
 
 - **Harness-agnostisch**: Funktioniert mit lokalen Agenten, die Dateizugriff haben, und semi-manuell auch mit webbasierten Chat-Tools.
@@ -37,8 +39,11 @@ dein-projekt/
         ├── round_01/
         │   ├── artifact.md            ← Ausgangstext
         │   ├── step_1_thesis.md
+        │   ├── step_1_handoff.md
         │   ├── step_2_antithesis.md
-        │   └── step_3_synthesis.md    ← wird zu artifact.md der Folgerunde
+        │   ├── step_2_handoff.md
+        │   ├── step_3_synthesis.md    ← wird zu artifact.md der Folgerunde
+        │   └── step_3_handoff.md
         ├── round_02/...
         └── round_10/...
 ```
@@ -73,7 +78,7 @@ Agent A:
 - Fragt nach: zweiter Agent (Name + Tool), dein Name im Sparring
 - Legt `sparring/` an und erzeugt die Projektdateien für das Sparring
 - Ergänzt, falls passend, eine Tool-spezifische Startanweisung
-- Erledigt **Schritt 1 (These) in Runde 1**
+- Erledigt **Schritt 1 (These) in Runde 1** plus Übergabeimpuls
 - Geht in den Wait-Loop
 
 ### Zweites Tool starten
@@ -86,7 +91,8 @@ Du in Agent B: "Steig ins Sparring ein"
 
 Agent B:
 - Liest `sparring/state.md`
-- Erledigt **Schritt 2 (Antithese) in Runde 1**
+- Liest den Übergabeimpuls aus `step_1_handoff.md`
+- Erledigt **Schritt 2 (Antithese) in Runde 1** plus Übergabeimpuls
 - Geht in den Wait-Loop
 
 Ab jetzt läuft alles autonom. Beide Sessions wachen abwechselnd auf, erledigen ihre Schritte, gehen wieder schlafen — bis Runde 10 abgeschlossen ist.

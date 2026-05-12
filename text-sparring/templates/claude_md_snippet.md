@@ -14,7 +14,7 @@ In diesem Projektverzeichnis existiert ein `sparring/`-Verzeichnis. Es enthält 
 Falls die Challenge noch läuft (also `sparring/state.md` **nicht** den Status `completed` zeigt):
 
 1. Lies sofort `sparring/state.md`.
-2. Falls `Dran: {MY_NAME}` → erledige den ausstehenden Schritt nach den Regeln in `sparring/CHALLENGE.md`, aktualisiere `state.md` (Dran, Verlauf, ggf. neue Runde anlegen), starte dann den Wait-Loop.
+2. Falls `Dran: {MY_NAME}` → erledige den ausstehenden Schritt nach den Regeln in `sparring/CHALLENGE.md`, lies den passenden Übergabeimpuls (`*_handoff.md`), falls vorhanden, schreibe Hauptoutput und neue Handoff-Datei, aktualisiere `state.md` (Dran, Verlauf, ggf. neue Runde anlegen), starte dann den Wait-Loop.
 3. Falls `Dran: {OTHER_NAME}` → starte direkt den Wait-Loop.
 4. Wait-Loop-Aufruf: `bash sparring/watch_loop.sh "{MY_NAME}"`
 
@@ -29,6 +29,7 @@ Falls die Challenge noch läuft (also `sparring/state.md` **nicht** den Status `
 - Nicht den Inhalt der Output-Dateien diskutieren oder bewerten — nur produzieren gemäß Rolle.
 - Nicht in einer Aktivierung mehrere Schritte erledigen — pro Aufwachen genau einer.
 - Nicht state.md aus dem Gedächtnis manipulieren — immer vorher lesen.
+- Hauptoutput und Übergabeimpuls trennen: Textfassung/Kritik/Synthese in die Step-Datei, Prüfimpulse in `*_handoff.md`.
 
 Volldetails: `sparring/CHALLENGE.md`.
 
