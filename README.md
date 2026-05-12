@@ -2,7 +2,7 @@
 
 > Ein harness-agnostischer Skill für **dialektisches Text-Sparring** zwischen zwei AI-Agenten.
 
-Zwei Agenten (typischerweise **Claude** und **Codex/ChatGPT**) verbessern einen Text gemeinsam über 10 Runden, indem sie sich gegenseitig schärfen — wie Sparringspartner im Training. Es geht nicht ums Gewinnen; es geht um akkumulierte Qualität durch Widerspruch und Integration.
+Zwei AI-Agenten verbessern einen Text gemeinsam über 10 Runden, indem sie sich gegenseitig schärfen — wie Sparringspartner im Training. Welche Tools diese Agenten ausführen, ist zweitrangig: Entscheidend ist, dass mindestens ein Agent Dateien im Projektverzeichnis lesen und schreiben kann. Es geht nicht ums Gewinnen; es geht um akkumulierte Qualität durch Widerspruch und Integration.
 
 ## Wie es funktioniert
 
@@ -18,21 +18,21 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach 10 
 
 ## Was das Besondere ist
 
-- **Harness-agnostisch**: Funktioniert in Claude Code, Cowork, Codex CLI und (semi-manuell) in ChatGPT Web.
+- **Harness-agnostisch**: Funktioniert mit lokalen Agenten, die Dateizugriff haben, und semi-manuell auch mit webbasierten Chat-Tools.
 - **Kein externer Daemon**: Kein `fswatch`, kein `cron`, kein `launchd`. Pures Bash + Markdown.
 - **Self-polling Agents**: Nach jedem erledigten Schritt geht der Agent in einen blockierenden Bash-Loop (`watch_loop.sh`), prüft alle 30 Sekunden `state.md` und übernimmt automatisch, sobald er wieder dran ist.
-- **Lars startet nur zweimal manuell**: einmal im ersten Tool ("Setup Sparring"), einmal im zweiten ("Steig ein"). Danach läuft alles autonom bis Runde 10.
+- **Nur zwei manuelle Starts nötig**: einmal im initiierenden Tool ("Setup Sparring"), einmal im zweiten Tool ("Steig ein"). Danach läuft der Wechsel automatisch bis Runde 10.
 
 ## Architektur
 
 ```
 dein-projekt/
-├── CLAUDE.md                          ← Anweisung für Claude beim Sessionstart
+├── <tool-instructions>                ← optional: Tool-spezifische Startanweisung
 └── sparring/
     ├── CHALLENGE.md                   ← Regelwerk + Rotationsplan
     ├── state.md                       ← Aktueller Status (einzige Wahrheit)
     ├── watch_loop.sh                  ← Pure-Bash Polling
-    ├── chatgpt_codex_instructions.md  ← Anweisung für den zweiten Agent
+    ├── chatgpt_codex_instructions.md  ← Beispiel-Anweisung für einen zweiten Agent
     └── rounds/
         ├── round_01/
         │   ├── artifact.md            ← Ausgangstext
@@ -45,10 +45,11 @@ dein-projekt/
 
 ## Installation
 
-### Als Claude Skill (empfohlen)
+### Als Skill-Bundle
 
 1. Lade das gepackte Bundle: [`dist/text-sparring.skill`](dist/text-sparring.skill)
-2. Importiere es in deiner Claude-Umgebung (Claude Code, Cowork, oder Claude.ai mit Skills-Support).
+2. Importiere es in eine Skill-fähige Agent-Umgebung.
+3. Starte das Sparring in einem Projekt, auf dessen Dateien der Agent zugreifen darf.
 
 ### Direkt aus dem Source-Verzeichnis
 
@@ -65,24 +66,25 @@ cd text-sparring
 ### Erstes Tool starten (Initiator)
 
 ```
-Du in Claude Code: "Starte ein Text-Sparring über draft.md"
+Du in Agent A: "Starte ein Text-Sparring über draft.md"
 ```
 
-Claude:
+Agent A:
 - Fragt nach: zweiter Agent (Name + Tool), dein Name im Sparring
-- Legt `sparring/` an, hängt Anweisungen an `CLAUDE.md`
+- Legt `sparring/` an und erzeugt die Projektdateien für das Sparring
+- Ergänzt, falls passend, eine Tool-spezifische Startanweisung
 - Erledigt **Schritt 1 (These) in Runde 1**
 - Geht in den Wait-Loop
 
 ### Zweites Tool starten
 
-Wechsle zu deinem zweiten Tool (Codex CLI, zweite Claude-Code-Session, …) im selben Projektverzeichnis:
+Wechsle zu Agent B im selben Projektverzeichnis. Das kann ein zweiter lokaler Agent sein oder ein webbasiertes Chat-Tool, sofern du die Dateien manuell überträgst.
 
 ```
-Du in Codex: "Steig ins Sparring ein"
+Du in Agent B: "Steig ins Sparring ein"
 ```
 
-Codex:
+Agent B:
 - Liest `sparring/state.md`
 - Erledigt **Schritt 2 (Antithese) in Runde 1**
 - Geht in den Wait-Loop
@@ -95,7 +97,7 @@ Der Skill triggert auf eine breite Palette von Formulierungen:
 
 **DE**: `Text-Sparring starten`, `lass zwei Agenten meinen Text schärfen`, `dialektischer Loop`, `Steig ins Sparring ein`, `Multi-Agent-Refinement`
 
-**EN**: `set up a text sparring`, `let Claude and Codex spar on this`, `join the running sparring`
+**EN**: `set up a text sparring`, `let two agents spar on this`, `join the running sparring`
 
 ## Konfiguration
 
@@ -110,8 +112,8 @@ Standard-Werte im Skill (können in `state.md` pro Projekt überschrieben werden
 ## Voraussetzungen
 
 - **macOS oder Linux** mit bash und `grep`/`sleep` (überall Standard)
-- **Claude Code, Cowork oder Codex CLI** für den autonomen Modus
-- ChatGPT Web ist nur semi-manuell nutzbar (siehe `chatgpt_codex_instructions.md`)
+- Für den autonomen Modus: zwei lokale Agent-Sessions mit Zugriff auf dasselbe Projektverzeichnis
+- Für den semi-manuellen Modus: ein zweites Chat-Tool ohne Dateizugriff, bei dem du `state.md`, `CHALLENGE.md` und die relevanten Runden-Dateien manuell übergibst
 
 Keine zusätzlichen Tools nötig. Keine Python-Dependencies. Kein `brew install`.
 
