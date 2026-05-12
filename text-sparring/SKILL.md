@@ -18,6 +18,14 @@ Triggere diesen Skill in zwei Situationen:
 
 Erkenne den Modus automatisch: Existiert `sparring/state.md` im aktuellen Projektverzeichnis → JOIN. Ansonsten → INIT.
 
+## Drei harte Gates vor jeder Schreibaktion
+
+Vor jedem Output diese drei Prüfungen durchlaufen. Wenn ein Gate fehlschlägt: **nichts schreiben**, dem User melden, welche Datei oder welches Feld konkret nicht passt. Nicht raten, nicht reparieren.
+
+1. **Role Gate** — Wirst du mit einer expliziten Kontextdatei `sparring/context/round_NN_step_M_prompt.md` aufgerufen, bist du **Step Worker**: erledige genau diesen einen Schritt, schreibe nur die im Kontext genannten Output-Pfade. Du liest oder änderst **nicht** `state.md`, legst keine neuen Runden an, kopierst keine Final-Artefakte, startest keinen Wait-Loop. Ohne Kontextdatei bist du **Hauptsession** und folgst INIT- oder JOIN-Modus.
+2. **Input Gate** — Alle für deine Rolle erwarteten Inputs existieren und sind lesbar (`artifact.md`, die Runden-Dateien aus den Vorgängerschritten, ggf. Vorrunden-Handoff). Bei Directory-Inputs muss das Verzeichnis tatsächlich Dateien enthalten.
+3. **Output Gate** — Die für deine Rolle erwarteten Output-Pfade enthalten noch keinen Inhalt. Findest du dort schon Text oder Dateien, ist der Schritt vermutlich bereits gelaufen — melde das dem User, statt zu überschreiben.
+
 ## INIT-Modus (erste Aktivierung)
 
 ### Schritt 1: Interview
@@ -72,7 +80,7 @@ Vorgehen:
 - Lies `templates/chatgpt_codex_instructions.md`, befülle die Platzhalter mit dem Projektpfad und dem Namen des zweiten Agents, schreibe nach `sparring/chatgpt_codex_instructions.md`.
 - Lege `sparring/context/` an. Nutze `templates/step_context.md.tpl` später als Vorlage für Schritt-Kontexte im Subagent-Modus.
 - Bei `Artifact-Typ: file`: Kopiere die vom User benannte Datei nach `sparring/rounds/round_01/artifact.md`.
-- Bei `Artifact-Typ: directory`: Kopiere das vom User benannte Verzeichnis nach `sparring/rounds/round_01/artifact/`.
+- Bei `Artifact-Typ: directory`: Kopiere das vom User benannte Verzeichnis nach `sparring/rounds/round_01/artifact/`. **Schließe dabei immer aus**: `sparring/`, `.git/`, `node_modules/`, `dist/`, `build/`, `.venv/`, `__pycache__/`, `.DS_Store`. Falls das Artefakt ein Projekt-Root ist (Top-Level mit `.git/`, `package.json`, `pyproject.toml` o.ä.) und nach Ausschluss noch mehr als drei Top-Level-Einträge bleiben: stoppe und frage den User nach einer expliziten Include-Liste, bevor du kopierst. Trage die tatsächlich verwendete Ausschluss- bzw. Include-Liste in `sparring/artifact.md` unter `Boundary` ein. Bei Folgerunden (Synthese → nächste Runde) gelten die Excludes nicht erneut, weil dort schon das gefilterte Artefakt kopiert wird.
 
 ### Schritt 3: CLAUDE.md erweitern (nur wenn du Claude bist)
 

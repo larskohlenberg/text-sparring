@@ -8,6 +8,10 @@ Versionierung nach [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Drei harte Gates (Role, Input, Output) am Anfang von `SKILL.md`, die vor jeder Schreibaktion geprüft werden — abgeleitet aus dem Sparring-Selbsttest (R3-Synthese), aber knapp gehalten statt als vollständiges Sicherheitsmanual.
+- Default-Ausschlussliste für Directory-Artefakte (`sparring/`, `.git/`, `node_modules/`, `dist/`, `build/`, `.venv/`, `__pycache__/`, `.DS_Store`), damit Selbstreferenz- und Build-Müll nicht in den Sparring-Korpus rutschen.
+- Eskalation auf explizite Include-Liste, wenn das Artefakt ein Projekt-Root mit vielen Top-Level-Einträgen ist.
+- `Boundary`-Sektion in `templates/artifact.md.tpl` mit `Excluded-Pfade` und `Included-Pfade` zur Dokumentation der tatsächlich verwendeten Verzeichnisgrenzen.
 - Separate `*_handoff.md`-Dateien pro Schritt, damit Agenten dem nächsten Schritt gezielte Prüf- und Schärfimpulse mitgeben können.
 - Initialer `Ausführungsmodus` (`Auto`, `Subagent`, `Inline`) mit gespeicherter tatsächlicher `Step-Ausführung` in `state.md`.
 - `step_context.md.tpl` als Vorlage für isolierte Subagent-Step-Kontexte.
