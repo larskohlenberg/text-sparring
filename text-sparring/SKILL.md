@@ -38,6 +38,11 @@ Stelle dem User exakt diese Fragen — eine nach der anderen, kompakt:
    - `Auto`: Subagent/Worker/Workstream verwenden, wenn das aktuelle Tool das erkennbar unterstützt; sonst inline.
    - `Subagent`: jeden Schritt in einem frischen Subagent-Kontext ausführen. Wenn das aktuelle Tool das nicht kann, stoppen und den User fragen.
    - `Inline`: Schritte direkt in der Hauptsession ausführen.
+7. **Subagent-Qualität?** Default: `Inherit`. Optionen:
+   - `Inherit`: Subagents übernehmen Modell/Qualität der Hauptsession; keine expliziten Overrides setzen.
+   - `Balanced`: mittlere Qualität/Kosten, wenn das Tool eine Qualitätswahl erlaubt.
+   - `High`: stärkste sinnvoll verfügbare Qualität, wenn das Tool eine Qualitätswahl erlaubt.
+   - `Role-based`: These eher Balanced, Antithese und Synthese eher High.
 
 ### Schritt 2: Scaffolding anlegen
 
@@ -62,7 +67,7 @@ Vorgehen:
 - Bestimme `Erkannter Sparring-Typ`: Bei User-Wahl `Auto` leite aus Artefakt und Projektkontext `Text`, `Campaign`, `Skill` oder `Code` ab. Bei expliziter User-Wahl übernimm diese als erkannten Typ, außer Artefakt und Typ widersprechen offensichtlich.
 - Lies `templates/CHALLENGE.md.tpl` und ersetze die Platzhalter mit den konkreten Agent-Namen, der gewählten Gesamtrundenzahl und dem unten beschriebenen Rotationsplan. Schreibe das Ergebnis nach `sparring/CHALLENGE.md`.
 - Lies `templates/artifact.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/artifact.md`. Setze `Initiale Kopie` auf `sparring/rounds/round_01/artifact.md` bei Dateien oder `sparring/rounds/round_01/artifact/` bei Verzeichnissen.
-- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/state.md`. Setze den initialen Status auf: Runde 1 von gewählter Gesamtrundenzahl, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**. Setze `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ`, `Erkannter Sparring-Typ`, `Ausführungsmodus` und `Step-Ausführung`.
+- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/state.md`. Setze den initialen Status auf: Runde 1 von gewählter Gesamtrundenzahl, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**. Setze `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ`, `Erkannter Sparring-Typ`, `Ausführungsmodus`, `Step-Ausführung` und `Subagent-Qualität`.
 - Kopiere `templates/watch_loop.sh` 1:1 nach `sparring/watch_loop.sh`. Mache sie nicht ausführbar — sie wird mit `bash watch_loop.sh ...` aufgerufen.
 - Lies `templates/chatgpt_codex_instructions.md`, befülle die Platzhalter mit dem Projektpfad und dem Namen des zweiten Agents, schreibe nach `sparring/chatgpt_codex_instructions.md`.
 - Lege `sparring/context/` an. Nutze `templates/step_context.md.tpl` später als Vorlage für Schritt-Kontexte im Subagent-Modus.
@@ -128,9 +133,11 @@ Lies `sparring/state.md` vollständig. Identifiziere:
 - Welche Runde und welcher Schritt aktuell offen ist
 - Welche Rolle du in diesem Schritt hast
 - Welcher `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ` und `Erkannter Sparring-Typ` gelten
-- Welcher `Ausführungsmodus` und welche `Step-Ausführung` gelten
+- Welcher `Ausführungsmodus`, welche `Step-Ausführung` und welche `Subagent-Qualität` gelten
 
-Falls `Dran:` nicht **dich** zeigt: melde *"Im laufenden Sparring ist gerade {OTHER} dran, nicht ich. Soll ich trotzdem in den Wait-Loop gehen und warten, bis ich dran bin?"* — auf User-Bestätigung dann Schritt 4 (Wait-Loop) ohne vorherige Arbeit.
+Falls `Dran:` den bekannten anderen Agenten zeigt: Starte direkt den Wait-Loop mit deinem Namen. Keine Rückfrage.
+
+Falls `Dran:` weder dich noch den bekannten anderen Agenten zeigt: Stoppe und frage den User, weil der State inkonsistent oder ein Agent-Name unbekannt ist.
 
 ### Schritt 2: Deinen Schritt erledigen
 
@@ -138,12 +145,19 @@ Wenn `Ausführungsmodus: Subagent` gesetzt ist und du keinen Subagent/Worker/Wor
 
 Wenn `Ausführungsmodus: Auto` gesetzt ist: Verwende Subagent-Ausführung, wenn dein aktuelles Tool das erkennbar unterstützt; sonst verwende inline. Aktualisiere `Step-Ausführung` in `state.md`, falls deine tatsächliche Umsetzung von der gespeicherten abweicht.
 
-Wenn `Step-Ausführung: subagent` gilt: Erzeuge vor dem Schritt eine Kontextdatei in `sparring/context/round_NN_step_M_prompt.md`, beauftrage einen frischen Subagent/Worker/Workstream mit genau diesem Kontext und prüfe danach, dass die erwarteten Output-Dateien geschrieben wurden. Der Subagent darf `state.md` nicht aktualisieren, keine neue Runde anlegen und keinen Wait-Loop starten.
+Wenn `Step-Ausführung: subagent` gilt: Erzeuge vor dem Schritt eine Kontextdatei in `sparring/context/round_NN_step_M_prompt.md`, beauftrage einen frischen Subagent/Worker/Workstream mit genau diesem Kontext und prüfe danach, dass die erwarteten Output-Dateien geschrieben wurden. Der Subagent darf `state.md` nicht aktualisieren, keine neue Runde anlegen und keinen Wait-Loop starten. Übersetze `Subagent-Qualität` in die beste verfügbare Modell-/Reasoning-Einstellung deines Tools:
+
+- `Inherit`: keine Modell- oder Reasoning-Overrides setzen.
+- `Balanced`: mittlere Qualität/Kosten wählen, falls möglich.
+- `High`: stärkste sinnvoll verfügbare Qualität wählen, falls möglich.
+- `Role-based`: These mit Balanced, Antithese und Synthese mit High ausführen, falls möglich.
+
+Wenn dein Tool keine Subagent-Qualitätswahl erlaubt, ist das kein Fehler; verwende faktisch `Inherit`.
 
 Wenn `Step-Ausführung: inline` gilt: Erledige den Schritt direkt in der Hauptsession.
 
 - **These**: Bei `file`: Lies `rounds/round_NN/artifact.md`; bei `directory`: lies `rounds/round_NN/artifact/`. Falls `NN > 1`, lies zusätzlich den Übergabeimpuls der Vorrunde (`rounds/round_{NN-1}/step_3_handoff.md`). Schreibe bei `file` nach `step_1_thesis.md`, bei `directory` nach `step_1_thesis/`, und immer nach `step_1_handoff.md`.
-- **Antithese**: Bei `file`: Lies `artifact.md`, `step_1_thesis.md` und `step_1_handoff.md`; bei `directory`: lies `artifact/`, `step_1_thesis/` und `step_1_handoff.md`. Schreibe nach `step_2_antithesis.md` und `step_2_handoff.md`.
+- **Antithese**: Bei `file`: Lies `artifact.md`, `step_1_thesis.md` und `step_1_handoff.md`; bei `directory`: lies `artifact/`, `step_1_thesis/` und `step_1_handoff.md`. Schreibe immer nach `step_2_antithesis.md` und `step_2_handoff.md`. Auch bei Directory-Artefakten bleibt die Antithese eine Markdown-Datei, weil sie keine neue Artefaktfassung erzeugt, sondern strukturierte Kritik.
 - **Synthese**: Lies `step_1_thesis` (Datei oder Verzeichnis), `step_2_antithesis.md` und `step_2_handoff.md`. Schreibe bei `file` nach `step_3_synthesis.md`, bei `directory` nach `step_3_synthesis/`, und immer nach `step_3_handoff.md`.
 
 Befolge dabei zwingend die Rollen-Definitionen aus `CHALLENGE.md`.

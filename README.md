@@ -24,6 +24,8 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der
 
 **Subagent-Modus**: Für lange Sparrings ist ein isolierter Step-Kontext empfohlen. Die Hauptsession orchestriert nur noch: Sie liest `state.md`, erzeugt einen kleinen Prompt unter `sparring/context/`, delegiert den aktuellen Schritt an einen frischen Subagent/Worker/Workstream, prüft die erwarteten Output-Dateien und aktualisiert danach `state.md`.
 
+**Subagent-Qualität**: Default ist `Inherit`. Der Skill setzt damit keine expliziten Modell- oder Reasoning-Overrides, sondern übernimmt die Qualität der Hauptsession. Optional kannst du `Balanced`, `High` oder `Role-based` wählen, sofern dein Tool solche Einstellungen unterstützt.
+
 ## Was das Besondere ist
 
 - **Harness-agnostisch**: Funktioniert mit lokalen Agenten, die Dateizugriff haben, und semi-manuell auch mit webbasierten Chat-Tools.
@@ -132,6 +134,8 @@ Standard-Werte im Skill (können in `state.md` pro Projekt überschrieben werden
 
 Der Skill speichert die stabile Artefaktdefinition in `sparring/artifact.md` und den laufenden Zustand in `sparring/state.md`.
 
+Bei Directory-Artefakten bleibt die Antithese trotzdem immer eine Markdown-Datei (`step_2_antithesis.md`). Sie erzeugt keine neue Artefaktfassung, sondern strukturierte Kritik.
+
 ### Sparring-Typen
 
 - `Auto`: Typ aus Artefakt und Projektkontext ableiten.
@@ -145,6 +149,13 @@ Der Skill speichert die stabile Artefaktdefinition in `sparring/artifact.md` und
 - `Auto`: Subagent-Ausführung verwenden, wenn das aktuelle Tool sie erkennbar unterstützt; sonst inline.
 - `Subagent`: Jeden Schritt in einem frischen Subagent/Worker/Workstream ausführen. Wenn das Tool das nicht kann, stoppt der Agent und fragt nach.
 - `Inline`: Der aktive Agent erledigt seine Schritte direkt in der Hauptsession.
+
+### Subagent-Qualität
+
+- `Inherit`: Keine explizite Modell-/Reasoning-Vorgabe; Subagent übernimmt die Hauptsession.
+- `Balanced`: Mittlere Qualität/Kosten, wenn das Tool eine Wahl erlaubt.
+- `High`: Stärkste sinnvoll verfügbare Qualität, wenn das Tool eine Wahl erlaubt.
+- `Role-based`: These eher Balanced, Antithese und Synthese eher High.
 
 ## Voraussetzungen
 

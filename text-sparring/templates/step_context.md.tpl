@@ -11,6 +11,7 @@ Siehe `sparring/artifact.md`.
 **Artifact-Typ:** {ARTIFACT_TYPE}
 **Sparring-Typ:** {RESOLVED_SPARRING_TYPE}
 **Aktuelle Arbeitsfassung:** {CURRENT_ARTIFACT_PATH}
+**Subagent-Qualität:** {SUBAGENT_QUALITY}
 
 ## Rolle
 

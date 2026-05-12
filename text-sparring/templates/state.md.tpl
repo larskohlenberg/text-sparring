@@ -15,6 +15,7 @@
 **Rolle in diesem Schritt:** These
 **Ausführungsmodus:** {EXECUTION_MODE}
 **Step-Ausführung:** {STEP_EXECUTION}
+**Subagent-Qualität:** {SUBAGENT_QUALITY}
 
 **Nächster Schritt nach dir:** {AGENT_B} übernimmt Antithese in Runde 1
 

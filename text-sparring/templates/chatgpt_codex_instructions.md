@@ -16,7 +16,9 @@ dialektische Challenge. Mein Name in der Challenge ist
 Bitte:
 1. Lies sparring/state.md vollständig.
 2. Lies sparring/artifact.md und sparring/CHALLENGE.md für Artefakt, Sparring-Typ und Regeln.
-3. Falls "Dran: {OTHER_NAME}" → erledige meinen ausstehenden
+3. Falls "Dran:" den bekannten anderen Agenten zeigt → starte direkt
+   den Wait-Loop mit meinem Namen. Keine Rückfrage.
+4. Falls "Dran: {OTHER_NAME}" → erledige meinen ausstehenden
    Schritt strikt nach Rolle, lies den passenden Übergabeimpuls
    (`*_handoff.md`), falls er existiert, schreibe die Output-Datei
    und die neue Handoff-Datei,
@@ -27,9 +29,11 @@ Bitte:
    einen isolierten Step-Kontext unter `sparring/context/` und delegiere
    den Schritt an einen frischen Subagent/Worker, falls dein Tool das
    unterstützt. Der Subagent darf state.md nicht aktualisieren.
-4. Starte danach den Wait-Loop:
+   Beachte `Subagent-Qualität`; wenn dein Tool keine Qualitätswahl
+   erlaubt, verwende faktisch Inherit.
+5. Starte danach den Wait-Loop:
    bash sparring/watch_loop.sh "{OTHER_NAME}"
-5. Reagiere auf Exit-Codes:
+6. Reagiere auf Exit-Codes:
    - 0 (WAKE) → nächsten Schritt erledigen, Loop erneut starten
    - 1 (DONE) → mich informieren, FINAL_ARTIFACT.md erwähnen
    - 2 (TIMEOUT) → mich fragen, ob weiter warten

@@ -15,7 +15,7 @@ Falls die Challenge noch läuft (also `sparring/state.md` **nicht** den Status `
 
 1. Lies sofort `sparring/state.md` und `sparring/artifact.md`.
 2. Falls `Dran: {MY_NAME}` → erledige den ausstehenden Schritt nach den Regeln in `sparring/CHALLENGE.md`. Wenn `Step-Ausführung: subagent` gilt, erzeuge zuerst einen Step-Kontext in `sparring/context/` und delegiere nur die Step-Arbeit an einen Subagent. Lies den passenden Übergabeimpuls (`*_handoff.md`), falls vorhanden, schreibe Hauptoutput und neue Handoff-Datei, aktualisiere `state.md` (Dran, Verlauf, ggf. neue Runde anlegen), starte dann den Wait-Loop.
-3. Falls `Dran: {OTHER_NAME}` → starte direkt den Wait-Loop.
+3. Falls `Dran: {OTHER_NAME}` → starte direkt den Wait-Loop. Keine Rückfrage.
 4. Wait-Loop-Aufruf: `bash sparring/watch_loop.sh "{MY_NAME}"`
 
 ### Reaktion auf Exit des Wait-Loops

@@ -34,6 +34,8 @@ Bei `Sparring-Typ: Auto` leite den erkannten Typ aus Artefakt und Projektkontext
 
 Bei explizitem `Sparring-Typ` uebernimm diesen als erkannten Typ. Frage nur nach, wenn Artefakt und Typ offensichtlich widersprechen.
 
+Bei `Artifact-Typ: directory` erzeugen nur These und Synthese Verzeichnisse. Die Antithese bleibt immer `step_2_antithesis.md`, weil sie keine neue Artefaktfassung ist, sondern strukturierte Kritik.
+
 ---
 
 ## Rollen-Definitionen
@@ -152,6 +154,7 @@ Das Sparring kann Schritte inline oder in isolierten Subagent-Kontexten ausführ
 
 - `Ausführungsmodus` ist die User-Wahl: `Auto`, `Subagent` oder `Inline`.
 - `Step-Ausführung` ist die tatsächliche Umsetzung im aktuellen Tool: `subagent` oder `inline`.
+- `Subagent-Qualität` ist die Qualitäts-Policy für Step-Subagents: `Inherit`, `Balanced`, `High` oder `Role-based`.
 
 Im Subagent-Modus erzeugt die Hauptsession vor jedem Schritt eine Datei unter `sparring/context/round_NN_step_M_prompt.md`. Der Subagent/Worker/Workstream erhält nur diesen Step-Kontext und schreibt nur die dort genannten Output-Dateien.
 
@@ -163,6 +166,8 @@ Wichtig:
 - Subagents dürfen keine Orchestrierung übernehmen.
 - Wenn `Ausführungsmodus: Subagent` gesetzt ist und ein Tool keine Subagents starten kann, muss der Agent stoppen und den User fragen. Kein stiller Fallback.
 - Bei `Ausführungsmodus: Auto` darf ein Agent auf inline zurückfallen, wenn keine Subagent-Ausführung verfügbar ist.
+- Bei `Subagent-Qualität: Inherit` werden keine Modell- oder Reasoning-Overrides gesetzt.
+- Bei `Balanced`, `High` oder `Role-based` übersetzt der Agent die Policy in die beste verfügbare lokale Modell-/Reasoning-Einstellung. Wenn das Tool keine Qualitätswahl erlaubt, verwende faktisch `Inherit`.
 
 ---
 

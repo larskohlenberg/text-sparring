@@ -14,6 +14,9 @@ Versionierung nach [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Datei- oder Verzeichnis-Artefakte mit stabiler Definition in `sparring/artifact.md`.
 - Initialer `Sparring-Typ` (`Auto`, `Text`, `Campaign`, `Skill`, `Code`) mit erkannter konkreter Ausprägung in `state.md`.
 - Flexible Rundenzahl in der Initialisierung (1 bis 10, Default 10).
+- Automatisches Warten im JOIN-Modus, wenn der bekannte andere Agent gerade dran ist.
+- Initiale `Subagent-Qualität` (`Inherit`, `Balanced`, `High`, `Role-based`) mit tool-agnostischer Modell-/Reasoning-Policy.
+- Klarstellung, dass Directory-Sparrings keine `step_2_antithesis/` erzeugen; die Antithese bleibt strukturierte Markdown-Kritik.
 
 ## [0.1.0] - 2026-05-12
 
