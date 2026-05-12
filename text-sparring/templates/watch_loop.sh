@@ -42,7 +42,7 @@ echo "WAIT: $MY_NAME wartet (alle ${POLL_SEC}s, max ${MAX_WAIT_MIN}min) ..."
 for i in $(seq 1 $MAX_ITER); do
   # Challenge fertig?
   if grep -qE '^\*\*Status:\*\*[[:space:]]*completed' "$STATE_FILE"; then
-    echo "DONE: Alle 10 Runden abgeschlossen."
+    echo "DONE: Alle gewählten Runden abgeschlossen."
     cat "$STATE_FILE"
     exit 1
   fi

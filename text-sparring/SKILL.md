@@ -1,11 +1,11 @@
 ---
 name: text-sparring
-description: Set up an autonomous multi-agent text sparring loop where two AI agents iteratively refine a text artifact over 10 rounds using Thesis → Antithesis → Synthesis. Use this skill whenever the user wants two agents to "spar" over a text, mutually challenge or refine a draft, or run a dialectical improvement loop. Trigger on requests like "starte ein Text-Sparring", "lass zwei Agenten meinen Text gegenseitig schärfen", "richte einen dialektischen Loop ein", "set up a text sparring", "let two agents spar on this draft", or any mention of "Text-Sparring", "Agent-Sparring", "Multi-Agent-Refinement". Also trigger when an agent is asked to JOIN an existing sparring ("steig ins Sparring ein", "join the running sparring", "übernimm Schritt 2"). The skill is harness-agnostic and requires no external tools beyond bash and standard Unix utilities.
+description: Set up an autonomous multi-agent text sparring loop where two AI agents iteratively refine a text artifact over configurable rounds using Thesis → Antithesis → Synthesis. Use this skill whenever the user wants two agents to "spar" over a text, mutually challenge or refine a draft, or run a dialectical improvement loop. Trigger on requests like "starte ein Text-Sparring", "lass zwei Agenten meinen Text gegenseitig schärfen", "richte einen dialektischen Loop ein", "set up a text sparring", "let two agents spar on this draft", or any mention of "Text-Sparring", "Agent-Sparring", "Multi-Agent-Refinement". Also trigger when an agent is asked to JOIN an existing sparring ("steig ins Sparring ein", "join the running sparring", "übernimm Schritt 2"). The skill is harness-agnostic and requires no external tools beyond bash and standard Unix utilities.
 ---
 
 # Text Sparring
 
-Ein harness-agnostischer Skill zum Aufsetzen und Mitwirken an einem **Text-Sparring zwischen zwei AI-Agenten**. Zwei Agenten durchlaufen 10 Runden mit den Rollen **These → Antithese → Synthese**, wobei beide Agenten alle Rollen in Vollrotation durchlaufen.
+Ein harness-agnostischer Skill zum Aufsetzen und Mitwirken an einem **Text-Sparring zwischen zwei AI-Agenten**. Zwei Agenten durchlaufen eine konfigurierbare Anzahl von Runden mit den Rollen **These → Antithese → Synthese**.
 
 Es geht **nicht ums Gewinnen**, sondern um gegenseitiges Schärfen — wie zwei Sparringspartner im Training. Der Skill kennt keinen Inhalt; er orchestriert nur den **Prozess**. Der zu sparrende Text liegt außerhalb des Skills im Projektverzeichnis.
 
@@ -33,7 +33,8 @@ Stelle dem User exakt diese Fragen — eine nach der anderen, kompakt:
    - `Campaign`: Posts, Kampagnen, Content-Serien oder Redaktionsmaterial.
    - `Skill`: Skills, Agent-Workflows, Prompt-/Template-Systeme oder `.skill`-Bundles.
    - `Code`: Quellcode, Tests, Build-Dateien oder technische Implementierungen.
-5. **Ausführungsmodus?** Default: `Auto`. Optionen:
+5. **Wie viele Runden?** Default: `10`. Akzeptiere ganze Zahlen von 1 bis 10. Für schnelle Tests sind 2–3 Runden sinnvoll; für gründliche Schärfung 5–10.
+6. **Ausführungsmodus?** Default: `Auto`. Optionen:
    - `Auto`: Subagent/Worker/Workstream verwenden, wenn das aktuelle Tool das erkennbar unterstützt; sonst inline.
    - `Subagent`: jeden Schritt in einem frischen Subagent-Kontext ausführen. Wenn das aktuelle Tool das nicht kann, stoppen und den User fragen.
    - `Inline`: Schritte direkt in der Hauptsession ausführen.
@@ -59,9 +60,9 @@ Vorgehen:
 
 - Prüfe den Artefaktpfad: Wenn er eine Datei ist, setze `Artifact-Typ` auf `file`; wenn er ein Verzeichnis ist, setze `Artifact-Typ` auf `directory`. Wenn er weder Datei noch Verzeichnis ist, frage den User erneut.
 - Bestimme `Erkannter Sparring-Typ`: Bei User-Wahl `Auto` leite aus Artefakt und Projektkontext `Text`, `Campaign`, `Skill` oder `Code` ab. Bei expliziter User-Wahl übernimm diese als erkannten Typ, außer Artefakt und Typ widersprechen offensichtlich.
-- Lies `templates/CHALLENGE.md.tpl` und ersetze die Platzhalter mit den konkreten Agent-Namen und dem unten beschriebenen Rotationsplan. Schreibe das Ergebnis nach `sparring/CHALLENGE.md`.
+- Lies `templates/CHALLENGE.md.tpl` und ersetze die Platzhalter mit den konkreten Agent-Namen, der gewählten Gesamtrundenzahl und dem unten beschriebenen Rotationsplan. Schreibe das Ergebnis nach `sparring/CHALLENGE.md`.
 - Lies `templates/artifact.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/artifact.md`. Setze `Initiale Kopie` auf `sparring/rounds/round_01/artifact.md` bei Dateien oder `sparring/rounds/round_01/artifact/` bei Verzeichnissen.
-- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/state.md`. Setze den initialen Status auf: Runde 1, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**. Setze `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ`, `Erkannter Sparring-Typ`, `Ausführungsmodus` und `Step-Ausführung`.
+- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/state.md`. Setze den initialen Status auf: Runde 1 von gewählter Gesamtrundenzahl, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**. Setze `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ`, `Erkannter Sparring-Typ`, `Ausführungsmodus` und `Step-Ausführung`.
 - Kopiere `templates/watch_loop.sh` 1:1 nach `sparring/watch_loop.sh`. Mache sie nicht ausführbar — sie wird mit `bash watch_loop.sh ...` aufgerufen.
 - Lies `templates/chatgpt_codex_instructions.md`, befülle die Platzhalter mit dem Projektpfad und dem Namen des zweiten Agents, schreibe nach `sparring/chatgpt_codex_instructions.md`.
 - Lege `sparring/context/` an. Nutze `templates/step_context.md.tpl` später als Vorlage für Schritt-Kontexte im Subagent-Modus.
@@ -76,7 +77,7 @@ Ersetze im Snippet die Platzhalter `{MY_NAME}` und `{OTHER_NAME}` mit den konkre
 
 ### Schritt 4: Rotationsplan generieren
 
-Der Plan ist **fest und deterministisch** — er gilt für jedes Setup gleich, nur die Namen werden eingesetzt. Verwende exakt diese Tabelle (A = Initiator, B = zweiter Agent):
+Der Plan ist **fest und deterministisch** — er gilt für jedes Setup gleich, nur die Namen werden eingesetzt. Verwende exakt diese Tabelle als 10-Runden-Muster (A = Initiator, B = zweiter Agent):
 
 | Runde | These | Antithese | Synthese |
 |-------|-------|-----------|----------|
@@ -91,7 +92,7 @@ Der Plan ist **fest und deterministisch** — er gilt für jedes Setup gleich, n
 | 9 | A | B | B |
 | 10 | B | A | A |
 
-Diese Verteilung ist exakt ausbalanciert: jeder Agent macht jede Rolle genau 5× über 10 Runden.
+Bei weniger als 10 Runden gilt nur der Präfix bis zur gewählten Gesamtrundenzahl. Bei genau 10 Runden ist die Verteilung exakt ausbalanciert: jeder Agent macht jede Rolle genau 5×.
 
 Schreibe sie in `state.md` mit den echten Namen statt A/B.
 
@@ -150,14 +151,14 @@ Befolge dabei zwingend die Rollen-Definitionen aus `CHALLENGE.md`.
 ### Schritt 3: State und ggf. neue Runde aktualisieren
 
 - Aktualisiere `state.md`: Schritt-Status, `Dran:`, Verlauf.
-- **Falls du gerade Schritt 3 (Synthese) erledigt hast** UND die aktuelle Runde < 10 ist:
+- **Falls du gerade Schritt 3 (Synthese) erledigt hast** UND die aktuelle Runde < Gesamtrundenzahl ist:
   - Lege `rounds/round_{NN+1}/` an
   - Bei `Artifact-Typ: file`: Kopiere `step_3_synthesis.md` nach `rounds/round_{NN+1}/artifact.md`
   - Bei `Artifact-Typ: directory`: Kopiere `step_3_synthesis/` nach `rounds/round_{NN+1}/artifact/`
   - Belasse `step_3_handoff.md` im abgeschlossenen Rundenordner; die These der nächsten Runde liest ihn dort als Übergabeimpuls.
   - Inkrementiere die Runden-Nummer in `state.md`
   - Setze `Dran:` und Rolle laut Rotationsplan für die neue Runde
-- **Falls du gerade Schritt 3 der Runde 10 erledigt hast**:
+- **Falls du gerade Schritt 3 der letzten Runde erledigt hast**:
   - Setze in `state.md` den Status auf `completed`
   - Bei `Artifact-Typ: file`: Kopiere `step_3_synthesis.md` nach `sparring/FINAL_ARTIFACT.md`
   - Bei `Artifact-Typ: directory`: Kopiere `step_3_synthesis/` nach `sparring/FINAL_ARTIFACT/`
@@ -173,7 +174,7 @@ Der Bash-Loop blockiert und beendet sich mit drei möglichen Exit-Codes. Reagier
 | Exit | Output enthält | Reaktion |
 |------|----------------|----------|
 | 0 | `WAKE:` und state.md-Inhalt | Du bist wieder dran. Gehe zu JOIN-Modus Schritt 2 (deinen Schritt erledigen). Danach erneut watch_loop aufrufen. |
-| 1 | `DONE:` | Alle 10 Runden durch. Melde dem User: *"Sparring abgeschlossen — finales Artefakt liegt in `sparring/FINAL_ARTIFACT.md`."* Beende sauber, kein neuer Loop. |
+| 1 | `DONE:` | Alle gewählten Runden durch. Melde dem User: *"Sparring abgeschlossen — finales Artefakt liegt in `sparring/FINAL_ARTIFACT.md` bzw. `sparring/FINAL_ARTIFACT/`."* Beende sauber, kein neuer Loop. |
 | 2 | `TIMEOUT:` | Der andere Agent hat sich 30 Min nicht gemeldet. Frage den User: *"{OTHER_NAME} meldet sich seit 30 Min nicht. Weiter warten, oder Sparring pausieren?"* Bei "weiter": watch_loop erneut starten. |
 
 ## Wichtige Verhaltensregeln

@@ -8,7 +8,7 @@
 **Sparring-Typ:** {SPARRING_TYPE}
 **Erkannter Sparring-Typ:** {RESOLVED_SPARRING_TYPE}
 
-**Aktuelle Runde:** 1 von 10
+**Aktuelle Runde:** 1 von {TOTAL_ROUNDS}
 **Aktueller Schritt:** 1 (These)
 **Status:** waiting_for_output
 **Dran:** {AGENT_A}

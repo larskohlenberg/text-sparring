@@ -2,7 +2,7 @@
 
 **Initiator (Agent A):** {AGENT_A}
 **Zweiter Agent (Agent B):** {AGENT_B}
-**Gesamtrunden:** 10
+**Gesamtrunden:** {TOTAL_ROUNDS}
 **Polling-Intervall:** 30 Sekunden
 **Max. Wartezeit pro Loop:** 30 Minuten
 
@@ -10,7 +10,7 @@
 
 ## Zweck
 
-Zwei Agenten verbessern einen Text iterativ in 10 Runden. Jede Runde besteht aus drei Schritten — **These**, **Antithese**, **Synthese**. Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach Runde 10 endet die Challenge automatisch; das Ergebnis liegt in `FINAL_ARTIFACT.md`.
+Zwei Agenten verbessern ein Artefakt iterativ über die in `state.md` festgelegte Rundenzahl. Jede Runde besteht aus drei Schritten — **These**, **Antithese**, **Synthese**. Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der letzten Runde endet die Challenge automatisch; das Ergebnis liegt in `FINAL_ARTIFACT.md` beziehungsweise `FINAL_ARTIFACT/`.
 
 Es geht **nicht um einen Gewinner**. Es geht um akkumulierte Qualität durch Widerspruch und Integration.
 
@@ -168,7 +168,7 @@ Wichtig:
 
 ## Rotationsplan (Vollrotation)
 
-Jede Rolle wird über 10 Runden gleich oft von beiden Agenten besetzt (5×5).
+Der Rotationsplan ist als 10-Runden-Muster definiert. Wenn weniger als 10 Runden gewählt wurden, gilt nur der Präfix bis zur gewählten Gesamtrundenzahl. Bei genau 10 Runden ist die Rollenverteilung exakt ausbalanciert (5×5 je Rolle).
 
 | Runde | These | Antithese | Synthese |
 |-------|-------|-----------|----------|
@@ -198,13 +198,13 @@ sparring/rounds/round_NN/
 └── step_3_handoff.md       ← Übergabeimpuls an die nächste Runde
 ```
 
-Nach Runde 10 wird `step_3_synthesis.md` beziehungsweise `step_3_synthesis/` zusätzlich nach `sparring/FINAL_ARTIFACT.md` oder `sparring/FINAL_ARTIFACT/` kopiert.
+Nach der letzten Runde wird `step_3_synthesis.md` beziehungsweise `step_3_synthesis/` zusätzlich nach `sparring/FINAL_ARTIFACT.md` oder `sparring/FINAL_ARTIFACT/` kopiert.
 
 ---
 
 ## Exit-Bedingungen
 
-- Nach Schritt 3 der Runde 10: Challenge beendet, `state.md` zeigt `completed`.
+- Nach Schritt 3 der letzten Runde: Challenge beendet, `state.md` zeigt `completed`.
 - Während des Wait-Loops: Falls 30 Min Timeout → der wartende Agent fragt den User nach.
 - Manueller Abbruch: User kann jederzeit einer Session sagen "stoppen", dann beendet der Agent den Loop und schreibt nichts mehr.
 

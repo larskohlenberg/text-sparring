@@ -21,7 +21,8 @@ Bitte:
    (`*_handoff.md`), falls er existiert, schreibe die Output-Datei
    und die neue Handoff-Datei,
    aktualisiere state.md (Dran-Feld, Verlauf, ggf. neue Runde
-   anlegen, falls ich gerade Synthese erledigt habe und Runde < 10).
+   anlegen, falls ich gerade Synthese erledigt habe und die aktuelle
+   Runde kleiner als die Gesamtrundenzahl ist).
    Wenn state.md `Step-Ausführung: subagent` zeigt, erzeuge zuerst
    einen isolierten Step-Kontext unter `sparring/context/` und delegiere
    den Schritt an einen frischen Subagent/Worker, falls dein Tool das

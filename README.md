@@ -2,7 +2,7 @@
 
 > Ein harness-agnostischer Skill für **dialektisches Text-Sparring** zwischen zwei AI-Agenten.
 
-Zwei AI-Agenten verbessern einen Text gemeinsam über 10 Runden, indem sie sich gegenseitig schärfen — wie Sparringspartner im Training. Welche Tools diese Agenten ausführen, ist zweitrangig: Entscheidend ist, dass mindestens ein Agent Dateien im Projektverzeichnis lesen und schreiben kann. Es geht nicht ums Gewinnen; es geht um akkumulierte Qualität durch Widerspruch und Integration.
+Zwei AI-Agenten verbessern ein Artefakt gemeinsam über eine wählbare Anzahl von Runden, indem sie sich gegenseitig schärfen — wie Sparringspartner im Training. Welche Tools diese Agenten ausführen, ist zweitrangig: Entscheidend ist, dass mindestens ein Agent Dateien im Projektverzeichnis lesen und schreiben kann. Es geht nicht ums Gewinnen; es geht um akkumulierte Qualität durch Widerspruch und Integration.
 
 ## Wie es funktioniert
 
@@ -12,9 +12,9 @@ Jede Runde besteht aus drei Schritten:
 2. **Antithese** — Der andere Agent stellt die fundamentalsten Annahmen radikal in Frage.
 3. **Synthese** — Ein Agent integriert beide Sichten zu einer neuen Version (keine Kompromisse, echte Integration).
 
-Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach 10 Runden endet das Sparring; das Ergebnis liegt in `FINAL_ARTIFACT.md`.
+Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der gewählten letzten Runde endet das Sparring; das Ergebnis liegt in `FINAL_ARTIFACT.md` beziehungsweise `FINAL_ARTIFACT/`.
 
-**Vollrotation**: Über die 10 Runden übernimmt jeder Agent jede Rolle (These / Antithese / Synthese) genau 5×. Die Verteilung ist deterministisch und ausbalanciert.
+**Rotation**: Der Skill nutzt ein deterministisches 10-Runden-Muster. Wenn weniger Runden gewählt werden, wird nur der entsprechende Präfix genutzt. Bei 10 Runden ist die Rollenverteilung exakt ausbalanciert.
 
 **Artefakt statt ganzes Projekt**: Beim Start gibst du einen Pfad zu einer Datei oder einem Verzeichnis an. Nur dieses Artefakt wird über die Runden fortgeschrieben; der übrige Projektkontext dient zur Orientierung.
 
@@ -29,7 +29,7 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach 10 
 - **Harness-agnostisch**: Funktioniert mit lokalen Agenten, die Dateizugriff haben, und semi-manuell auch mit webbasierten Chat-Tools.
 - **Kein externer Daemon**: Kein `fswatch`, kein `cron`, kein `launchd`. Pures Bash + Markdown.
 - **Self-polling Agents**: Nach jedem erledigten Schritt geht der Agent in einen blockierenden Bash-Loop (`watch_loop.sh`), prüft alle 30 Sekunden `state.md` und übernimmt automatisch, sobald er wieder dran ist.
-- **Nur zwei manuelle Starts nötig**: einmal im initiierenden Tool ("Setup Sparring"), einmal im zweiten Tool ("Steig ein"). Danach läuft der Wechsel automatisch bis Runde 10.
+- **Nur zwei manuelle Starts nötig**: einmal im initiierenden Tool ("Setup Sparring"), einmal im zweiten Tool ("Steig ein"). Danach läuft der Wechsel automatisch bis zur gewählten letzten Runde.
 
 ## Architektur
 
@@ -53,7 +53,7 @@ dein-projekt/
         │   ├── step_3_synthesis.md|/  ← wird zum Artefakt der Folgerunde
         │   └── step_3_handoff.md
         ├── round_02/...
-        └── round_10/...
+        └── round_NN/...
 ```
 
 ## Installation
@@ -83,7 +83,7 @@ Du in Agent A: "Starte ein Text-Sparring über README.md"
 ```
 
 Agent A:
-- Fragt nach: Artefaktpfad, zweiter Agent (Name + Tool), dein Name im Sparring, Sparring-Typ und Ausführungsmodus
+- Fragt nach: Artefaktpfad, zweiter Agent (Name + Tool), dein Name im Sparring, Sparring-Typ, Rundenzahl und Ausführungsmodus
 - Legt `sparring/` an und erzeugt die Projektdateien für das Sparring
 - Ergänzt, falls passend, eine Tool-spezifische Startanweisung
 - Erledigt **Schritt 1 (These) in Runde 1** plus Übergabeimpuls
@@ -103,7 +103,7 @@ Agent B:
 - Erledigt **Schritt 2 (Antithese) in Runde 1** plus Übergabeimpuls
 - Geht in den Wait-Loop
 
-Ab jetzt läuft alles autonom. Beide Sessions wachen abwechselnd auf, erledigen ihre Schritte, gehen wieder schlafen — bis Runde 10 abgeschlossen ist.
+Ab jetzt läuft alles autonom. Beide Sessions wachen abwechselnd auf, erledigen ihre Schritte, gehen wieder schlafen — bis die gewählte letzte Runde abgeschlossen ist.
 
 ## Trigger-Phrasen
 
@@ -121,7 +121,7 @@ Standard-Werte im Skill (können in `state.md` pro Projekt überschrieben werden
 |-----------|---------|--------------|
 | `POLL_SEC` | `30` | Wie oft `watch_loop.sh` `state.md` prüft (Sekunden) |
 | `MAX_WAIT_MIN` | `30` | Max. Wartezeit bevor Timeout-Alarm |
-| Anzahl Runden | `10` | Fest in Rotationsplan, nicht parametrisiert |
+| Anzahl Runden | `10` | Wählbar von 1 bis 10 |
 | `Sparring-Typ` | `Auto` | `Auto`, `Text`, `Campaign`, `Skill` oder `Code`; wird in `state.md` gespeichert |
 | `Ausführungsmodus` | `Auto` | `Auto`, `Subagent` oder `Inline`; wird in `state.md` gespeichert |
 
@@ -160,7 +160,7 @@ Aktuell fokussiert auf **Texte**. Mögliche Erweiterungen:
 
 - **Code-Sparring**: Rollen-Definitionen für Refactoring-Reviews
 - **Image-Prompt-Sparring**: Iterative Verbesserung von Bildgenerierungs-Prompts
-- **Variable Rundenzahl**: 5 / 10 / 20 als Skill-Parameter
+- **Erweiterte Rundenzahl**: 20+ Runden mit wiederholbarem oder neu balanciertem Rotationsplan
 - **Intelligentes Exit-Kriterium**: Stopp wenn Antithese keinen substanziellen Punkt mehr findet
 
 ## Lizenz
