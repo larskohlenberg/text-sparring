@@ -17,6 +17,7 @@ Versionierung nach [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Automatisches Warten im JOIN-Modus, wenn der bekannte andere Agent gerade dran ist.
 - Initiale `Subagent-Qualität` (`Inherit`, `Balanced`, `High`, `Role-based`) mit tool-agnostischer Modell-/Reasoning-Policy.
 - Klarstellung, dass Directory-Sparrings keine `step_2_antithesis/` erzeugen; die Antithese bleibt strukturierte Markdown-Kritik.
+- Silent Wait Mode: Während `watch_loop.sh` läuft, geben Agenten keine Zwischenkommentare oder Statusmeldungen aus.
 
 ## [0.1.0] - 2026-05-12
 

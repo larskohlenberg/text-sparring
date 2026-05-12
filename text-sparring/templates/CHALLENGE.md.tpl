@@ -215,11 +215,32 @@ Nach der letzten Runde wird `step_3_synthesis.md` beziehungsweise `step_3_synthe
 
 ---
 
+## Silent Wait Mode
+
+Sobald ein Agent den Wait-Loop startet, bleibt er stumm, bis der Prozess endet.
+
+Erlaubte Reaktionen gibt es nur auf:
+
+- Exit 0 / WAKE
+- Exit 1 / DONE
+- Exit 2 / TIMEOUT
+
+Während des Wartens:
+
+- Keine Zwischenberichte.
+- Keine Spekulation über den anderen Agenten.
+- Keine Plananalyse.
+- Keine erneute Zusammenfassung.
+- Keine UI-Kommentare wie "weiter wartend" oder "noch kein Wake".
+
+---
+
 ## Verhaltensregeln für beide Agenten
 
 1. **state.md ist die einzige Wahrheit.** Vor jeder Aktion lesen — kein Vertrauen ins eigene Gedächtnis.
 2. **Genau ein Schritt pro Aufwachen.** Nach Erledigung zurück in den Wait-Loop.
-3. **Keine Meta-Kommentare in den Output-Dateien.** Reine Inhalts-Outputs.
-4. **Übergabeimpulse getrennt halten.** Prüfimpulse gehören in `*_handoff.md`, nicht in die Hauptoutput-Dateien.
-5. **Bei Inkonsistenz**: Stop, frag den User. Nicht raten.
-6. **Rollentreue**: Wenn du als Antithese-Agent versucht bist, "konstruktiv zu sein" — widerstehe. Die Rolle braucht die Schärfe.
+3. **Silent Wait Mode.** Während `watch_loop.sh` läuft, keine Zwischenkommentare oder Statusmeldungen ausgeben.
+4. **Keine Meta-Kommentare in den Output-Dateien.** Reine Inhalts-Outputs.
+5. **Übergabeimpulse getrennt halten.** Prüfimpulse gehören in `*_handoff.md`, nicht in die Hauptoutput-Dateien.
+6. **Bei Inkonsistenz**: Stop, frag den User. Nicht raten.
+7. **Rollentreue**: Wenn du als Antithese-Agent versucht bist, "konstruktiv zu sein" — widerstehe. Die Rolle braucht die Schärfe.

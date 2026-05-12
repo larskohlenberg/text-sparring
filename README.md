@@ -26,11 +26,14 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der
 
 **Subagent-Qualität**: Default ist `Inherit`. Der Skill setzt damit keine expliziten Modell- oder Reasoning-Overrides, sondern übernimmt die Qualität der Hauptsession. Optional kannst du `Balanced`, `High` oder `Role-based` wählen, sofern dein Tool solche Einstellungen unterstützt.
 
+**Silent Wait Mode**: Während ein Agent im Wait-Loop ist, bleibt er stumm. Er schreibt keine Zwischenberichte oder Spekulationen, sondern reagiert erst wieder auf WAKE, DONE oder TIMEOUT.
+
 ## Was das Besondere ist
 
 - **Harness-agnostisch**: Funktioniert mit lokalen Agenten, die Dateizugriff haben, und semi-manuell auch mit webbasierten Chat-Tools.
 - **Kein externer Daemon**: Kein `fswatch`, kein `cron`, kein `launchd`. Pures Bash + Markdown.
 - **Self-polling Agents**: Nach jedem erledigten Schritt geht der Agent in einen blockierenden Bash-Loop (`watch_loop.sh`), prüft alle 30 Sekunden `state.md` und übernimmt automatisch, sobald er wieder dran ist.
+- **Stummes Warten**: Der Wait-Loop erzeugt keine laufenden UI-Kommentare. Das spart Tokens und hält die Hauptsession sauber.
 - **Nur zwei manuelle Starts nötig**: einmal im initiierenden Tool ("Setup Sparring"), einmal im zweiten Tool ("Steig ein"). Danach läuft der Wechsel automatisch bis zur gewählten letzten Runde.
 
 ## Architektur

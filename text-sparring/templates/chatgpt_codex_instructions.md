@@ -33,7 +33,9 @@ Bitte:
    erlaubt, verwende faktisch Inherit.
 5. Starte danach den Wait-Loop:
    bash sparring/watch_loop.sh "{OTHER_NAME}"
-6. Reagiere auf Exit-Codes:
+6. Nach Start des Wait-Loops stumm bleiben. Keine Zwischenberichte,
+   keine Statusmeldungen, keine Spekulation über den anderen Agenten.
+7. Reagiere erst auf Exit-Codes:
    - 0 (WAKE) → nächsten Schritt erledigen, Loop erneut starten
    - 1 (DONE) → mich informieren, FINAL_ARTIFACT.md erwähnen
    - 2 (TIMEOUT) → mich fragen, ob weiter warten

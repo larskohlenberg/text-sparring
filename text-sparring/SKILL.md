@@ -122,7 +122,7 @@ Erkläre dem User **vor** dem Aufruf in einem kurzen Satz:
 
 > *"Setup steht. Schritt 1 (These) ist fertig. Ich gehe jetzt in den Wait-Loop und prüfe alle 30 Sekunden, ob ich wieder dran bin. Bitte starte jetzt eine Session in **{OTHER_NAME}** im selben Projektverzeichnis und sag dort: 'Steig ins Sparring ein'."*
 
-Dann den Loop aufrufen. Reagiere auf den Exit-Code (siehe unten "Reaktion auf watch_loop").
+Dann den Loop aufrufen. Ab diesem Moment gilt Silent Wait Mode: Keine Zwischenkommentare, keine Statusmeldungen, keine Spekulation über den anderen Agenten. Erst wieder reagieren, wenn `watch_loop.sh` mit WAKE, DONE oder TIMEOUT endet.
 
 ## JOIN-Modus (zweiter Agent steigt ein)
 
@@ -181,6 +181,8 @@ Befolge dabei zwingend die Rollen-Definitionen aus `CHALLENGE.md`.
 
 Wie im INIT-Modus Schritt 7. Falls dieser Agent zum ersten Mal ins Sparring einsteigt: kein Hinweis an den User mehr nötig, der erste Hinweis kam vom Initiator.
 
+Auch hier gilt Silent Wait Mode: Nach Start von `bash sparring/watch_loop.sh "{MY_NAME}"` bleibt der Agent stumm, bis der Prozess mit WAKE, DONE oder TIMEOUT endet.
+
 ## Reaktion auf watch_loop
 
 Der Bash-Loop blockiert und beendet sich mit drei möglichen Exit-Codes. Reagiere konkret:
@@ -191,11 +193,28 @@ Der Bash-Loop blockiert und beendet sich mit drei möglichen Exit-Codes. Reagier
 | 1 | `DONE:` | Alle gewählten Runden durch. Melde dem User: *"Sparring abgeschlossen — finales Artefakt liegt in `sparring/FINAL_ARTIFACT.md` bzw. `sparring/FINAL_ARTIFACT/`."* Beende sauber, kein neuer Loop. |
 | 2 | `TIMEOUT:` | Der andere Agent hat sich 30 Min nicht gemeldet. Frage den User: *"{OTHER_NAME} meldet sich seit 30 Min nicht. Weiter warten, oder Sparring pausieren?"* Bei "weiter": watch_loop erneut starten. |
 
+### Silent Wait Mode
+
+Sobald ein Agent den Wait-Loop startet, bleibt er stumm, bis der Prozess endet.
+
+Erlaubte Reaktionen gibt es nur auf:
+- Exit 0 / WAKE
+- Exit 1 / DONE
+- Exit 2 / TIMEOUT
+
+Während des Wartens:
+- Keine Zwischenberichte.
+- Keine Spekulation über den anderen Agenten.
+- Keine Plananalyse.
+- Keine erneute Zusammenfassung.
+- Keine UI-Kommentare wie "weiter wartend" oder "noch kein Wake".
+
 ## Wichtige Verhaltensregeln
 
 - **Nicht den Inhalt bewerten** — der Skill befolgt nur den Prozess. Die Rollen in CHALLENGE.md geben vor, wie zu denken ist (radikal hinterfragen, integrieren ohne Kompromiss usw.). Verlass dich darauf.
 - **state.md ist die einzige Wahrheit** — vor jeder Aktion erneut lesen. Kein Caching im Kopf.
 - **Niemals Schritte überspringen** oder mehrere Schritte in einer Aktivierung erledigen. Pro Aufwachen genau ein Schritt, dann zurück in den Loop.
+- **Silent Wait Mode** — während `watch_loop.sh` läuft, keine Zwischenkommentare oder Statusmeldungen ausgeben.
 - **Hauptoutput und Übergabe trennen** — These/Synthese bleiben reine Textfassungen; Prüfimpulse gehören ausschließlich in `*_handoff.md`.
 - **Subagenten nur für Step-Arbeit** — Subagents schreiben ausschließlich die erwarteten Output-Dateien. Nur die Hauptsession aktualisiert `state.md`, legt neue Runden an und startet den Wait-Loop.
 - **Bei Konflikten**: Wenn state.md inkonsistent wirkt (z. B. Verlauf sagt Schritt 2 fertig, aber Datei fehlt), melde es dem User statt zu raten.

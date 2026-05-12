@@ -17,6 +17,7 @@ Falls die Challenge noch läuft (also `sparring/state.md` **nicht** den Status `
 2. Falls `Dran: {MY_NAME}` → erledige den ausstehenden Schritt nach den Regeln in `sparring/CHALLENGE.md`. Wenn `Step-Ausführung: subagent` gilt, erzeuge zuerst einen Step-Kontext in `sparring/context/` und delegiere nur die Step-Arbeit an einen Subagent. Lies den passenden Übergabeimpuls (`*_handoff.md`), falls vorhanden, schreibe Hauptoutput und neue Handoff-Datei, aktualisiere `state.md` (Dran, Verlauf, ggf. neue Runde anlegen), starte dann den Wait-Loop.
 3. Falls `Dran: {OTHER_NAME}` → starte direkt den Wait-Loop. Keine Rückfrage.
 4. Wait-Loop-Aufruf: `bash sparring/watch_loop.sh "{MY_NAME}"`
+5. Nach Start des Wait-Loops stumm bleiben, bis WAKE, DONE oder TIMEOUT erscheint.
 
 ### Reaktion auf Exit des Wait-Loops
 
@@ -29,6 +30,7 @@ Falls die Challenge noch läuft (also `sparring/state.md` **nicht** den Status `
 - Nicht den Inhalt der Output-Dateien diskutieren oder bewerten — nur produzieren gemäß Rolle.
 - Nicht in einer Aktivierung mehrere Schritte erledigen — pro Aufwachen genau einer.
 - Nicht state.md aus dem Gedächtnis manipulieren — immer vorher lesen.
+- Während der Wait-Loop läuft keine Zwischenberichte, Statusmeldungen, Spekulationen oder UI-Kommentare ausgeben.
 - Nur das in `sparring/artifact.md` definierte Artefakt fortschreiben; Projektkontext darf helfen, ist aber nicht Output-Fläche.
 - Hauptoutput und Übergabeimpuls trennen: Textfassung/Kritik/Synthese in die Step-Datei, Prüfimpulse in `*_handoff.md`.
 - Subagents schreiben nur Step-Outputs. `state.md`, neue Runden und Wait-Loop bleiben Aufgabe der Hauptsession.
