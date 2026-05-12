@@ -3,6 +3,11 @@
 **Initiator (Agent A):** {AGENT_A}
 **Zweiter Agent (Agent B):** {AGENT_B}
 
+**Artifact-Typ:** {ARTIFACT_TYPE}
+**Artifact-Pfad:** {ARTIFACT_PATH}
+**Sparring-Typ:** {SPARRING_TYPE}
+**Erkannter Sparring-Typ:** {RESOLVED_SPARRING_TYPE}
+
 **Aktuelle Runde:** 1 von 10
 **Aktueller Schritt:** 1 (These)
 **Status:** waiting_for_output

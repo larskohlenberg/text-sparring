@@ -15,7 +15,7 @@ dialektische Challenge. Mein Name in der Challenge ist
 
 Bitte:
 1. Lies sparring/state.md vollständig.
-2. Lies sparring/CHALLENGE.md für die Regeln.
+2. Lies sparring/artifact.md und sparring/CHALLENGE.md für Artefakt, Sparring-Typ und Regeln.
 3. Falls "Dran: {OTHER_NAME}" → erledige meinen ausstehenden
    Schritt strikt nach Rolle, lies den passenden Übergabeimpuls
    (`*_handoff.md`), falls er existiert, schreibe die Output-Datei
@@ -52,6 +52,8 @@ In diesem Fall:
    einen Output (These / Antithese / Synthese je nach Rolle laut
    state.md) plus einen separaten Übergabeimpuls für den nächsten
    Agenten. Keine Meta-Kommentare im Hauptoutput.
+   Beachte Artifact-Typ (`file` oder `directory`) und erkannten
+   Sparring-Typ (`Text`, `Campaign`, `Skill` oder `Code`).
    Wenn der Zustand einen Subagent-Modus beschreibt, behandle ihn als
    Kontextisolations-Wunsch. Ohne lokalen Datei- und Subagent-Zugriff
    bleibst du im semi-manuellen Modus.
@@ -60,6 +62,7 @@ In diesem Fall:
 
 2. Bei jedem Aufruf an den zweiten Agent kopierst du manuell rein:
    - aktuellen Inhalt von `sparring/state.md`
+   - Inhalt von `sparring/artifact.md`
    - Inhalt von `sparring/CHALLENGE.md`
    - das relevante Input-File (artifact.md / step_1_thesis.md / step_2_antithesis.md)
    - den passenden Übergabeimpuls (`*_handoff.md`), falls vorhanden

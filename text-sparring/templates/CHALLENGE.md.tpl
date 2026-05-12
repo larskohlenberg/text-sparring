@@ -16,6 +16,26 @@ Es geht **nicht um einen Gewinner**. Es geht um akkumulierte Qualität durch Wid
 
 ---
 
+## Sparring-Gegenstand
+
+Der konkrete Gegenstand steht in `sparring/artifact.md` und zusätzlich in `sparring/state.md`.
+
+- `Artifact-Typ: file` bedeutet: Die Arbeitsfassung ist eine einzelne Datei (`artifact.md`, `step_1_thesis.md`, `step_3_synthesis.md`).
+- `Artifact-Typ: directory` bedeutet: Die Arbeitsfassung ist ein Verzeichnis (`artifact/`, `step_1_thesis/`, `step_3_synthesis/`).
+- `Sparring-Typ` ist die User-Wahl: `Auto`, `Text`, `Campaign`, `Skill` oder `Code`.
+- `Erkannter Sparring-Typ` ist die konkrete Interpretation für diesen Lauf.
+
+Bei `Sparring-Typ: Auto` leite den erkannten Typ aus Artefakt und Projektkontext ab:
+
+- `Text`: generische Text-, README-, Essay- oder Konzeptarbeit.
+- `Campaign`: mehrere Posts, Kampagnenplaene, Content-Serien oder Redaktionsmaterial.
+- `Skill`: Skills, Agent-Workflows, Prompt-/Template-Systeme oder `.skill`-Bundles.
+- `Code`: Quellcode, Tests, Build-Dateien oder technische Implementierungen.
+
+Bei explizitem `Sparring-Typ` uebernimm diesen als erkannten Typ. Frage nur nach, wenn Artefakt und Typ offensichtlich widersprechen.
+
+---
+
 ## Rollen-Definitionen
 
 Diese Definitionen gelten verbindlich für jeden Schritt — unabhängig davon, welcher Agent gerade die Rolle übernimmt. Wenn du als Agent eine dieser Rollen hast, befolge sie strikt.
@@ -29,7 +49,9 @@ Du bist Autor der Runde. Deine Aufgabe:
 - Falls dies Runde 1 ist: das ist der erste Vorschlag. Verbessere den Ausgangstext substanziell, aber bleibe in seinem Thema und Geist.
 - Falls dies Runde 2+ ist: `artifact.md` ist die Synthese der Vorrunde — baue darauf auf, lies zusätzlich `step_3_handoff.md` aus der Vorrunde, aber verbessere mutig.
 
-Schreibe das Ergebnis nach `step_1_thesis.md` in deinem aktuellen Rundenordner. Kein Kommentar, kein Meta-Text — nur der Text selbst.
+Bei `Artifact-Typ: file`: Schreibe das Ergebnis nach `step_1_thesis.md` in deinem aktuellen Rundenordner. Kein Kommentar, kein Meta-Text — nur der Text selbst.
+
+Bei `Artifact-Typ: directory`: Schreibe die neue Fassung als vollständiges Verzeichnis nach `step_1_thesis/`. Erhalte sinnvolle relative Pfade. Entferne Dateien nur, wenn es die Qualität des Artefakts klar verbessert.
 
 Schreibe zusätzlich nach `step_1_handoff.md` einen kurzen Übergabeimpuls für die Antithese:
 
@@ -54,7 +76,7 @@ Formuliere für jede Annahme:
 
 Optional am Ende: zwei bis drei kürzere, kleinere Beobachtungen ("Nebenkritik") — Stellen, an denen der Text nicht radikal falsch, aber unscharf, klischeehaft oder vermeidbar konventionell ist.
 
-Schreibe das Ergebnis nach `step_2_antithesis.md`. Format:
+Schreibe das Ergebnis immer nach `step_2_antithesis.md`. Format:
 
 ```markdown
 ## Annahme 1: <kurzer Titel>
@@ -92,9 +114,11 @@ Deine Aufgabe ist **nicht Kompromiss**, sondern **Integration**:
 
 Schreibe eine **neue Version des Textes**, die beides trägt. Kein "einerseits / andererseits". Eine Version, in der die Spannung produktiv aufgelöst ist.
 
-Schreibe das Ergebnis nach `step_3_synthesis.md`. Wieder: nur der Text, kein Meta.
+Bei `Artifact-Typ: file`: Schreibe das Ergebnis nach `step_3_synthesis.md`. Wieder: nur der Text, kein Meta.
 
-**Wichtig**: Diese Datei wird automatisch zum `artifact.md` der nächsten Runde. Schreibe also einen vollständigen, lauffähigen Text — nicht ein Diff oder eine Sammlung von Notizen.
+Bei `Artifact-Typ: directory`: Schreibe die integrierte neue Fassung als vollständiges Verzeichnis nach `step_3_synthesis/`.
+
+**Wichtig**: Dieser Output wird automatisch zum Artefakt der nächsten Runde. Schreibe also eine vollständige, lauffähige Fassung — nicht ein Diff oder eine Sammlung von Notizen.
 
 Schreibe zusätzlich nach `step_3_handoff.md` einen kurzen Übergabeimpuls für die nächste Runde:
 
@@ -165,16 +189,16 @@ Jede Rolle wird über 10 Runden gleich oft von beiden Agenten besetzt (5×5).
 
 ```
 sparring/rounds/round_NN/
-├── artifact.md             ← Ausgangstext dieser Runde
-├── step_1_thesis.md        ← These (von Agent gemäß Plan)
+├── artifact.md|artifact/   ← Ausgangsartefakt dieser Runde
+├── step_1_thesis.md|/      ← These (von Agent gemäß Plan)
 ├── step_1_handoff.md       ← Übergabeimpuls an die Antithese
 ├── step_2_antithesis.md    ← Antithese
 ├── step_2_handoff.md       ← Übergabeimpuls an die Synthese
-├── step_3_synthesis.md     ← Synthese — wird zum artifact.md der Folgerunde
+├── step_3_synthesis.md|/   ← Synthese — wird zum Artefakt der Folgerunde
 └── step_3_handoff.md       ← Übergabeimpuls an die nächste Runde
 ```
 
-Nach Runde 10 wird `step_3_synthesis.md` zusätzlich nach `sparring/FINAL_ARTIFACT.md` kopiert.
+Nach Runde 10 wird `step_3_synthesis.md` beziehungsweise `step_3_synthesis/` zusätzlich nach `sparring/FINAL_ARTIFACT.md` oder `sparring/FINAL_ARTIFACT/` kopiert.
 
 ---
 

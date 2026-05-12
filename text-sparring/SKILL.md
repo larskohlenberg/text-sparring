@@ -24,10 +24,16 @@ Erkenne den Modus automatisch: Existiert `sparring/state.md` im aktuellen Projek
 
 Stelle dem User exakt diese Fragen — eine nach der anderen, kompakt:
 
-1. **Welchen Text soll ich sparren?** Erwarte einen Dateipfad (z. B. `draft.md`, `texte/kapitel_03.md`).
+1. **Welches Artefakt soll gechallenged werden?** Erwarte einen Pfad zu einer Datei oder einem Verzeichnis (z. B. `draft.md`, `docs/`, `text-sparring/`).
 2. **Welches zweite Tool kommt rein?** Optionen: `Codex CLI`, `ChatGPT (Web)`, `Cowork`, `andere Claude Code Session`. Frag nach dem Namen, wie er später in `state.md` referenziert werden soll (z. B. "Codex", "GPT-5").
 3. **Mein eigener Name im Sparring?** Default: `Claude`. Akzeptiere Abweichungen.
-4. **Ausführungsmodus?** Default: `Auto`. Optionen:
+4. **Sparring-Typ?** Default: `Auto`. Optionen:
+   - `Auto`: aus Artefakt und Projektkontext ableiten.
+   - `Text`: generische Text-, README-, Essay- oder Konzeptarbeit.
+   - `Campaign`: Posts, Kampagnen, Content-Serien oder Redaktionsmaterial.
+   - `Skill`: Skills, Agent-Workflows, Prompt-/Template-Systeme oder `.skill`-Bundles.
+   - `Code`: Quellcode, Tests, Build-Dateien oder technische Implementierungen.
+5. **Ausführungsmodus?** Default: `Auto`. Optionen:
    - `Auto`: Subagent/Worker/Workstream verwenden, wenn das aktuelle Tool das erkennbar unterstützt; sonst inline.
    - `Subagent`: jeden Schritt in einem frischen Subagent-Kontext ausführen. Wenn das aktuelle Tool das nicht kann, stoppen und den User fragen.
    - `Inline`: Schritte direkt in der Hauptsession ausführen.
@@ -39,23 +45,28 @@ Lege im aktuellen Projektverzeichnis (NICHT im Skill-Verzeichnis) folgende Struk
 ```
 sparring/
 ├── CHALLENGE.md
+├── artifact.md
 ├── state.md
 ├── watch_loop.sh
 ├── chatgpt_codex_instructions.md
 ├── context/
 └── rounds/
     └── round_01/
-        └── artifact.md          ← Kopie des Ausgangstexts
+        └── artifact.md|artifact/ ← Kopie des Ausgangsartefakts
 ```
 
 Vorgehen:
 
+- Prüfe den Artefaktpfad: Wenn er eine Datei ist, setze `Artifact-Typ` auf `file`; wenn er ein Verzeichnis ist, setze `Artifact-Typ` auf `directory`. Wenn er weder Datei noch Verzeichnis ist, frage den User erneut.
+- Bestimme `Erkannter Sparring-Typ`: Bei User-Wahl `Auto` leite aus Artefakt und Projektkontext `Text`, `Campaign`, `Skill` oder `Code` ab. Bei expliziter User-Wahl übernimm diese als erkannten Typ, außer Artefakt und Typ widersprechen offensichtlich.
 - Lies `templates/CHALLENGE.md.tpl` und ersetze die Platzhalter mit den konkreten Agent-Namen und dem unten beschriebenen Rotationsplan. Schreibe das Ergebnis nach `sparring/CHALLENGE.md`.
-- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/state.md`. Setze den initialen Status auf: Runde 1, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**. Setze `Ausführungsmodus` auf die User-Wahl (`Auto`, `Subagent` oder `Inline`) und `Step-Ausführung` auf die tatsächlich gewählte Umsetzung für dieses Tool (`subagent` oder `inline`).
+- Lies `templates/artifact.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/artifact.md`. Setze `Initiale Kopie` auf `sparring/rounds/round_01/artifact.md` bei Dateien oder `sparring/rounds/round_01/artifact/` bei Verzeichnissen.
+- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/state.md`. Setze den initialen Status auf: Runde 1, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**. Setze `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ`, `Erkannter Sparring-Typ`, `Ausführungsmodus` und `Step-Ausführung`.
 - Kopiere `templates/watch_loop.sh` 1:1 nach `sparring/watch_loop.sh`. Mache sie nicht ausführbar — sie wird mit `bash watch_loop.sh ...` aufgerufen.
 - Lies `templates/chatgpt_codex_instructions.md`, befülle die Platzhalter mit dem Projektpfad und dem Namen des zweiten Agents, schreibe nach `sparring/chatgpt_codex_instructions.md`.
 - Lege `sparring/context/` an. Nutze `templates/step_context.md.tpl` später als Vorlage für Schritt-Kontexte im Subagent-Modus.
-- Kopiere den vom User benannten Ausgangstext nach `sparring/rounds/round_01/artifact.md`.
+- Bei `Artifact-Typ: file`: Kopiere die vom User benannte Datei nach `sparring/rounds/round_01/artifact.md`.
+- Bei `Artifact-Typ: directory`: Kopiere das vom User benannte Verzeichnis nach `sparring/rounds/round_01/artifact/`.
 
 ### Schritt 3: CLAUDE.md erweitern (nur wenn du Claude bist)
 
@@ -88,7 +99,7 @@ Schreibe sie in `state.md` mit den echten Namen statt A/B.
 
 Wenn `Step-Ausführung: subagent` gilt: Erzeuge zuerst `sparring/context/round_01_step_1_prompt.md` aus `templates/step_context.md.tpl`, beauftrage einen frischen Subagent/Worker/Workstream mit genau diesem Kontext, warte auf Abschluss und prüfe, dass `step_1_thesis.md` und `step_1_handoff.md` existieren.
 
-Wenn `Step-Ausführung: inline` gilt: Lies `sparring/rounds/round_01/artifact.md` und produziere die These gemäß den Regeln in `CHALLENGE.md`. Schreibe nach `sparring/rounds/round_01/step_1_thesis.md` und den Übergabeimpuls nach `sparring/rounds/round_01/step_1_handoff.md`.
+Wenn `Step-Ausführung: inline` gilt: Lies bei `Artifact-Typ: file` `sparring/rounds/round_01/artifact.md`; lies bei `Artifact-Typ: directory` `sparring/rounds/round_01/artifact/`. Produziere die These gemäß den Regeln in `CHALLENGE.md`. Schreibe bei `file` nach `step_1_thesis.md`, bei `directory` nach `step_1_thesis/`, und den Übergabeimpuls immer nach `step_1_handoff.md`.
 
 ### Schritt 6: state.md aktualisieren
 
@@ -115,6 +126,7 @@ Lies `sparring/state.md` vollständig. Identifiziere:
 - Wer der Initiator ist
 - Welche Runde und welcher Schritt aktuell offen ist
 - Welche Rolle du in diesem Schritt hast
+- Welcher `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ` und `Erkannter Sparring-Typ` gelten
 - Welcher `Ausführungsmodus` und welche `Step-Ausführung` gelten
 
 Falls `Dran:` nicht **dich** zeigt: melde *"Im laufenden Sparring ist gerade {OTHER} dran, nicht ich. Soll ich trotzdem in den Wait-Loop gehen und warten, bis ich dran bin?"* — auf User-Bestätigung dann Schritt 4 (Wait-Loop) ohne vorherige Arbeit.
@@ -129,9 +141,9 @@ Wenn `Step-Ausführung: subagent` gilt: Erzeuge vor dem Schritt eine Kontextdate
 
 Wenn `Step-Ausführung: inline` gilt: Erledige den Schritt direkt in der Hauptsession.
 
-- **These**: Lies `rounds/round_NN/artifact.md` und, falls `NN > 1`, den Übergabeimpuls der Vorrunde (`rounds/round_{NN-1}/step_3_handoff.md`). Schreibe nach `step_1_thesis.md` und `step_1_handoff.md`.
-- **Antithese**: Lies `rounds/round_NN/step_1_thesis.md`, `step_1_handoff.md` und `artifact.md` als Bezug. Schreibe nach `step_2_antithesis.md` und `step_2_handoff.md`.
-- **Synthese**: Lies `step_1_thesis.md`, `step_2_antithesis.md` und `step_2_handoff.md`. Schreibe nach `step_3_synthesis.md` und `step_3_handoff.md`.
+- **These**: Bei `file`: Lies `rounds/round_NN/artifact.md`; bei `directory`: lies `rounds/round_NN/artifact/`. Falls `NN > 1`, lies zusätzlich den Übergabeimpuls der Vorrunde (`rounds/round_{NN-1}/step_3_handoff.md`). Schreibe bei `file` nach `step_1_thesis.md`, bei `directory` nach `step_1_thesis/`, und immer nach `step_1_handoff.md`.
+- **Antithese**: Bei `file`: Lies `artifact.md`, `step_1_thesis.md` und `step_1_handoff.md`; bei `directory`: lies `artifact/`, `step_1_thesis/` und `step_1_handoff.md`. Schreibe nach `step_2_antithesis.md` und `step_2_handoff.md`.
+- **Synthese**: Lies `step_1_thesis` (Datei oder Verzeichnis), `step_2_antithesis.md` und `step_2_handoff.md`. Schreibe bei `file` nach `step_3_synthesis.md`, bei `directory` nach `step_3_synthesis/`, und immer nach `step_3_handoff.md`.
 
 Befolge dabei zwingend die Rollen-Definitionen aus `CHALLENGE.md`.
 
@@ -140,13 +152,15 @@ Befolge dabei zwingend die Rollen-Definitionen aus `CHALLENGE.md`.
 - Aktualisiere `state.md`: Schritt-Status, `Dran:`, Verlauf.
 - **Falls du gerade Schritt 3 (Synthese) erledigt hast** UND die aktuelle Runde < 10 ist:
   - Lege `rounds/round_{NN+1}/` an
-  - Kopiere `step_3_synthesis.md` nach `rounds/round_{NN+1}/artifact.md`
+  - Bei `Artifact-Typ: file`: Kopiere `step_3_synthesis.md` nach `rounds/round_{NN+1}/artifact.md`
+  - Bei `Artifact-Typ: directory`: Kopiere `step_3_synthesis/` nach `rounds/round_{NN+1}/artifact/`
   - Belasse `step_3_handoff.md` im abgeschlossenen Rundenordner; die These der nächsten Runde liest ihn dort als Übergabeimpuls.
   - Inkrementiere die Runden-Nummer in `state.md`
   - Setze `Dran:` und Rolle laut Rotationsplan für die neue Runde
 - **Falls du gerade Schritt 3 der Runde 10 erledigt hast**:
   - Setze in `state.md` den Status auf `completed`
-  - Kopiere `step_3_synthesis.md` nach `sparring/FINAL_ARTIFACT.md`
+  - Bei `Artifact-Typ: file`: Kopiere `step_3_synthesis.md` nach `sparring/FINAL_ARTIFACT.md`
+  - Bei `Artifact-Typ: directory`: Kopiere `step_3_synthesis/` nach `sparring/FINAL_ARTIFACT/`
 
 ### Schritt 4: Wait-Loop starten
 
@@ -177,6 +191,7 @@ Der Bash-Loop blockiert und beendet sich mit drei möglichen Exit-Codes. Reagier
 |-------|-------|
 | `templates/CHALLENGE.md.tpl` | Regelwerk + Rollen-Definitionen + Rotationsplan-Schema |
 | `templates/state.md.tpl` | Status-Datei mit Platzhaltern |
+| `templates/artifact.md.tpl` | Stabile Definition des gechallengten Artefakts |
 | `templates/claude_md_snippet.md` | Anhang für CLAUDE.md im Projekt |
 | `templates/chatgpt_codex_instructions.md` | Instructions für den zweiten Agent (Custom Instructions o. Ä.) |
 | `templates/step_context.md.tpl` | Vorlage für isolierte Subagent-Step-Kontexte |

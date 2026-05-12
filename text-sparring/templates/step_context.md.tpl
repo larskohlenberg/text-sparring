@@ -4,6 +4,14 @@
 
 Erledige genau Runde {ROUND}, Schritt {STEP}: {ROLE}.
 
+## Sparring Artifact
+
+Siehe `sparring/artifact.md`.
+
+**Artifact-Typ:** {ARTIFACT_TYPE}
+**Sparring-Typ:** {RESOLVED_SPARRING_TYPE}
+**Aktuelle Arbeitsfassung:** {CURRENT_ARTIFACT_PATH}
+
 ## Rolle
 
 Arbeite strikt nach der Rollen-Definition für **{ROLE}** in `sparring/CHALLENGE.md`.

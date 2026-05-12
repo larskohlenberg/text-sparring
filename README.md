@@ -16,6 +16,10 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach 10 
 
 **Vollrotation**: Über die 10 Runden übernimmt jeder Agent jede Rolle (These / Antithese / Synthese) genau 5×. Die Verteilung ist deterministisch und ausbalanciert.
 
+**Artefakt statt ganzes Projekt**: Beim Start gibst du einen Pfad zu einer Datei oder einem Verzeichnis an. Nur dieses Artefakt wird über die Runden fortgeschrieben; der übrige Projektkontext dient zur Orientierung.
+
+**Sparring-Typ**: Standard ist `Auto`. Der Skill leitet dann aus Artefakt und Projektkontext ab, ob eher `Text`, `Campaign`, `Skill` oder `Code` gechallenged wird. Du kannst den Typ bei der Initialisierung auch explizit setzen.
+
 **Übergabeimpulse**: Jeder Schritt erzeugt neben seinem Hauptoutput eine kurze `*_handoff.md`-Datei. Darin markiert der aktuelle Agent 1–3 konkrete Prüf- oder Schärfpunkte für den nächsten Agenten. Die Haupttexte bleiben dadurch sauber, während der nächste Schritt trotzdem gezielter an Spannung, Risiko oder ungenutztem Potenzial weiterarbeiten kann.
 
 **Subagent-Modus**: Für lange Sparrings ist ein isolierter Step-Kontext empfohlen. Die Hauptsession orchestriert nur noch: Sie liest `state.md`, erzeugt einen kleinen Prompt unter `sparring/context/`, delegiert den aktuellen Schritt an einen frischen Subagent/Worker/Workstream, prüft die erwarteten Output-Dateien und aktualisiert danach `state.md`.
@@ -33,6 +37,7 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach 10 
 dein-projekt/
 ├── <tool-instructions>                ← optional: Tool-spezifische Startanweisung
 └── sparring/
+    ├── artifact.md                    ← stabile Definition des gechallengten Artefakts
     ├── CHALLENGE.md                   ← Regelwerk + Rotationsplan
     ├── state.md                       ← Aktueller Status (einzige Wahrheit)
     ├── watch_loop.sh                  ← Pure-Bash Polling
@@ -40,12 +45,12 @@ dein-projekt/
     ├── context/                       ← isolierte Step-Kontexte für Subagent-Ausführung
     └── rounds/
         ├── round_01/
-        │   ├── artifact.md            ← Ausgangstext
-        │   ├── step_1_thesis.md
+        │   ├── artifact.md|artifact/  ← Ausgangsartefakt
+        │   ├── step_1_thesis.md|/
         │   ├── step_1_handoff.md
         │   ├── step_2_antithesis.md
         │   ├── step_2_handoff.md
-        │   ├── step_3_synthesis.md    ← wird zu artifact.md der Folgerunde
+        │   ├── step_3_synthesis.md|/  ← wird zum Artefakt der Folgerunde
         │   └── step_3_handoff.md
         ├── round_02/...
         └── round_10/...
@@ -74,11 +79,11 @@ cd text-sparring
 ### Erstes Tool starten (Initiator)
 
 ```
-Du in Agent A: "Starte ein Text-Sparring über draft.md"
+Du in Agent A: "Starte ein Text-Sparring über README.md"
 ```
 
 Agent A:
-- Fragt nach: zweiter Agent (Name + Tool), dein Name im Sparring und Ausführungsmodus
+- Fragt nach: Artefaktpfad, zweiter Agent (Name + Tool), dein Name im Sparring, Sparring-Typ und Ausführungsmodus
 - Legt `sparring/` an und erzeugt die Projektdateien für das Sparring
 - Ergänzt, falls passend, eine Tool-spezifische Startanweisung
 - Erledigt **Schritt 1 (These) in Runde 1** plus Übergabeimpuls
@@ -117,7 +122,23 @@ Standard-Werte im Skill (können in `state.md` pro Projekt überschrieben werden
 | `POLL_SEC` | `30` | Wie oft `watch_loop.sh` `state.md` prüft (Sekunden) |
 | `MAX_WAIT_MIN` | `30` | Max. Wartezeit bevor Timeout-Alarm |
 | Anzahl Runden | `10` | Fest in Rotationsplan, nicht parametrisiert |
+| `Sparring-Typ` | `Auto` | `Auto`, `Text`, `Campaign`, `Skill` oder `Code`; wird in `state.md` gespeichert |
 | `Ausführungsmodus` | `Auto` | `Auto`, `Subagent` oder `Inline`; wird in `state.md` gespeichert |
+
+### Artefakte
+
+- `file`: Eine einzelne Datei wird nach `round_01/artifact.md` kopiert. These und Synthese sind ebenfalls Markdown-Dateien.
+- `directory`: Ein Verzeichnis wird nach `round_01/artifact/` kopiert. These und Synthese sind vollständige Verzeichnisse (`step_1_thesis/`, `step_3_synthesis/`).
+
+Der Skill speichert die stabile Artefaktdefinition in `sparring/artifact.md` und den laufenden Zustand in `sparring/state.md`.
+
+### Sparring-Typen
+
+- `Auto`: Typ aus Artefakt und Projektkontext ableiten.
+- `Text`: Generische Text-, README-, Essay- oder Konzeptarbeit.
+- `Campaign`: Posts, Kampagnen, Content-Serien oder Redaktionsmaterial.
+- `Skill`: Skills, Agent-Workflows, Prompt-/Template-Systeme oder `.skill`-Bundles.
+- `Code`: Quellcode, Tests, Build-Dateien oder technische Implementierungen.
 
 ### Ausführungsmodi
 
