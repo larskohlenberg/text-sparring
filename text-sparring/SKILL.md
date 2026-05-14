@@ -50,6 +50,7 @@ Wenn die Trigger-Phrase des Users Worte wie **"Turbo"**, **"Schnellstart"**, **"
 3. Wenn die Trigger-Phrase einen konkreten Artefaktpfad enthält, nimm den; sonst leite ihn aus dem Projektkontext ab.
 4. Fasse die gewählte Konfiguration in 4–6 Zeilen zusammen und sage dem User in einem Satz, dass du jetzt loslegst.
 5. Lege direkt das Scaffolding an und erledige Schritt 1 (These) — ohne weitere Rückfrage.
+6. Gib am Ende den Handover-Prompt für den zweiten Agenten aus (siehe Schritt 7) und starte den Wait-Loop.
 
 **Ausnahme:** Wenn du für einen einzelnen Punkt keinen vertretbaren Default ableiten kannst (z. B. mehrere gleichwertige Artefakt-Kandidaten und keiner in der Trigger-Phrase, oder der Name des zweiten Tools ist nicht erkennbar), frag **nur diese eine Frage** zurück und mach dann mit dem Rest direkt weiter. Kein vollständiges Interview.
 
@@ -163,15 +164,31 @@ Setze in `sparring/<NAME>/state.md`:
 - `Dran:` auf den zweiten Agent (Name aus Interview)
 - Aktualisiere die Verlauf-Sektion
 
-### Schritt 7: Wait-Loop starten
+### Schritt 7: Handover-Prompt ausgeben und Wait-Loop starten
 
-Führe aus: `bash sparring/<NAME>/watch_loop.sh "{MY_NAME}"` mit deinem konkreten Namen und dem konkreten Sparring-Pfad.
+**Vor** dem Wait-Loop musst du dem User einen fertigen, copy-paste-fähigen Handover-Prompt für den zweiten Agenten ausgeben. Format:
 
-Erkläre dem User **vor** dem Aufruf in einem kurzen Satz:
+> Setup für Sparring **`<NAME>`** steht. Schritt 1 (These) ist fertig. Ich gehe gleich in den Wait-Loop.
+>
+> **Handover-Prompt für {OTHER_NAME}:**
+>
+> Starte eine Session in **{OTHER_NAME}** im selben Projektverzeichnis (`{PROJECT_PATH}`) und kopiere genau diesen Text als ersten Prompt:
+>
+> ````
+> Du bist "{OTHER_NAME}" im laufenden Text-Sparring "<NAME>"
+> (Sparring-Pfad: sparring/<NAME>/) im aktuellen Projektverzeichnis.
+> Steig ins Sparring ein: lies sparring/<NAME>/state.md und
+> sparring/<NAME>/CHALLENGE.md, folge dem JOIN-Modus der
+> text-sparring-Skill, und übernimm den ausstehenden Schritt.
+> Falls die Skill nicht automatisch lädt, lies ihre SKILL.md
+> explizit.
+> ````
 
-> *"Setup für Sparring **`<NAME>`** steht. Schritt 1 (These) ist fertig. Ich gehe jetzt in den Wait-Loop und prüfe alle 30 Sekunden, ob ich wieder dran bin. Bitte starte jetzt eine Session in **{OTHER_NAME}** im selben Projektverzeichnis und sag dort: 'Steig ins Sparring `<NAME>` ein'."*
+Setze die Platzhalter `{OTHER_NAME}`, `<NAME>` und `{PROJECT_PATH}` mit den konkreten Werten ein, bevor du den Block ausgibst. Der innere Codeblock (mit den vier Backticks außen) muss exakt diese Form behalten, damit der User ihn als einen Block markieren und kopieren kann.
 
-Dann den Loop aufrufen. Ab diesem Moment gilt Silent Wait Mode: Keine Zwischenkommentare, keine Statusmeldungen, keine Spekulation über den anderen Agenten. Erst wieder reagieren, wenn `watch_loop.sh` mit WAKE, DONE oder TIMEOUT endet.
+Führe danach aus: `bash sparring/<NAME>/watch_loop.sh "{MY_NAME}"`.
+
+Ab Aufruf des Loops gilt Silent Wait Mode: Keine Zwischenkommentare, keine Statusmeldungen, keine Spekulation über den anderen Agenten. Erst wieder reagieren, wenn `watch_loop.sh` mit WAKE, DONE oder TIMEOUT endet.
 
 ## JOIN-Modus (zweiter Agent steigt ein)
 

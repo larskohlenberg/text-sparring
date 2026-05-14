@@ -8,6 +8,7 @@ Versionierung nach [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Copy-paste-fertiger Handover-Prompt am Ende der INIT-Phase.** Statt nur einer kurzen Anweisung *"sag dort: Steig ins Sparring ein"* gibt der Agent jetzt einen explizit abgegrenzten, vollständigen Prompt aus, der den Namen des zweiten Agenten, den Sparring-Namen, den Sparring-Pfad und die nötigen JOIN-Schritte enthält. Funktioniert sowohl im normalen Interview-Modus als auch im Turbo-Modus.
 - **Turbo-Modus für INIT:** Trigger-Phrasen wie *"Turbo-Modus"*, *"Schnellstart"*, *"ohne Fragen"*, *"auto-init"* überspringen das komplette Interview. Der Agent generiert für alle 8 Punkte konkrete Vorschläge aus Projektkontext, fasst die Konfiguration in 4–6 Zeilen zusammen und legt direkt los. Einzelfragen werden nur gestellt, wenn kein vertretbarer Default ableitbar ist.
 - **Aktive Interview-Vorschläge:** Das INIT-Interview erwartet jetzt pro Frage einen konkreten Vorschlag mit einer Satz-Begründung, basierend auf Projektkontext und Artefakt — nicht mehr nur statische Defaults. Am Ende fasst der Agent die gewählte Konfiguration zusammen und holt sich eine finale Bestätigung, bevor das Scaffolding entsteht.
 - **Mehrere Sparrings pro Projekt:** Jedes Sparring lebt jetzt in einem benannten Unterordner `sparring/<NAME>/`. Mehrere Sparrings können parallel oder nacheinander im selben Projekt laufen — z. B. `sparring/readme-v1/` und `sparring/readme-v2/`.
