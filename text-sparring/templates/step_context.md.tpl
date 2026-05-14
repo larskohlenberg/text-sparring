@@ -36,3 +36,4 @@ Arbeite strikt nach der Rollen-Definition für **{ROLE}** in `{SPARRING_PATH}/CH
 - Starte keinen Wait-Loop.
 - Halte Hauptoutput und Übergabeimpuls getrennt.
 - Wenn notwendige Input-Dateien fehlen oder widersprüchlich sind, schreibe keine Outputs und melde die Inkonsistenz an die Hauptsession.
+- **Keine anderen Skills aktivieren.** Dieser Step läuft im Single-Skill-Modus der text-sparring-Skill. Aktiviere insbesondere nicht `brainstorming`, `test-driven-development`, `systematic-debugging`, `using-superpowers`, `writing-plans` oder andere Workflow-Skills, auch wenn ihre Beschreibungen passen könnten. Dein Job ist ausschließlich die Rolle aus `CHALLENGE.md`. Ausnahme nur, wenn die Hauptsession in diesem Step-Kontext einen anderen Skill explizit benennt.

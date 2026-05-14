@@ -9,6 +9,14 @@ Ein harness-agnostischer Skill zum Aufsetzen und Mitwirken an einem **Text-Sparr
 
 Es geht **nicht ums Gewinnen**, sondern um gegenseitiges Schärfen — wie zwei Sparringspartner im Training. Der Skill kennt keinen Inhalt; er orchestriert nur den **Prozess**. Der zu sparrende Text liegt außerhalb des Skills im Projektverzeichnis.
 
+## Skill-Isolation (Single-Skill-Modus)
+
+Solange du in diesem Skill bist — egal ob in INIT, JOIN, als Step-Worker oder im Wait-Loop — **aktiviere keine anderen Skills automatisch**. Auch nicht `brainstorming`, `test-driven-development`, `systematic-debugging`, `using-superpowers`, `writing-plans`, `executing-plans`, `subagent-driven-development` oder andere Workflow-/Helfer-Skills, die sich evtl. aufdrängen. Das Sparring orchestriert sich vollständig selbst über `state.md`, `CHALLENGE.md` und die Step-Kontexte — jede zusätzliche Skill-Aktivierung erzeugt Overkill (doppelte Pläne, Brainstorming-Sessions, TDD-Schleifen) und bricht die Single-Step-Pro-Aufwachen-Regel.
+
+**Ausnahme:** Der User nennt einen anderen Skill **in seinem aktuellen Prompt explizit** (z. B. *"Nutze TDD beim Synthese-Schritt"*). Dann darfst du diesen einen Skill für genau diesen Schritt verwenden.
+
+Diese Isolation gilt auch für Subagents: Step-Kontexte enthalten eine entsprechende Klausel.
+
 ## Wann triggern
 
 Triggere diesen Skill in zwei Situationen:
@@ -182,6 +190,12 @@ Setze in `sparring/<NAME>/state.md`:
 > text-sparring-Skill, und übernimm den ausstehenden Schritt.
 > Falls die Skill nicht automatisch lädt, lies ihre SKILL.md
 > explizit.
+>
+> Wichtig: Arbeite im Single-Skill-Modus der text-sparring-Skill.
+> Aktiviere keine anderen Skills automatisch (kein brainstorming,
+> kein TDD, kein systematic-debugging, kein using-superpowers etc.),
+> auch wenn sie sich aufdrängen. Das Sparring orchestriert sich
+> selbst.
 > ````
 
 Setze die Platzhalter `{OTHER_NAME}`, `<NAME>` und `{PROJECT_PATH}` mit den konkreten Werten ein, bevor du den Block ausgibst. Der innere Codeblock (mit den vier Backticks außen) muss exakt diese Form behalten, damit der User ihn als einen Block markieren und kopieren kann.

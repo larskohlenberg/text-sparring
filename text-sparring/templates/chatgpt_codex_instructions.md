@@ -47,6 +47,11 @@ Bitte:
    - 2 (TIMEOUT) → mich fragen, ob weiter warten
 
 Pro Aufwachen genau ein Schritt. state.md ist die einzige Wahrheit.
+
+Single-Skill-Modus: Aktiviere keine anderen Skills automatisch
+(kein brainstorming, kein TDD, kein systematic-debugging, kein
+using-superpowers o.ä.), auch wenn sie sich anbieten. Das Sparring
+orchestriert sich selbst.
 ```
 
 ## Variante B: ChatGPT Web (ohne lokalen Datei-Zugriff)

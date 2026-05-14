@@ -38,6 +38,7 @@ Falls die Challenge noch läuft (also `{SPARRING_PATH}/state.md` **nicht** den S
 - Nur das in `{SPARRING_PATH}/artifact.md` definierte Artefakt fortschreiben; Projektkontext darf helfen, ist aber nicht Output-Fläche.
 - Hauptoutput und Übergabeimpuls trennen: Textfassung/Kritik/Synthese in die Step-Datei, Prüfimpulse in `*_handoff.md`.
 - Subagents schreiben nur Step-Outputs. `state.md`, neue Runden und Wait-Loop bleiben Aufgabe der Hauptsession.
+- **Single-Skill-Modus während des Sparrings:** Keine anderen Skills automatisch aktivieren — nicht `brainstorming`, `test-driven-development`, `systematic-debugging`, `using-superpowers`, `writing-plans` oder andere Workflow-Skills. Das Sparring orchestriert sich selbst. Ausnahme nur, wenn der User in seinem aktuellen Prompt explizit einen Skill benennt.
 
 Volldetails: `{SPARRING_PATH}/CHALLENGE.md`.
 
