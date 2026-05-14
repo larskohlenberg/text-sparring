@@ -16,9 +16,13 @@ Siehe `{SPARRING_PATH}/artifact.md`.
 **Aktuelle Arbeitsfassung:** {CURRENT_ARTIFACT_PATH}
 **Subagent-Qualität:** {SUBAGENT_QUALITY}
 
+## Projektkontext (Pflichtlektüre vor der Step-Arbeit)
+
+Lies vor Beginn deines Schritts alle in `{SPARRING_PATH}/artifact.md` unter `Projektkontext` aufgeführten Dateien. Sie enthalten Constraints (Längen, Tonalität, Zielgruppe, Brand Voice, Format-Vorgaben), die zusätzlich zur Rolle aus `CHALLENGE.md` gelten und im Output respektiert werden müssen. Steht dort `(keine)`, überspringe diesen Schritt.
+
 ## Rolle
 
-Arbeite strikt nach der Rollen-Definition für **{ROLE}** in `{SPARRING_PATH}/CHALLENGE.md`.
+Arbeite strikt nach der Rollen-Definition für **{ROLE}** in `{SPARRING_PATH}/CHALLENGE.md`, unter Einhaltung der Projektkontext-Vorgaben.
 
 ## Input-Dateien
 

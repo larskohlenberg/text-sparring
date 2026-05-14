@@ -44,6 +44,8 @@ Bei `Artifact-Typ: directory` erzeugen nur These und Synthese Verzeichnisse. Die
 
 Diese Definitionen gelten verbindlich für jeden Schritt — unabhängig davon, welcher Agent gerade die Rolle übernimmt. Wenn du als Agent eine dieser Rollen hast, befolge sie strikt.
 
+**Vor jedem Schritt** lies die unter `Projektkontext` in `{SPARRING_PATH}/artifact.md` aufgeführten Dateien. Sie enthalten Constraints (Längen, Tonalität, Zielgruppe, Brand Voice, Format-Vorgaben), die zusätzlich zu den hier definierten Rollen-Regeln gelten. Wenn dort `(keine)` steht, ist kein Projektkontext aktiv.
+
 ### These (Schritt 1)
 
 Du bist Autor der Runde. Deine Aufgabe:

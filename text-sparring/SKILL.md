@@ -54,7 +54,7 @@ Vor jedem Output diese vier Prüfungen durchlaufen. Wenn ein Gate fehlschlägt: 
 Wenn die Trigger-Phrase des Users Worte wie **"Turbo"**, **"Schnellstart"**, **"ohne Fragen"**, **"auto"** oder **"quick"** im INIT-Kontext enthält (z. B. *"Starte ein Text-Sparring im Turbo-Modus über draft.md"*), überspringe das Interview komplett:
 
 1. Sieh dir das Projektverzeichnis an (wie unten beschrieben).
-2. Generiere konkrete Vorschläge für alle 8 Interview-Punkte aus Projektkontext und Praxis-Defaults (gleiche Logik wie unten, nur ohne den User zu fragen).
+2. Generiere konkrete Vorschläge für alle 9 Interview-Punkte aus Projektkontext und Praxis-Defaults (gleiche Logik wie unten, nur ohne den User zu fragen).
 3. Wenn die Trigger-Phrase einen konkreten Artefaktpfad enthält, nimm den; sonst leite ihn aus dem Projektkontext ab.
 4. Fasse die gewählte Konfiguration in 4–6 Zeilen zusammen und sage dem User in einem Satz, dass du jetzt loslegst.
 5. Lege direkt das Scaffolding an und erledige Schritt 1 (These) — ohne weitere Rückfrage.
@@ -78,25 +78,26 @@ Hier die Fragen plus, woraus du den Vorschlag jeweils ableitest:
 
 1. **Welches Artefakt soll gechallenged werden?** Schlage konkret eine Datei oder ein Verzeichnis vor, das du im Projekt siehst (z. B. die einzige Top-Level-Markdown-Datei, ein offensichtliches `docs/`, ein `text-sparring/`-Bundle). Wenn mehrere plausibel sind, nenne 2–3 Kandidaten und empfiehl einen. Wenn nichts Naheliegendes da ist, frag offen nach einem Pfad.
 2. **Wie soll dieses Sparring heißen?** Leite einen Slug aus dem Artefakt-Basename ab (z. B. `draft.md` → `draft`, `text-sparring/` → `text-sparring`). Falls unter `sparring/` schon ein gleichnamiger Ordner existiert, hänge automatisch einen aufsteigenden Suffix `-v2`, `-v3` an und schlage diesen Namen vor. Normalisiere User-Eingaben vor dem Anlegen: nur Kleinbuchstaben, Ziffern, Bindestriche; Leerzeichen und Unterstriche werden zu `-`; sonstige Sonderzeichen entfernt. Zeige den finalen Slug zur Bestätigung. Im weiteren Verlauf heißt dieser Slug `<NAME>`.
-3. **Welches zweite Tool kommt rein?** Optionen: `Codex CLI`, `ChatGPT (Web)`, `Cowork`, `andere Claude Code Session`. Empfiehl als Default `Codex CLI` oder `andere Claude Code Session` mit der Begründung, dass beide vollautonom laufen (Wait-Loop funktioniert). `ChatGPT (Web)` nur erwähnen, wenn der User explizit kein lokales Tool hat. Frag dann nach dem Namen, wie er später in `state.md` stehen soll (z. B. "Codex", "GPT-5").
-4. **Mein eigener Name im Sparring?** Schlage `Claude` vor, weil das die naheliegende Default-Bezeichnung für dieses Tool ist. Akzeptiere jede Abweichung.
-5. **Sparring-Typ?** Untersuche kurz das Artefakt und schlage konkret einen der vier Typen vor (`Text`, `Campaign`, `Skill`, `Code`) statt nur `Auto`. Begründung soll auf dem Artefakt basieren: README/Essay → `Text`, Post-Sammlung → `Campaign`, SKILL.md mit Templates → `Skill`, Quellcode-Verzeichnis → `Code`. Wenn unklar, nimm `Auto` und sage warum.
-6. **Wie viele Runden?** Schlage je nach Kontext konkret eine Zahl vor:
+3. **Welche Projektkontext-Dateien gelten?** Scanne das Projektverzeichnis und nahe Unterordner aktiv nach Dokumenten, die Constraints, Stil, Zielgruppe, Längenvorgaben, Tonalität oder Brand Voice enthalten könnten. Suchmuster (case-insensitive, DE/EN): `*redaktionsplan*`, `*editorial*`, `*style[-_ ]guide*`, `*styleguide*`, `*briefing*`, `*brief.md`, `*brand[-_ ]voice*`, `*tone[-_ ]of[-_ ]voice*`, `*content[-_ ]strategy*`, `*personas*`, `*post[-_ ]guidelines*`, `*messaging*`, `*positioning*`. Bei `Sparring-Typ: Campaign` zusätzlich Redaktions-/Kanal-Dokumente; bei `Skill` zusätzlich Schreib-/Prompt-Guidelines; bei `Code` zusätzlich `CONTRIBUTING.md`/Coding-Conventions. Schlage die gefundenen Dateien als Liste relativer Pfade vor, jeweils mit einer halbsatzigen Begründung. Der User bestätigt, streicht oder ergänzt. Default: leer, wenn nichts Passendes gefunden — nicht raten. Diese Dateien werden in `artifact.md` unter `Projektkontext` als **referenzierte** Pfade eingetragen (nicht kopiert); die Agenten lesen sie zur Step-Laufzeit live, damit Updates am Redaktionsplan auch laufende Sparrings erreichen.
+4. **Welches zweite Tool kommt rein?** Optionen: `Codex CLI`, `ChatGPT (Web)`, `Cowork`, `andere Claude Code Session`. Empfiehl als Default `Codex CLI` oder `andere Claude Code Session` mit der Begründung, dass beide vollautonom laufen (Wait-Loop funktioniert). `ChatGPT (Web)` nur erwähnen, wenn der User explizit kein lokales Tool hat. Frag dann nach dem Namen, wie er später in `state.md` stehen soll (z. B. "Codex", "GPT-5").
+5. **Mein eigener Name im Sparring?** Schlage `Claude` vor, weil das die naheliegende Default-Bezeichnung für dieses Tool ist. Akzeptiere jede Abweichung.
+6. **Sparring-Typ?** Untersuche kurz das Artefakt und schlage konkret einen der vier Typen vor (`Text`, `Campaign`, `Skill`, `Code`) statt nur `Auto`. Begründung soll auf dem Artefakt basieren: README/Essay → `Text`, Post-Sammlung → `Campaign`, SKILL.md mit Templates → `Skill`, Quellcode-Verzeichnis → `Code`. Wenn unklar, nimm `Auto` und sage warum.
+7. **Wie viele Runden?** Schlage je nach Kontext konkret eine Zahl vor:
    - Schnelltest oder neues Setup ausprobieren → `3`
    - Realer Verbesserungsdurchlauf bei mittellangem Artefakt → `5`
    - Tiefe Schärfung eines wichtigen Artefakts → `10`
    Begründung soll auf Artefaktgröße und User-Ziel basieren.
-7. **Ausführungsmodus?** Schlage `Subagent` vor, wenn du in einer Umgebung läufst, die Subagents erkennbar unterstützt (z. B. Claude Code mit Task-Tool). Sonst `Inline`. `Auto` nur dann, wenn du dir nicht sicher bist. Begründung: Subagent isoliert Step-Kontexte sauberer und vermeidet Rollenvermischung.
+8. **Ausführungsmodus?** Schlage `Subagent` vor, wenn du in einer Umgebung läufst, die Subagents erkennbar unterstützt (z. B. Claude Code mit Task-Tool). Sonst `Inline`. `Auto` nur dann, wenn du dir nicht sicher bist. Begründung: Subagent isoliert Step-Kontexte sauberer und vermeidet Rollenvermischung.
    - `Auto`: Subagent verwenden, wenn das aktuelle Tool das erkennbar unterstützt; sonst inline.
    - `Subagent`: jeden Schritt in einem frischen Subagent-Kontext ausführen. Wenn das aktuelle Tool das nicht kann, stoppen und den User fragen.
    - `Inline`: Schritte direkt in der Hauptsession ausführen.
-8. **Subagent-Qualität?** Schlage in der Regel `Inherit` vor (Begründung: keine unnötigen Overrides, Subagent läuft auf gleichem Modell wie Hauptsession). Wenn das Artefakt besonders wichtig ist oder der User Qualität betont, schlage `High` oder `Role-based` vor.
+9. **Subagent-Qualität?** Schlage in der Regel `Inherit` vor (Begründung: keine unnötigen Overrides, Subagent läuft auf gleichem Modell wie Hauptsession). Wenn das Artefakt besonders wichtig ist oder der User Qualität betont, schlage `High` oder `Role-based` vor.
    - `Inherit`: Subagents übernehmen Modell/Qualität der Hauptsession; keine expliziten Overrides setzen.
    - `Balanced`: mittlere Qualität/Kosten, wenn das Tool eine Qualitätswahl erlaubt.
    - `High`: stärkste sinnvoll verfügbare Qualität, wenn das Tool eine Qualitätswahl erlaubt.
    - `Role-based`: These eher Balanced, Antithese und Synthese eher High.
 
-Nach allen 8 Antworten fasse die Konfiguration in 4–6 Zeilen zusammen und hol dir ein finales "Los" vom User, bevor du das Scaffolding anlegst.
+Nach allen 9 Antworten fasse die Konfiguration in 4–6 Zeilen zusammen und hol dir ein finales "Los" vom User, bevor du das Scaffolding anlegst.
 
 ### Schritt 2: Scaffolding anlegen
 
@@ -122,7 +123,7 @@ Vorgehen:
 - Bestimme `Erkannter Sparring-Typ`: Bei User-Wahl `Auto` leite aus Artefakt und Projektkontext `Text`, `Campaign`, `Skill` oder `Code` ab. Bei expliziter User-Wahl übernimm diese als erkannten Typ, außer Artefakt und Typ widersprechen offensichtlich.
 - Lege das Verzeichnis `sparring/<NAME>/` an. Falls es bereits existiert (Race oder unerkannter Konflikt): stoppe und frage den User.
 - Lies `templates/CHALLENGE.md.tpl` und ersetze die Platzhalter mit den konkreten Agent-Namen, der gewählten Gesamtrundenzahl, dem unten beschriebenen Rotationsplan und dem Sparring-Pfad `sparring/<NAME>`. Schreibe das Ergebnis nach `sparring/<NAME>/CHALLENGE.md`.
-- Lies `templates/artifact.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/<NAME>/artifact.md`. Setze `Initiale Kopie` auf `sparring/<NAME>/rounds/round_01/artifact.md` bei Dateien oder `sparring/<NAME>/rounds/round_01/artifact/` bei Verzeichnissen.
+- Lies `templates/artifact.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/<NAME>/artifact.md`. Setze `Initiale Kopie` auf `sparring/<NAME>/rounds/round_01/artifact.md` bei Dateien oder `sparring/<NAME>/rounds/round_01/artifact/` bei Verzeichnissen. Trage die im Interview bestätigten Projektkontext-Pfade als Bulletliste unter `Projektkontext` ein (relative Pfade vom Projekt-Root). Wenn keiner bestätigt wurde: Sektion mit dem Hinweis `(keine)` befüllen, nicht weglassen.
 - Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/<NAME>/state.md`. Setze `Sparring-Name` auf `<NAME>`. Setze den initialen Status auf: Runde 1 von gewählter Gesamtrundenzahl, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**. Setze `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ`, `Erkannter Sparring-Typ`, `Ausführungsmodus`, `Step-Ausführung` und `Subagent-Qualität`.
 - Kopiere `templates/watch_loop.sh` 1:1 nach `sparring/<NAME>/watch_loop.sh`. Mache sie nicht ausführbar — sie wird mit `bash sparring/<NAME>/watch_loop.sh ...` aufgerufen. Das Skript lokalisiert seine `state.md` über sein eigenes Verzeichnis, kein extra Argument nötig.
 - Lies `templates/chatgpt_codex_instructions.md`, befülle die Platzhalter mit dem Projektpfad, dem Namen des zweiten Agents und dem Sparring-Pfad `sparring/<NAME>`, schreibe nach `sparring/<NAME>/chatgpt_codex_instructions.md`.
