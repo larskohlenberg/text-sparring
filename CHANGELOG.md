@@ -8,6 +8,7 @@ Versionierung nach [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Aktive Interview-Vorschläge:** Das INIT-Interview erwartet jetzt pro Frage einen konkreten Vorschlag mit einer Satz-Begründung, basierend auf Projektkontext und Artefakt — nicht mehr nur statische Defaults. Am Ende fasst der Agent die gewählte Konfiguration zusammen und holt sich eine finale Bestätigung, bevor das Scaffolding entsteht.
 - **Mehrere Sparrings pro Projekt:** Jedes Sparring lebt jetzt in einem benannten Unterordner `sparring/<NAME>/`. Mehrere Sparrings können parallel oder nacheinander im selben Projekt laufen — z. B. `sparring/readme-v1/` und `sparring/readme-v2/`.
 - Neue Interview-Frage **"Wie soll dieses Sparring heißen?"** mit Default aus Artefakt-Basename und automatischer Versionierung (`-v2`, `-v3`) bei Namenskonflikten. Slugs werden normalisiert (Kleinbuchstaben, Ziffern, Bindestriche).
 - Automatische **Erkennung des aktiven Sparrings im JOIN-Modus**: Bei genau einem aktiven Sparring silent join, bei mehreren Rückfrage, expliziter Name in der Trigger-Phrase wird übernommen.

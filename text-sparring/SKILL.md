@@ -43,28 +43,37 @@ Vor jedem Output diese vier Prüfungen durchlaufen. Wenn ein Gate fehlschlägt: 
 
 ### Schritt 1: Interview
 
-Stelle dem User exakt diese Fragen — eine nach der anderen, kompakt:
+**Vor dem Interview:** Sieh dir das aktuelle Projektverzeichnis kurz an (Top-Level-Dateien und -Ordner, ggf. eine `README.md` oder `CLAUDE.md`). Das ist die Grundlage für deine konkreten Vorschläge unten — du musst sie nicht im Detail lesen, nur Kontext sammeln.
 
-1. **Welches Artefakt soll gechallenged werden?** Erwarte einen Pfad zu einer Datei oder einem Verzeichnis (z. B. `draft.md`, `docs/`, `text-sparring/`).
-2. **Wie soll dieses Sparring heißen?** Default: aus dem Artefakt-Basename abgeleitet (z. B. `draft.md` → `draft`, `text-sparring/` → `text-sparring`). Falls unter `sparring/` schon ein Ordner mit diesem Namen existiert, hänge automatisch einen aufsteigenden Suffix `-v2`, `-v3` an und biete den so entstandenen Namen als Default an. Normalisiere die User-Eingabe vor dem Anlegen: nur Kleinbuchstaben, Ziffern und Bindestriche; ersetze Leerzeichen und Unterstriche durch `-`; entferne sonstige Sonderzeichen. Zeige dem User den finalen Slug zur Bestätigung, bevor du das Verzeichnis anlegst. Im weiteren Verlauf des Skills wird dieser Slug `<NAME>` genannt.
-3. **Welches zweite Tool kommt rein?** Optionen: `Codex CLI`, `ChatGPT (Web)`, `Cowork`, `andere Claude Code Session`. Frag nach dem Namen, wie er später in `state.md` referenziert werden soll (z. B. "Codex", "GPT-5").
-4. **Mein eigener Name im Sparring?** Default: `Claude`. Akzeptiere Abweichungen.
-5. **Sparring-Typ?** Default: `Auto`. Optionen:
-   - `Auto`: aus Artefakt und Projektkontext ableiten.
-   - `Text`: generische Text-, README-, Essay- oder Konzeptarbeit.
-   - `Campaign`: Posts, Kampagnen, Content-Serien oder Redaktionsmaterial.
-   - `Skill`: Skills, Agent-Workflows, Prompt-/Template-Systeme oder `.skill`-Bundles.
-   - `Code`: Quellcode, Tests, Build-Dateien oder technische Implementierungen.
-6. **Wie viele Runden?** Default: `10`. Akzeptiere ganze Zahlen von 1 bis 10. Für schnelle Tests sind 2–3 Runden sinnvoll; für gründliche Schärfung 5–10.
-7. **Ausführungsmodus?** Default: `Auto`. Optionen:
-   - `Auto`: Subagent/Worker/Workstream verwenden, wenn das aktuelle Tool das erkennbar unterstützt; sonst inline.
+**Format pro Frage:** Stelle die Frage, gib einen **konkreten Vorschlag** und eine **knappe Begründung in 1 Satz** (worauf basiert der Vorschlag — Artefakt, Projektkontext, Praxis-Erfahrung). Dann warte auf Bestätigung oder Korrektur. Eine Frage nach der anderen, nicht alles auf einmal.
+
+Beispielformat:
+
+> *"**Welches Artefakt?** — Ich schlage `README.md` vor. Begründung: das ist die einzige Markdown-Datei im Root und sieht nach dem Hauptartefakt aus. Passt das, oder soll es etwas anderes sein?"*
+
+Hier die Fragen plus, woraus du den Vorschlag jeweils ableitest:
+
+1. **Welches Artefakt soll gechallenged werden?** Schlage konkret eine Datei oder ein Verzeichnis vor, das du im Projekt siehst (z. B. die einzige Top-Level-Markdown-Datei, ein offensichtliches `docs/`, ein `text-sparring/`-Bundle). Wenn mehrere plausibel sind, nenne 2–3 Kandidaten und empfiehl einen. Wenn nichts Naheliegendes da ist, frag offen nach einem Pfad.
+2. **Wie soll dieses Sparring heißen?** Leite einen Slug aus dem Artefakt-Basename ab (z. B. `draft.md` → `draft`, `text-sparring/` → `text-sparring`). Falls unter `sparring/` schon ein gleichnamiger Ordner existiert, hänge automatisch einen aufsteigenden Suffix `-v2`, `-v3` an und schlage diesen Namen vor. Normalisiere User-Eingaben vor dem Anlegen: nur Kleinbuchstaben, Ziffern, Bindestriche; Leerzeichen und Unterstriche werden zu `-`; sonstige Sonderzeichen entfernt. Zeige den finalen Slug zur Bestätigung. Im weiteren Verlauf heißt dieser Slug `<NAME>`.
+3. **Welches zweite Tool kommt rein?** Optionen: `Codex CLI`, `ChatGPT (Web)`, `Cowork`, `andere Claude Code Session`. Empfiehl als Default `Codex CLI` oder `andere Claude Code Session` mit der Begründung, dass beide vollautonom laufen (Wait-Loop funktioniert). `ChatGPT (Web)` nur erwähnen, wenn der User explizit kein lokales Tool hat. Frag dann nach dem Namen, wie er später in `state.md` stehen soll (z. B. "Codex", "GPT-5").
+4. **Mein eigener Name im Sparring?** Schlage `Claude` vor, weil das die naheliegende Default-Bezeichnung für dieses Tool ist. Akzeptiere jede Abweichung.
+5. **Sparring-Typ?** Untersuche kurz das Artefakt und schlage konkret einen der vier Typen vor (`Text`, `Campaign`, `Skill`, `Code`) statt nur `Auto`. Begründung soll auf dem Artefakt basieren: README/Essay → `Text`, Post-Sammlung → `Campaign`, SKILL.md mit Templates → `Skill`, Quellcode-Verzeichnis → `Code`. Wenn unklar, nimm `Auto` und sage warum.
+6. **Wie viele Runden?** Schlage je nach Kontext konkret eine Zahl vor:
+   - Schnelltest oder neues Setup ausprobieren → `3`
+   - Realer Verbesserungsdurchlauf bei mittellangem Artefakt → `5`
+   - Tiefe Schärfung eines wichtigen Artefakts → `10`
+   Begründung soll auf Artefaktgröße und User-Ziel basieren.
+7. **Ausführungsmodus?** Schlage `Subagent` vor, wenn du in einer Umgebung läufst, die Subagents erkennbar unterstützt (z. B. Claude Code mit Task-Tool). Sonst `Inline`. `Auto` nur dann, wenn du dir nicht sicher bist. Begründung: Subagent isoliert Step-Kontexte sauberer und vermeidet Rollenvermischung.
+   - `Auto`: Subagent verwenden, wenn das aktuelle Tool das erkennbar unterstützt; sonst inline.
    - `Subagent`: jeden Schritt in einem frischen Subagent-Kontext ausführen. Wenn das aktuelle Tool das nicht kann, stoppen und den User fragen.
    - `Inline`: Schritte direkt in der Hauptsession ausführen.
-8. **Subagent-Qualität?** Default: `Inherit`. Optionen:
+8. **Subagent-Qualität?** Schlage in der Regel `Inherit` vor (Begründung: keine unnötigen Overrides, Subagent läuft auf gleichem Modell wie Hauptsession). Wenn das Artefakt besonders wichtig ist oder der User Qualität betont, schlage `High` oder `Role-based` vor.
    - `Inherit`: Subagents übernehmen Modell/Qualität der Hauptsession; keine expliziten Overrides setzen.
    - `Balanced`: mittlere Qualität/Kosten, wenn das Tool eine Qualitätswahl erlaubt.
    - `High`: stärkste sinnvoll verfügbare Qualität, wenn das Tool eine Qualitätswahl erlaubt.
    - `Role-based`: These eher Balanced, Antithese und Synthese eher High.
+
+Nach allen 8 Antworten fasse die Konfiguration in 4–6 Zeilen zusammen und hol dir ein finales "Los" vom User, bevor du das Scaffolding anlegst.
 
 ### Schritt 2: Scaffolding anlegen
 
