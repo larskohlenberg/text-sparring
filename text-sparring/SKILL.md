@@ -303,6 +303,7 @@ Während des Wartens:
 - **Silent Wait Mode** — während `watch_loop.sh` läuft, keine Zwischenkommentare oder Statusmeldungen ausgeben.
 - **Hauptoutput und Übergabe trennen** — These/Synthese bleiben reine Textfassungen; Prüfimpulse gehören ausschließlich in `*_handoff.md`.
 - **Subagenten nur für Step-Arbeit** — Subagents schreiben ausschließlich die erwarteten Output-Dateien. Nur die Hauptsession aktualisiert `state.md`, legt neue Runden an und startet den Wait-Loop.
+- **Keine analytischen Shell-Aufrufe während der Step-Arbeit** — weder als Hauptsession (Inline-Modus) noch in Subagents. Konkret: kein `wc`, `awk`, `grep`, `sed`, `tr` o.ä. zur Längen-Messung, Sektionsextraktion oder zum Vergleich von Outputs gegen Vorrunden bzw. Referenzdateien. Solche Aufrufe brechen den Wait-Loop durch Permission-Prompts der Harness und liefern für die Rolle keinen Mehrwert. Längen-Constraints stehen in `CHALLENGE.md` und im Step-Kontext, alles andere ist Sprachgefühl. Native Read-/Write-Tools sind davon nicht betroffen; nur shell-basierte Mess-Pipes sind verboten.
 - **Bei Konflikten**: Wenn state.md inkonsistent wirkt (z. B. Verlauf sagt Schritt 2 fertig, aber Datei fehlt), melde es dem User statt zu raten.
 
 ## Dateien in diesem Skill
