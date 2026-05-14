@@ -1,6 +1,6 @@
 ---
 name: text-sparring
-description: Set up an autonomous multi-agent text sparring loop where two AI agents iteratively refine a text artifact over configurable rounds using Thesis → Antithesis → Synthesis. Multiple sparrings per project are supported via named subfolders under `sparring/`. Use this skill whenever the user wants two agents to "spar" over a text, mutually challenge or refine a draft, or run a dialectical improvement loop. Trigger on requests like "starte ein Text-Sparring", "lass zwei Agenten meinen Text gegenseitig schärfen", "richte einen dialektischen Loop ein", "set up a text sparring", "let two agents spar on this draft", or any mention of "Text-Sparring", "Agent-Sparring", "Multi-Agent-Refinement". Also recognize a turbo/quick-start variant ("Turbo-Modus", "Schnellstart", "ohne Fragen", "auto-init") that skips the interview and applies AI-generated defaults. Also trigger when an agent is asked to JOIN an existing sparring ("steig ins Sparring ein", "steig ins Sparring <name> ein", "join the running sparring", "übernimm Schritt 2"). The skill is harness-agnostic and requires no external tools beyond bash and standard Unix utilities.
+description: Set up an autonomous multi-agent text sparring loop where two AI agents iteratively refine a text artifact over configurable rounds using Thesis → Antithesis → Synthesis. Multiple sparrings per project are supported via named subfolders under `sparring/`. Use this skill whenever the user wants two agents to "spar" over a text, mutually challenge or refine a draft, or run a dialectical improvement loop. Trigger on requests like "starte ein Text-Sparring", "lass zwei Agenten meinen Text gegenseitig schärfen", "richte einen dialektischen Loop ein", "set up a text sparring", "let two agents spar on this draft", or any mention of "Text-Sparring", "Agent-Sparring", "Multi-Agent-Refinement". Also recognize a turbo/quick-start variant ("Turbo-Modus", "Schnellstart", "ohne Fragen", "auto-init") that skips the interview and applies AI-generated defaults. Also trigger when an agent is asked to JOIN an existing sparring ("steig ins Sparring ein", "steig ins Sparring <name> ein", "join the running sparring", "übernimm Schritt 2"). Also trigger on EXTEND requests that lengthen an existing (active or completed) sparring by additional rounds ("verlängere das Sparring um 3 Runden", "Sparring <name> auf 8 Runden erweitern", "extend sparring <name> by 3 rounds"). The skill is harness-agnostic and requires no external tools beyond bash and standard Unix utilities.
 ---
 
 # Text Sparring
@@ -32,6 +32,7 @@ Jedes Sparring lebt in einem benannten Unterordner unter `sparring/`, zum Beispi
 
 Erkenne den Modus automatisch:
 
+- **Trigger-Phrase enthält Erweiterungs-Schlüsselwörter** (`verlängere`/`verlängern`, `erweitere`/`erweitern auf`, `extend`/`extend by`, `noch X Runden`, `weitere X Runden`, `fortsetzen mit X Runden`) → **EXTEND-Modus** für das genannte (oder einzig plausible) Sparring, unabhängig von dessen Status. Siehe EXTEND-Modus unten.
 - **Keine `sparring/*/state.md`-Dateien vorhanden** → INIT.
 - **Genau eine `sparring/*/state.md` mit Status ≠ `completed`** → JOIN für genau dieses Sparring.
 - **Mehrere `sparring/*/state.md` mit Status ≠ `completed`** → Stoppe, liste die aktiven Sparrings (Name + aktuelle Runde + wer dran ist) und frage den User, welches gemeint ist. Falls der User in der Trigger-Phrase einen Namen genannt hat (z. B. *"Steig ins Sparring readme-v2 ein"*), nimm diesen direkt ohne Rückfrage.
@@ -268,6 +269,57 @@ Alle Pfade unten relativ zu `sparring/<NAME>/`.
 Wie im INIT-Modus Schritt 7. Falls dieser Agent zum ersten Mal ins Sparring einsteigt: kein Hinweis an den User mehr nötig, der erste Hinweis kam vom Initiator.
 
 Auch hier gilt Silent Wait Mode: Nach Start von `bash sparring/<NAME>/watch_loop.sh "{MY_NAME}"` bleibt der Agent stumm, bis der Prozess mit WAKE, DONE oder TIMEOUT endet.
+
+## EXTEND-Modus (Sparring um Runden verlängern)
+
+Verlängert ein bestehendes Sparring um eine vom User genannte Anzahl zusätzlicher Runden. Funktioniert sowohl für **abgeschlossene** Sparrings (häufigster Fall: nach manueller Sichtung des Finalartefakts mehr Schärfung gewünscht) als auch für **laufende** Sparrings (Plan wird nachträglich verlängert).
+
+### Schritt 1: Sparring und Erweiterung parsen
+
+- Parse aus der Trigger-Phrase den Sparring-Slug und die Anzahl `X` zusätzlicher Runden.
+- Wenn der Slug fehlt und nur ein Sparring im Projekt existiert: dieses nehmen. Bei mehreren: User fragen.
+- Wenn `X` fehlt: User fragen.
+- Setze `<NAME>` auf den erkannten Slug.
+
+### Schritt 2: State lesen, Plausibilität prüfen, Identität klären
+
+- Lies `sparring/<NAME>/state.md`. Halte fest: aktueller `TOTAL_ROUNDS` = `N`, aktueller `Status`.
+- Berechne `T = N + X` (neue Gesamtrundenzahl).
+- Wenn `T > 10`: stoppe, melde *"Maximum sind 10 Runden gesamt; aktuell `N`, mögliche Erweiterung um maximal `10 - N`"*. Keine weitere Aktion.
+- Wenn `X <= 0`: stoppe, das ist keine Verlängerung.
+- Identifiziere dich aus state.md: bist du der **Initiator** (Agent A) oder der **zweite Agent** (Agent B)? Wenn dein eigener Name (laut User-Trigger oder Konvention `Claude` in Claude Code) eindeutig einem der beiden entspricht: nimm den. Bei Mehrdeutigkeit: User fragen.
+
+### Schritt 3: state.md aktualisieren
+
+- Setze `Aktuelle Runde:` auf `N+1 von T` **nur wenn vorheriger Status `completed` war**; sonst nur den `T`-Wert in dieser Zeile aktualisieren.
+- Erweitere die Rotationsplan-Tabelle: zeige Zeilen `1..T` (die Zeilen `N+1..T` aus dem 10-Runden-Muster ergänzen, mit den echten Namen).
+- Bei vorherigem Status `completed`:
+  - `Status:` → `waiting_for_output`
+  - `Aktueller Schritt:` → `1 (These)`
+  - `Rolle in diesem Schritt:` → `These`
+  - `Dran:` → derjenige Agent, der laut Rotationsplan in Runde `N+1` die These macht
+  - `Nächster Schritt nach dir:` → entsprechend setzen
+- Bei vorherigem Status `waiting_for_output` (laufende Verlängerung): keine weiteren Feldänderungen.
+- Verlauf-Eintrag anhängen: *"Sparring von `N` auf `T` Runden verlängert"*.
+
+### Schritt 4: Neue Runde anlegen (nur bei reaktiviertem `completed`)
+
+- Lege `sparring/<NAME>/rounds/round_{N+1}/` an.
+- Bei `Artifact-Typ: file`: Kopiere `rounds/round_N/step_3_synthesis.md` → `rounds/round_{N+1}/artifact.md`.
+- Bei `Artifact-Typ: directory`: Kopiere `rounds/round_N/step_3_synthesis/` → `rounds/round_{N+1}/artifact/`.
+- Archiviere das alte Finalartefakt, damit es als Snapshot erhalten bleibt:
+  - Datei: `mv sparring/<NAME>/FINAL_ARTIFACT.md sparring/<NAME>/FINAL_ARTIFACT_after_round_N.md`
+  - Verzeichnis: `mv sparring/<NAME>/FINAL_ARTIFACT sparring/<NAME>/FINAL_ARTIFACT_after_round_N`
+
+### Schritt 5: Wenn du dran bist, deinen Schritt erledigen (nur nach Reaktivierung)
+
+- Wenn `Dran:` du bist: erledige These der Runde `N+1` analog zu JOIN-Modus Schritt 2, inkl. Beachtung von `Step-Ausführung` (Subagent oder Inline) und Projektkontext-Dateien.
+- Wenn `Dran:` der andere ist: keine Step-Arbeit jetzt.
+
+### Schritt 6: Handover-Prompt + Wait-Loop
+
+- **Nach Reaktivierung** (vorher `completed`): Emit den Handover-Prompt-Block für den anderen Agenten (gleicher Format wie INIT Schritt 7) — er muss seine Session wieder starten und ins fortgesetzte Sparring einsteigen. Danach `bash sparring/<NAME>/watch_loop.sh "{MY_NAME}"`.
+- **Bei laufender Verlängerung** (vorher `waiting_for_output`): kein neuer Wait-Loop. Bestätige dem User in einem Satz, dass der Plan jetzt `T` Runden umfasst — der bereits laufende Loop polled weiter und sieht das neue Total automatisch beim nächsten Rundenwechsel. Wenn der User dich getriggert hat, während du eigentlich im Wait-Loop sein solltest: zurück in den Wait-Loop.
 
 ## Reaktion auf watch_loop
 
