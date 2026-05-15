@@ -16,6 +16,8 @@ Zwei Agenten verbessern ein Artefakt iterativ über die in `state.md` festgelegt
 
 Es geht **nicht um einen Gewinner**. Es geht um akkumulierte Qualität durch Widerspruch und Integration.
 
+Wenn in `state.md` `Measurement: on` gesetzt ist, läuft nach jeder Synthese ein dritter, neutraler Evaluator-Subagent, der einen deskriptiven Delta-Score erzeugt (`measurement_round.md`, `measurement_cumulative.md`). Diese Bewertung ist **kein Sieg-Kriterium** und beeinflusst die Rollenarbeit nicht — sie ist nur ein Anhaltspunkt für den User. These-, Antithese- und Synthese-Agents arbeiten unverändert nach ihren Rollen-Definitionen, ohne den Score zu optimieren.
+
 ---
 
 ## Sparring-Gegenstand

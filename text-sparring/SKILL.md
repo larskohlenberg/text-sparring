@@ -1,6 +1,6 @@
 ---
 name: text-sparring
-description: Set up an autonomous multi-agent text sparring loop where two AI agents iteratively refine a text artifact over configurable rounds using Thesis → Antithesis → Synthesis. Multiple sparrings per project are supported via named subfolders under `sparring/`. Use this skill whenever the user wants two agents to "spar" over a text, mutually challenge or refine a draft, or run a dialectical improvement loop. Trigger on requests like "starte ein Text-Sparring", "lass zwei Agenten meinen Text gegenseitig schärfen", "richte einen dialektischen Loop ein", "set up a text sparring", "let two agents spar on this draft", or any mention of "Text-Sparring", "Agent-Sparring", "Multi-Agent-Refinement". Also recognize a turbo/quick-start variant ("Turbo-Modus", "Schnellstart", "ohne Fragen", "auto-init") that skips the interview and applies AI-generated defaults. Also trigger when an agent is asked to JOIN an existing sparring ("steig ins Sparring ein", "steig ins Sparring <name> ein", "join the running sparring", "übernimm Schritt 2"). Also trigger on RESIZE requests that change the total round count of an existing sparring — either lengthening ("verlängere das Sparring um 3 Runden", "Sparring <name> auf 8 Runden erweitern", "extend sparring <name> by 3 rounds") or shortening ("verkürze Sparring <name> auf 5 Runden", "kürze um 2 Runden", "Sparring nach Runde 5 beenden", "shorten sparring <name> to 5 rounds"). The skill is harness-agnostic and requires no external tools beyond bash and standard Unix utilities.
+description: Set up an autonomous multi-agent text sparring loop where two AI agents iteratively refine a text artifact over configurable rounds using Thesis → Antithesis → Synthesis, with optional dialectical quality measurement per round. Multiple sparrings per project are supported via named subfolders under `sparring/`. Use this skill whenever the user wants two agents to "spar" over a text, mutually challenge or refine a draft, or run a dialectical improvement loop. Trigger on requests like "starte ein Text-Sparring", "lass zwei Agenten meinen Text gegenseitig schärfen", "richte einen dialektischen Loop ein", "set up a text sparring", "let two agents spar on this draft", or any mention of "Text-Sparring", "Agent-Sparring", "Multi-Agent-Refinement". Also recognize a turbo/quick-start variant ("Turbo-Modus", "Schnellstart", "ohne Fragen", "auto-init") that skips the interview and applies AI-generated defaults. Also trigger when an agent is asked to JOIN an existing sparring ("steig ins Sparring ein", "steig ins Sparring <name> ein", "join the running sparring", "übernimm Schritt 2"). Also trigger on RESIZE requests that change the total round count of an existing sparring — either lengthening ("verlängere das Sparring um 3 Runden", "Sparring <name> auf 8 Runden erweitern", "extend sparring <name> by 3 rounds") or shortening ("verkürze Sparring <name> auf 5 Runden", "kürze um 2 Runden", "Sparring nach Runde 5 beenden", "shorten sparring <name> to 5 rounds"). The skill is harness-agnostic and requires no external tools beyond bash and standard Unix utilities.
 ---
 
 # Text Sparring
@@ -55,10 +55,10 @@ Vor jedem Output diese vier Prüfungen durchlaufen. Wenn ein Gate fehlschlägt: 
 Wenn die Trigger-Phrase des Users Worte wie **"Turbo"**, **"Schnellstart"**, **"ohne Fragen"**, **"auto"** oder **"quick"** im INIT-Kontext enthält (z. B. *"Starte ein Text-Sparring im Turbo-Modus über draft.md"*), überspringe das Interview komplett:
 
 1. Sieh dir das Projektverzeichnis an (wie unten beschrieben).
-2. Generiere konkrete Vorschläge für alle 9 Interview-Punkte aus Projektkontext und Praxis-Defaults (gleiche Logik wie unten, nur ohne den User zu fragen).
+2. Generiere konkrete Vorschläge für alle 10 Interview-Punkte aus Projektkontext und Praxis-Defaults (gleiche Logik wie unten, nur ohne den User zu fragen). **Measurement (Frage 10) ist im Turbo-Modus per Default `Off`**; nur wenn die Trigger-Phrase explizit "mit Messung", "with measurement", "mit Qualitätsmessung" o.ä. enthält, setze `On` mit `Measurement-Qualität: High`.
 3. Wenn die Trigger-Phrase einen konkreten Artefaktpfad enthält, nimm den; sonst leite ihn aus dem Projektkontext ab.
 4. Fasse die gewählte Konfiguration in 4–6 Zeilen zusammen und sage dem User in einem Satz, dass du jetzt loslegst.
-5. Lege direkt das Scaffolding an und erledige Schritt 1 (These) — ohne weitere Rückfrage.
+5. Lege direkt das Scaffolding an, führe (falls `Measurement: on`) Schritt 4.5 (Baseline-Measurement) aus, und erledige Schritt 1 (These) — ohne weitere Rückfrage.
 6. Gib am Ende den Handover-Prompt für den zweiten Agenten aus (siehe Schritt 7) und starte den Wait-Loop.
 
 **Ausnahme:** Wenn du für einen einzelnen Punkt keinen vertretbaren Default ableiten kannst (z. B. mehrere gleichwertige Artefakt-Kandidaten und keiner in der Trigger-Phrase, oder der Name des zweiten Tools ist nicht erkennbar), frag **nur diese eine Frage** zurück und mach dann mit dem Rest direkt weiter. Kein vollständiges Interview.
@@ -97,8 +97,15 @@ Hier die Fragen plus, woraus du den Vorschlag jeweils ableitest:
    - `Balanced`: mittlere Qualität/Kosten, wenn das Tool eine Qualitätswahl erlaubt.
    - `High`: stärkste sinnvoll verfügbare Qualität, wenn das Tool eine Qualitätswahl erlaubt.
    - `Role-based`: These eher Balanced, Antithese und Synthese eher High.
+10. **Messung aktivieren?** Schlage `Off` als Default vor mit folgender Begründung: Measurement gibt nach jeder Runde einen deskriptiven Delta-Score (5 Dimensionen, 1-5 Skala) plus kumulative Trendzahl gegen das Original — als Anhaltspunkt, wieviel das Sparring gebracht hat. Kostet bei 5 Runden ca. 11 zusätzliche Evaluator-Subagent-Aufrufe in High-Qualität. Lohnt sich für wichtige Artefakte; bei Schnelltests eher aus. Werte: `On` / `Off`. Bei `On` Folgefrage nach `Measurement-Qualität`:
+    - `Inherit`: Evaluator übernimmt Qualität der Hauptsession; keine Overrides.
+    - `Balanced`: mittlere Qualität, wenn das Tool eine Qualitätswahl erlaubt.
+    - `High` (Default bei `On`): stärkste sinnvoll verfügbare Qualität; Bewertung profitiert von Reasoning.
+    - `xHigh`: nur wenn das Tool ein noch stärkeres Profil bietet.
 
-Nach allen 9 Antworten fasse die Konfiguration in 4–6 Zeilen zusammen und hol dir ein finales "Los" vom User, bevor du das Scaffolding anlegst.
+    Bei `Off` bleibt das Feld `Measurement-Qualität` in state.md auf `-`.
+
+Nach allen 10 Antworten fasse die Konfiguration in 4–6 Zeilen zusammen und hol dir ein finales "Los" vom User, bevor du das Scaffolding anlegst.
 
 ### Schritt 2: Scaffolding anlegen
 
@@ -125,7 +132,7 @@ Vorgehen:
 - Lege das Verzeichnis `sparring/<NAME>/` an. Falls es bereits existiert (Race oder unerkannter Konflikt): stoppe und frage den User.
 - Lies `templates/CHALLENGE.md.tpl` und ersetze die Platzhalter mit den konkreten Agent-Namen, der gewählten Gesamtrundenzahl, dem unten beschriebenen Rotationsplan und dem Sparring-Pfad `sparring/<NAME>`. Schreibe das Ergebnis nach `sparring/<NAME>/CHALLENGE.md`.
 - Lies `templates/artifact.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/<NAME>/artifact.md`. Setze `Initiale Kopie` auf `sparring/<NAME>/rounds/round_01/artifact.md` bei Dateien oder `sparring/<NAME>/rounds/round_01/artifact/` bei Verzeichnissen. Trage die im Interview bestätigten Projektkontext-Pfade als Bulletliste unter `Projektkontext` ein (relative Pfade vom Projekt-Root). Wenn keiner bestätigt wurde: Sektion mit dem Hinweis `(keine)` befüllen, nicht weglassen.
-- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/<NAME>/state.md`. Setze `Sparring-Name` auf `<NAME>`. Setze den initialen Status auf: Runde 1 von gewählter Gesamtrundenzahl, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**. Setze `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ`, `Erkannter Sparring-Typ`, `Ausführungsmodus`, `Step-Ausführung` und `Subagent-Qualität`.
+- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/<NAME>/state.md`. Setze `Sparring-Name` auf `<NAME>`. Setze den initialen Status auf: Runde 1 von gewählter Gesamtrundenzahl, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**. Setze `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ`, `Erkannter Sparring-Typ`, `Ausführungsmodus`, `Step-Ausführung`, `Subagent-Qualität`, `Measurement` (`on` oder `off`) und `Measurement-Qualität` (bei `Measurement: off` setze `-`).
 - Kopiere `templates/watch_loop.sh` 1:1 nach `sparring/<NAME>/watch_loop.sh`. Mache sie nicht ausführbar — sie wird mit `bash sparring/<NAME>/watch_loop.sh ...` aufgerufen. Das Skript lokalisiert seine `state.md` über sein eigenes Verzeichnis, kein extra Argument nötig.
 - Lies `templates/chatgpt_codex_instructions.md`, befülle die Platzhalter mit dem Projektpfad, dem Namen des zweiten Agents und dem Sparring-Pfad `sparring/<NAME>`, schreibe nach `sparring/<NAME>/chatgpt_codex_instructions.md`.
 - Lege `sparring/<NAME>/context/` an. Nutze `templates/step_context.md.tpl` später als Vorlage für Schritt-Kontexte im Subagent-Modus.
@@ -160,6 +167,33 @@ Der Plan ist **fest und deterministisch** — er gilt für jedes Setup gleich, n
 Bei weniger als 10 Runden gilt nur der Präfix bis zur gewählten Gesamtrundenzahl. Bei genau 10 Runden ist die Verteilung exakt ausbalanciert: jeder Agent macht jede Rolle genau 5×.
 
 Schreibe sie in `state.md` mit den echten Namen statt A/B.
+
+### Schritt 4.5: Baseline-Measurement (nur wenn `Measurement: on`)
+
+Wenn `Measurement: off` gilt, überspringe diesen Schritt komplett.
+
+Wenn `Measurement: on` gilt, lasse einen neutralen Evaluator-Subagent eine einmalige Eingangs-Bewertung des Originalartefakts erstellen, **bevor** Schritt 5 (These Runde 1) startet:
+
+1. Wähle die passende Rubric-Datei anhand von `Erkannter Sparring-Typ`:
+   - `Text` → `templates/measurement_rubric_text.md`
+   - `Campaign` → `templates/measurement_rubric_campaign.md`
+   - `Skill` → `templates/measurement_rubric_skill.md`
+   - `Code` → `templates/measurement_rubric_code.md`
+2. Erzeuge `sparring/<NAME>/context/baseline_measurement_prompt.md` aus `templates/measurement_context.md.tpl`. Platzhalter:
+   - `{MEASUREMENT_TYPE}` = `baseline`
+   - `{MEASUREMENT_TYPE_LABEL}` = `Baseline`
+   - `{SPARRING_NAME}`, `{SPARRING_PATH}` = entsprechend
+   - `{RESOLVED_SPARRING_TYPE}`, `{ARTIFACT_TYPE}` = aus state.md
+   - `{RUBRIC_PATH}` = die gewählte Rubric (z. B. `text-sparring/templates/measurement_rubric_text.md`)
+   - `{INPUT_FILES}` = bei `file`: `sparring/<NAME>/rounds/round_01/artifact.md` plus `sparring/<NAME>/artifact.md`; bei `directory`: `sparring/<NAME>/rounds/round_01/artifact/` plus `sparring/<NAME>/artifact.md`
+   - `{INPUT_ARTIFACT_LABEL}` = `Original (rounds/round_01/artifact)`
+   - `{OUTPUT_FILE}` = `sparring/<NAME>/rounds/round_01/measurement_baseline.md`
+3. Beauftrage einen frischen Subagent/Worker/Workstream mit genau diesem Kontext, in der durch `Measurement-Qualität` bestimmten Modell-/Reasoning-Stufe. Wenn das Tool keine Subagent-Qualitätswahl erlaubt: verwende faktisch `Inherit`.
+4. Warte auf Abschluss und prüfe, dass `sparring/<NAME>/rounds/round_01/measurement_baseline.md` existiert.
+5. Lies den Mittelwert und die Einzelscores aus der Datei und gib dem User einen 2-Zeiler aus, z. B.: *"Baseline-Score: ⌀ 2.7 (Integrative Complexity 2.5, Argumentation 3.0, Idea Density 2.5, Klarheit 3.0, Constraint-Treue 2.5). Starte jetzt Runde 1."*
+6. Ergänze in `state.md` einen Verlauf-Eintrag: *"Baseline-Measurement: ⌀ x.x"*.
+
+Wenn der Evaluator-Subagent stattdessen einen Inkonsistenz-Hinweis liefert (z. B. fehlende Inputs): melde das dem User, schreibe Schritt 5 noch nicht und kein Wait-Loop. Kein stiller Fallback.
 
 ### Schritt 5: Schritt 1 (These der Runde 1) erledigen
 
@@ -247,6 +281,42 @@ Wenn `Step-Ausführung: inline` gilt: Erledige den Schritt direkt in der Hauptse
 
 Befolge dabei zwingend die Rollen-Definitionen aus `sparring/<NAME>/CHALLENGE.md`.
 
+### Schritt 2.5: Measurement nach Synthese (nur wenn `Measurement: on` UND der eben erledigte Step war die Synthese)
+
+Wenn `Measurement: off` ODER der gerade erledigte Step war nicht die Synthese (Round-Step 3), überspringe diesen Schritt komplett.
+
+Andernfalls führt die Hauptsession **vor** dem State-Update (Schritt 3) zwei zusätzliche Evaluator-Subagent-Aufrufe aus. Beide nutzen `templates/measurement_context.md.tpl` und die Rubric, die zum `Erkannter Sparring-Typ` passt (siehe Schritt 4.5 für die Rubric-Auswahl).
+
+**2.5a — Round-Delta-Measurement:**
+
+1. Erzeuge `sparring/<NAME>/context/round_NN_measurement_round_prompt.md` aus `templates/measurement_context.md.tpl`. Platzhalter:
+   - `{MEASUREMENT_TYPE}` = `round_delta`
+   - `{MEASUREMENT_TYPE_LABEL}` = `Round-Delta`
+   - `{ROUND}` = `NN`
+   - `{INPUT_FILES}` = bei `file`: `sparring/<NAME>/rounds/round_NN/artifact.md` (=Pre) und `sparring/<NAME>/rounds/round_NN/step_3_synthesis.md` (=Post) plus `sparring/<NAME>/artifact.md`; bei `directory`: die Verzeichnis-Varianten.
+   - `{PRE_LABEL}` = `Runden-Input (rounds/round_NN/artifact)`
+   - `{POST_LABEL}` = `Synthese der Runde NN (rounds/round_NN/step_3_synthesis)`
+   - `{OUTPUT_FILE}` = `sparring/<NAME>/rounds/round_NN/measurement_round.md`
+2. Beauftrage einen frischen Subagent in der durch `Measurement-Qualität` bestimmten Stufe.
+3. Warte auf Abschluss, prüfe Existenz der Output-Datei.
+
+**2.5b — Cumulative-Measurement:**
+
+1. Erzeuge `sparring/<NAME>/context/round_NN_measurement_cumulative_prompt.md` aus `templates/measurement_context.md.tpl`. Platzhalter:
+   - `{MEASUREMENT_TYPE}` = `cumulative`
+   - `{MEASUREMENT_TYPE_LABEL}` = `Cumulative`
+   - `{ROUND}` = `NN`
+   - `{INPUT_FILES}` = `sparring/<NAME>/rounds/round_01/measurement_baseline.md` (=feste Referenz, Pre-Scores) UND `sparring/<NAME>/rounds/round_NN/step_3_synthesis.md` (=aktueller Stand) UND `sparring/<NAME>/artifact.md`. Bei `NN >= 2` zusätzlich `sparring/<NAME>/rounds/round_{NN-1}/measurement_cumulative.md` für die Diminishing-Returns-Einschätzung.
+   - `{PRE_LABEL}` = `Original-Baseline (rounds/round_01/measurement_baseline.md)`
+   - `{POST_LABEL}` = `Synthese der Runde NN (rounds/round_NN/step_3_synthesis)`
+   - `{OUTPUT_FILE}` = `sparring/<NAME>/rounds/round_NN/measurement_cumulative.md`
+2. Beauftrage einen frischen Subagent in der durch `Measurement-Qualität` bestimmten Stufe.
+3. Warte auf Abschluss, prüfe Existenz der Output-Datei.
+
+Nach beiden erfolgreichen Aufrufen geht es weiter mit Schritt 3 (State-Update). Wenn einer der beiden Subagents fehlschlägt oder einen Inkonsistenz-Hinweis liefert: melde dem User, **schreibe state.md noch nicht** und starte keinen Wait-Loop. Kein stiller Fallback.
+
+Hinweis: Diese Mess-Subagents fallen unter Orchestrierung der Hauptsession, nicht unter Step-Arbeit — das Spawnen ist erlaubt. Die Evaluator-Subagents selbst dürfen aber inhaltlich keine programmatische Messung durchführen (das ist in ihrem Kontext via `measurement_context.md.tpl` ausgeschlossen).
+
 ### Schritt 3: State und ggf. neue Runde aktualisieren
 
 Alle Pfade unten relativ zu `sparring/<NAME>/`.
@@ -263,6 +333,7 @@ Alle Pfade unten relativ zu `sparring/<NAME>/`.
   - Setze in `state.md` den Status auf `completed`
   - Bei `Artifact-Typ: file`: Kopiere `rounds/round_NN/step_3_synthesis.md` nach `sparring/<NAME>/FINAL_ARTIFACT.md`
   - Bei `Artifact-Typ: directory`: Kopiere `rounds/round_NN/step_3_synthesis/` nach `sparring/<NAME>/FINAL_ARTIFACT/`
+  - **Falls `Measurement: on`**: Kopiere zusätzlich `rounds/round_NN/measurement_cumulative.md` nach `sparring/<NAME>/MEASUREMENT.md`. Diese Datei dient als finaler Mess-Report. Das Format des Cumulative-Outputs deckt die gleichen Felder ab wie `templates/MEASUREMENT.md.tpl` — keine zusätzliche Aggregations-Logik nötig, da der Verlauf bereits in `state.md` und in den einzelnen `measurement_round.md`-Dateien dokumentiert ist.
 
 ### Schritt 4: Wait-Loop starten
 
@@ -317,6 +388,7 @@ Auch hier gilt Silent Wait Mode: Nach Start von `bash sparring/<NAME>/watch_loop
 - Archiviere das alte Finalartefakt, damit es als Snapshot erhalten bleibt:
   - Datei: `mv sparring/<NAME>/FINAL_ARTIFACT.md sparring/<NAME>/FINAL_ARTIFACT_after_round_N.md`
   - Verzeichnis: `mv sparring/<NAME>/FINAL_ARTIFACT sparring/<NAME>/FINAL_ARTIFACT_after_round_N`
+- Bei `Measurement: on`: Archiviere zusätzlich den alten Mess-Report analog: `mv sparring/<NAME>/MEASUREMENT.md sparring/<NAME>/MEASUREMENT_after_round_N.md`. Die `measurement_baseline.md` aus `rounds/round_01/` bleibt **unverändert** — sie ist die Original-Referenz und gilt auch für die ergänzten Runden. Folge-Cumulative-Messungen referenzieren weiterhin diese Baseline.
 
 ### Schritt 5: Wenn du dran bist, deinen Schritt erledigen (nur nach Reaktivierung)
 
@@ -363,7 +435,7 @@ Während des Wartens:
 - **Silent Wait Mode** — während `watch_loop.sh` läuft, keine Zwischenkommentare oder Statusmeldungen ausgeben.
 - **Hauptoutput und Übergabe trennen** — These/Synthese bleiben reine Textfassungen; Prüfimpulse gehören ausschließlich in `*_handoff.md`.
 - **Subagenten nur für Step-Arbeit** — Subagents schreiben ausschließlich die erwarteten Output-Dateien. Nur die Hauptsession aktualisiert `state.md`, legt neue Runden an und startet den Wait-Loop.
-- **Keine programmatische Messung oder Sektionsextraktion während der Step-Arbeit** — weder als Hauptsession (Inline-Modus) noch in Subagents. Konkret verboten: jede Form von Code-Ausführung zur Längen-Messung, Sektionsextraktion, Diff- oder Vergleichsberechnung gegen Vorrunden bzw. Referenzdateien. Das schließt ein: Shell-Pipes (`wc`, `awk`, `grep`, `sed`, `tr`, `cut`, `head`, `tail`), `python3 -c …`-One-Liner, Node-/Deno-Snippets, Inline-Skripte in beliebigen anderen Sprachen, sowie spontan angelegte Hilfsskripte. Das Verbot greift auch dann, wenn der Code "nur kurz mal" laufen soll. Solche Aufrufe brechen den Wait-Loop durch Permission-Prompts der Harness und liefern für die Rolle keinen Mehrwert: Längen-Constraints stehen in `CHALLENGE.md` und im Step-Kontext, alles andere ist Sprachgefühl. Native Read-/Write-Tools der Harness (z. B. `Read`, `Write`, `Edit`) bleiben erlaubt; nur programmatische Mess- und Analyseoperationen sind tabu. Orchestrierungs-Operationen der Hauptsession (Verzeichnis kopieren, neuen Rundenordner anlegen, Scaffolding-Datei schreiben) zählen nicht als Step-Arbeit und sind weiter erlaubt.
+- **Keine programmatische Messung oder Sektionsextraktion während der Step-Arbeit** — weder als Hauptsession (Inline-Modus) noch in Subagents. Konkret verboten: jede Form von Code-Ausführung zur Längen-Messung, Sektionsextraktion, Diff- oder Vergleichsberechnung gegen Vorrunden bzw. Referenzdateien. Das schließt ein: Shell-Pipes (`wc`, `awk`, `grep`, `sed`, `tr`, `cut`, `head`, `tail`), `python3 -c …`-One-Liner, Node-/Deno-Snippets, Inline-Skripte in beliebigen anderen Sprachen, sowie spontan angelegte Hilfsskripte. Das Verbot greift auch dann, wenn der Code "nur kurz mal" laufen soll. Solche Aufrufe brechen den Wait-Loop durch Permission-Prompts der Harness und liefern für die Rolle keinen Mehrwert: Längen-Constraints stehen in `CHALLENGE.md` und im Step-Kontext, alles andere ist Sprachgefühl. Native Read-/Write-Tools der Harness (z. B. `Read`, `Write`, `Edit`) bleiben erlaubt; nur programmatische Mess- und Analyseoperationen sind tabu. Orchestrierungs-Operationen der Hauptsession (Verzeichnis kopieren, neuen Rundenordner anlegen, Scaffolding-Datei schreiben, **Evaluator-Subagent für Measurement beauftragen**) zählen nicht als Step-Arbeit und sind weiter erlaubt. Auch der Evaluator-Subagent selbst arbeitet inhaltlich ohne programmatische Messung — diese Klausel ist in `measurement_context.md.tpl` festgeschrieben.
 - **Bei Konflikten**: Wenn state.md inkonsistent wirkt (z. B. Verlauf sagt Schritt 2 fertig, aber Datei fehlt), melde es dem User statt zu raten.
 
 ## Dateien in diesem Skill
@@ -378,5 +450,11 @@ Während des Wartens:
 | `templates/step_context.md.tpl` | Vorlage für isolierte Subagent-Step-Kontexte |
 | `templates/watch_loop.sh` | Bash-Polling-Script, pure POSIX |
 | `templates/round_artifact.md.tpl` | (Reserve, derzeit ungenutzt — Ausgangstext wird direkt kopiert) |
+| `templates/measurement_context.md.tpl` | Vorlage für isolierten Evaluator-Subagent-Kontext (Baseline, Round-Delta, Cumulative) |
+| `templates/measurement_rubric_text.md` | 5-Dim-Rubric für Sparring-Typ `Text` |
+| `templates/measurement_rubric_campaign.md` | 5-Dim-Rubric für Sparring-Typ `Campaign` |
+| `templates/measurement_rubric_skill.md` | 5-Dim-Rubric für Sparring-Typ `Skill` |
+| `templates/measurement_rubric_code.md` | 5-Dim-Rubric für Sparring-Typ `Code` |
+| `templates/MEASUREMENT.md.tpl` | Referenz-Layout für finalen Mess-Report (zur Orientierung, nicht zwingend kopiert) |
 
 Platzhalter in den Templates haben die Form `{NAME}` und werden beim Scaffolding ersetzt.

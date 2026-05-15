@@ -36,6 +36,16 @@ Bitte:
    aktualisieren.
    Beachte `Subagent-Qualität`; wenn dein Tool keine Qualitätswahl
    erlaubt, verwende faktisch Inherit.
+   Wenn state.md `Measurement: on` zeigt UND du gerade die Synthese
+   (Step 3) erledigt hast: BEVOR du state.md aktualisierst, beauftrage
+   zwei zusätzliche Evaluator-Subagents (Round-Delta und Cumulative)
+   nach dem Schema aus SKILL.md JOIN-Schritt 2.5. Beide nutzen
+   `templates/measurement_context.md.tpl` und die zum erkannten
+   Sparring-Typ passende Rubric. Beachte `Measurement-Qualität` für
+   die Stufe. Erst nach Abschluss beider Mess-Subagents geht es mit
+   dem State-Update weiter. Bei letzter Runde zusätzlich:
+   `measurement_cumulative.md` nach `{SPARRING_PATH}/MEASUREMENT.md`
+   kopieren.
 5. Starte danach den Wait-Loop:
    bash {SPARRING_PATH}/watch_loop.sh "{OTHER_NAME}"
 6. Nach Start des Wait-Loops stumm bleiben. Keine Zwischenberichte,
