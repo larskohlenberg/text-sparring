@@ -7,6 +7,20 @@ Versionierung nach [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed (Simplification Pass)
+- **SKILL.md auf Kern-Workflow eingedampft** (525 → 275 Zeilen, ~48 % weniger). Detail-Sektionen leben jetzt in `text-sparring/references/` (Pre-Check, Turbo, RESIZE, Gates, Conventions) und werden bei Bedarf gelesen. Lädt damit beim Triggern ein deutlich kleineres Stück Kontext.
+- **Description radikal gekürzt** (~1100 → ~360 Zeichen, ein Satz Deutsch + Trigger-Phrasen + Negativbeispiel). Lange Descriptions verschlechtern Trigger-Genauigkeit eher als sie zu verbessern.
+- **Interview von 10 auf 5 Pflichtfragen reduziert** (Artefakt, Sparring-Name, zweites Tool, Rundenzahl, Ausführungsmodus). Der Rest (eigener Name, Sparring-Typ, Subagent-Qualität, Measurement, Projektkontext-Dateien) wird aus Smart-Defaults und Projekt-Scan abgeleitet und in der finalen Konfigurations-Zusammenfassung zur Bestätigung präsentiert.
+- **RESIZE-Modus von 58 auf ~15 Zeilen geschrumpft.** Sechs-Schritt-Choreografie zu 5 nummerierten Punkten zusammengezogen.
+- **Single-Skill-Modus durch Worker-Mode-Framing ersetzt.** Statt andere Skills (brainstorming, TDD, systematic-debugging) per Verbot auszusperren, erklärt der Skill jetzt, dass jeder Sparring-Step Worker-Mode mit fertiger Rolle und vorgegebenen Output-Pfaden ist — andere Skills sind dann nicht der Konflikt, sondern nur ein Mismatch ihrer Trigger-Logik mit dieser Step-Natur.
+
+### Removed
+- **Measurement als integrierter Bestandteil**: alle Measurement-Files (Rubrics, Context-Template, Procedure-Beschreibung) sind in den neuen Sibling-Skill `text-sparring-measurement` ausgelagert. Hauptskill ist measurement-frei; bei `Measurement: on` in `state.md` verweist er per Pointer auf den Sibling. Wer Sparring ohne Messung will, braucht den Measurement-Skill nicht.
+
+### Added
+- **`text-sparring-measurement` als eigenständiger Sibling-Skill** (`dist/text-sparring-measurement.skill`, 25 KB). Eigene Frontmatter, eigene Trigger-Logik ("mit Messung", "with measurement", "Baseline-Score", "Round-Delta"). Enthält die 4 Rubrics (Text/Campaign/Skill/Code), den Evaluator-Kontext-Template und das MEASUREMENT-Layout.
+- **`text-sparring/references/`** mit 5 Dateien: `gates.md`, `turbo.md`, `precheck.md`, `resize.md`, `conventions.md`. SKILL.md verlinkt sie als Pointer.
+
 ## [0.2.0] - 2026-05-16
 
 ### Added
