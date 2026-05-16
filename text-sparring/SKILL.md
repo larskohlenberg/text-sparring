@@ -32,6 +32,7 @@ Jedes Sparring lebt in einem benannten Unterordner unter `sparring/`, zum Beispi
 
 Erkenne den Modus automatisch:
 
+- **Trigger-Phrase enthält Pre-Check-Schlüsselwörter** — `pre-check`, `precheck`, `sparring check`, `lohnt sich sparring`, `sparring-check`, EN: `pre-check sparring`, `is sparring worth`, `sparring worth it` → **Pre-Check-Modus**. Siehe Pre-Check-Modus unten. Dieser Modus hat Vorrang vor allen anderen (auch wenn ein laufendes Sparring existiert — der Pre-Check legt nur eine `precheck.md` an und kollidiert nicht mit laufendem State, prüft das aber explizit).
 - **Trigger-Phrase enthält Resize-Schlüsselwörter** — Erweiterung (`verlängere`/`verlängern`, `erweitere`/`erweitern auf`, `extend`/`extend by`, `noch X Runden`, `weitere X Runden`, `fortsetzen mit X Runden`) oder Verkürzung (`verkürze`/`kürzen auf`, `kürze um`, `shorten`/`shorten to`, `nach Runde X beenden`, `auf X Runden reduzieren`) → **RESIZE-Modus** für das genannte (oder einzig plausible) Sparring. Siehe RESIZE-Modus unten.
 - **Keine `sparring/*/state.md`-Dateien vorhanden** → INIT.
 - **Genau eine `sparring/*/state.md` mit Status ≠ `completed`** → JOIN für genau dieses Sparring.
@@ -54,12 +55,14 @@ Vor jedem Output diese vier Prüfungen durchlaufen. Wenn ein Gate fehlschlägt: 
 
 Wenn die Trigger-Phrase des Users Worte wie **"Turbo"**, **"Schnellstart"**, **"ohne Fragen"**, **"auto"** oder **"quick"** im INIT-Kontext enthält (z. B. *"Starte ein Text-Sparring im Turbo-Modus über draft.md"*), überspringe das Interview komplett:
 
+0. **Pre-Check ausführen** (inline, vor allem Weiteren): Führe Pre-Check-Modus Schritte 1, 2, 6, 7 aus (Artefakt parsen, Slug ableiten, Sparring-Typ ableiten, `precheck.md` schreiben). Überspringe in Turbo den State-Konflikt-Check (Schritt 3) und das Precheck-Existiert-Handling (Schritt 4) — Turbo legt das Sparring sowieso an und überschreibt eine ggf. existierende `precheck.md` beim Re-Run. Lies die finale Empfehlung aus der erzeugten `precheck.md` und merke sie als `precheck_rounds`.
 1. Sieh dir das Projektverzeichnis an (wie unten beschrieben).
-2. Generiere konkrete Vorschläge für alle 10 Interview-Punkte aus Projektkontext und Praxis-Defaults (gleiche Logik wie unten, nur ohne den User zu fragen). **Measurement (Frage 10) ist im Turbo-Modus per Default `Off`**; nur wenn die Trigger-Phrase explizit "mit Messung", "with measurement", "mit Qualitätsmessung" o.ä. enthält, setze `On` mit `Measurement-Qualität: High`.
+2. Generiere konkrete Vorschläge für alle 10 Interview-Punkte aus Projektkontext und Praxis-Defaults (gleiche Logik wie unten, nur ohne den User zu fragen). **Measurement (Frage 10) ist im Turbo-Modus per Default `Off`**; nur wenn die Trigger-Phrase explizit "mit Messung", "with measurement", "mit Qualitätsmessung" o.ä. enthält, setze `On` mit `Measurement-Qualität: High`. **Frage 7 (Anzahl Runden):** Übernimm `precheck_rounds` als Default, außer der User hat in der Trigger-Phrase explizit eine andere Zahl genannt (dann gewinnt die User-Zahl, die `precheck.md` bleibt aber als Nachvollziehbarkeit liegen).
 3. Wenn die Trigger-Phrase einen konkreten Artefaktpfad enthält, nimm den; sonst leite ihn aus dem Projektkontext ab.
-4. Fasse die gewählte Konfiguration in 4–6 Zeilen zusammen und sage dem User in einem Satz, dass du jetzt loslegst.
-5. Lege direkt das Scaffolding an, führe (falls `Measurement: on`) Schritt 4.5 (Baseline-Measurement) aus, und erledige Schritt 1 (These) — ohne weitere Rückfrage.
-6. Gib am Ende den Handover-Prompt für den zweiten Agenten aus (siehe Schritt 7) und starte den Wait-Loop.
+4. **Bei `precheck_rounds == 0`** (Sparring nicht empfohlen) UND keine User-Zahl in der Trigger-Phrase: Gib dem User die Empfehlung in 2–3 Zeilen (Score + Veto-Begründung + Pfad zur `precheck.md`) und frage einmal nach: *"Trotzdem starten? Wenn ja, mit wievielen Runden? (Empfehlung im Skipping-Fall: 3, oder Abbruch)"*. Bei Abbruch: stoppe, kein Scaffolding. Bei Bestätigung mit Rundenzahl: weiter mit dieser Zahl statt `precheck_rounds`.
+5. Fasse die gewählte Konfiguration in 4–6 Zeilen zusammen und sage dem User in einem Satz, dass du jetzt loslegst.
+6. Lege direkt das Scaffolding an, führe (falls `Measurement: on`) Schritt 4.5 (Baseline-Measurement) aus, und erledige Schritt 1 (These) — ohne weitere Rückfrage.
+7. Gib am Ende den Handover-Prompt für den zweiten Agenten aus (siehe Schritt 7) und starte den Wait-Loop.
 
 **Ausnahme:** Wenn du für einen einzelnen Punkt keinen vertretbaren Default ableiten kannst (z. B. mehrere gleichwertige Artefakt-Kandidaten und keiner in der Trigger-Phrase, oder der Name des zweiten Tools ist nicht erkennbar), frag **nur diese eine Frage** zurück und mach dann mit dem Rest direkt weiter. Kein vollständiges Interview.
 
@@ -400,6 +403,67 @@ Auch hier gilt Silent Wait Mode: Nach Start von `bash sparring/<NAME>/watch_loop
 - **Nach Reaktivierung** (vorher `completed`, jetzt erweitert): Emit den Handover-Prompt-Block für den anderen Agenten (gleicher Format wie INIT Schritt 7) — er muss seine Session wieder starten und ins fortgesetzte Sparring einsteigen. Danach `bash sparring/<NAME>/watch_loop.sh "{MY_NAME}"`.
 - **Bei Resize eines laufenden Sparrings** (vorher `waiting_for_output`): kein neuer Wait-Loop. Bestätige dem User in einem Satz, dass der Plan jetzt `T` Runden umfasst — der bereits laufende Loop polled weiter und sieht das neue Total automatisch beim nächsten Rundenwechsel. Wenn der User dich getriggert hat, während du eigentlich im Wait-Loop sein solltest: zurück in den Wait-Loop. Bei Verkürzung: weise den User außerdem darauf hin, dass das Sparring nach der gerade laufenden oder der nächsten Synthese abschließt (sobald die aktuelle Runde die neue Gesamtzahl `T` erreicht).
 
+## Pre-Check-Modus (lohnt sich ein Sparring überhaupt?)
+
+Beantwortet vor einem möglichen Sparring die Frage: **Lohnt sich das hier?** Und wenn ja, **wie tief?** Der Pre-Check ist gedacht für zwei Situationen:
+
+- **Pipeline-Modus** — automatisierter Aufruf in einer Prozesskette (z. B. "spar diesen Entwurf, wenn es sich lohnt"). Liefert nur eine `.md`-Datei, kein Scaffolding. Der aufrufende Prozess liest die Datei und entscheidet selbst.
+- **Manueller Quick-Check** — User will wissen, ob es sich lohnt, bevor er INIT auslöst.
+
+Der Pre-Check läuft **inline in der Hauptsession** — kein Subagent, kein Wait-Loop. Ein einziger Pass: Artefakt lesen, drei Dimensionen scoren, Empfehlung schreiben.
+
+### Schritt 1: Artefaktpfad bestimmen
+
+- Wenn die Trigger-Phrase einen konkreten Pfad enthält: nimm den. Verifiziere, dass die Datei oder das Verzeichnis existiert.
+- Wenn nicht: Scanne das Projektverzeichnis (gleiche Logik wie INIT-Frage 1), schlage einen Pfad vor und frag einmal zurück. Im Pipeline-Modus (wo der Pfad immer in der Trigger-Phrase steht) entfällt das.
+- Bei nicht existierender oder mehrdeutiger Eingabe: stoppe und frag den User.
+
+### Schritt 2: Slug ableiten
+
+- Leite den Slug aus dem Artefakt-Basename ab (gleiche Normalisierung wie INIT-Frage 2: nur Kleinbuchstaben, Ziffern, Bindestriche; Leerzeichen/Unterstriche zu `-`; sonstige Sonderzeichen entfernt).
+- Bei `<NAME>`-Kollision unter `sparring/` siehe Schritt 3.
+
+### Schritt 3: State-Konflikt prüfen
+
+- Falls `sparring/<NAME>/state.md` existiert: stoppe und frage den User. Das könnte ein laufendes oder abgeschlossenes Sparring sein; der Pre-Check soll keine bestehenden Sparrings überschreiben oder verwirren.
+- Falls die Trigger-Phrase explizit auf einen anderen, freien Slug deutet (z. B. *"pre-check für draft.md als draft-v2"*): nimm diesen.
+
+### Schritt 4: Precheck-Existiert-Handling
+
+- Falls `sparring/<NAME>/precheck.md` bereits existiert: melde dem User in einem Satz, dass die alte Version überschrieben wird, und mach weiter.
+
+### Schritt 5: Sparring-Ordner anlegen
+
+- Lege `sparring/<NAME>/` an, falls noch nicht vorhanden. Lege **kein** weiteres Scaffolding an (kein `state.md`, kein `CHALLENGE.md`, keine `rounds/`). Nur das Verzeichnis und später die `precheck.md` darin.
+
+### Schritt 6: Erkannten Sparring-Typ ableiten
+
+- Untersuche kurz das Artefakt (Format, Dateinamen, Inhalt) und leite einen der vier Typen ab: `Text`, `Campaign`, `Skill`, `Code` (gleiche Logik wie INIT Schritt 2 / Frage 6, ohne User-Rückfrage). Der Sparring-Typ fließt nur in die `precheck.md` als Information ein — die Rubric selbst ist typ-unabhängig.
+
+### Schritt 7: Inline Pre-Check ausführen
+
+- Lies `templates/precheck_rubric.md` vollständig.
+- Lies `templates/precheck_context.md.tpl` als Strukturvorlage und ersetze gedanklich die Platzhalter (`{SPARRING_NAME}`, `{SPARRING_PATH}`, `{RESOLVED_SPARRING_TYPE}`, `{ARTIFACT_TYPE}`, `{RUBRIC_PATH}`, `{INPUT_FILES}`, `{OUTPUT_FILE}`) — diese Datei ist Vorlage für deine eigene inline-Arbeit, nicht für einen Subagenten. Sie definiert die Grenzen und das Output-Format verbindlich.
+- Lies bei `Artifact-Typ: file` die Artefaktdatei direkt; bei `Artifact-Typ: directory` die wesentlichen Dateien des Verzeichnisses (gleiche Ausschlüsse wie in INIT Schritt 2).
+- Falls eine `sparring/<NAME>/artifact.md` mit `Projektkontext`-Sektion existiert (kann im Pre-Check-Modus nicht der Fall sein, da kein Scaffolding läuft, aber im Turbo-Modus möglich): lies die referenzierten Pfade. Sonst: scanne kurz das Projektverzeichnis nach offensichtlichen Briefing-/Redaktionsplan-/Style-Guide-Dateien (Suchmuster wie in INIT-Frage 3) — qualitative Einordnung der Zielklarheit.
+- Bewerte jede der drei Dimensionen isoliert (0, 1 oder 2 — keine halben Schritte).
+- Wende die zwei Vetos an: bei `Headroom == 0` ODER `Zielklarheit == 0` → Score = **0**.
+- Schätze die Größenklasse qualitativ ein (Klein/Mittel/Groß — kein `wc`, kein Zählen).
+- Berechne `min(Roh-Empfehlung aus Score, Größen-Cap)` = finale Empfehlung.
+- Schreibe das Ergebnis nach `sparring/<NAME>/precheck.md` im Format aus `templates/precheck_context.md.tpl` ("Output-Format"-Sektion).
+
+### Schritt 8: Resümee an den User, Ende
+
+- Gib in 2–3 Zeilen aus: Score, Veto-Status, finale Rundenempfehlung, Pfad zur `precheck.md`. Beispiel:
+
+  > *"Pre-Check für `<NAME>`: Score 4/6, Größenklasse Mittel → **5 Runden empfohlen**. Details in `sparring/<NAME>/precheck.md`."*
+
+- Bei `0 Runden / nicht empfohlen` zusätzlich der Hinweis, welches Veto griff (oder dass der Score zu niedrig war), z. B.:
+
+  > *"Pre-Check für `<NAME>`: Headroom-Veto greift (Artefakt bereits ausgereift) → **Sparring nicht empfohlen**. Details in `sparring/<NAME>/precheck.md`."*
+
+- **Kein Scaffolding, kein Wait-Loop, kein Handover-Prompt.** Der Modus endet hier. Der User (oder die aufrufende Pipeline) entscheidet, ob anschließend ein INIT/Turbo folgt.
+
 ## Reaktion auf watch_loop
 
 Der Bash-Loop blockiert und beendet sich mit drei möglichen Exit-Codes. Reagiere konkret:
@@ -451,6 +515,8 @@ Während des Wartens:
 | `templates/watch_loop.sh` | Bash-Polling-Script, pure POSIX |
 | `templates/round_artifact.md.tpl` | (Reserve, derzeit ungenutzt — Ausgangstext wird direkt kopiert) |
 | `templates/measurement_context.md.tpl` | Vorlage für isolierten Evaluator-Subagent-Kontext (Baseline, Round-Delta, Cumulative) |
+| `templates/precheck_rubric.md` | 3-Dim-Rubric für Pre-Check (Sparring-Fit), typ-unabhängig, inkl. Vetos und Größen-Cap |
+| `templates/precheck_context.md.tpl` | Vorlage für inline Pre-Check der Hauptsession (Aufgabe, Grenzen, Output-Format) |
 | `templates/measurement_rubric_text.md` | 5-Dim-Rubric für Sparring-Typ `Text` |
 | `templates/measurement_rubric_campaign.md` | 5-Dim-Rubric für Sparring-Typ `Campaign` |
 | `templates/measurement_rubric_skill.md` | 5-Dim-Rubric für Sparring-Typ `Skill` |
