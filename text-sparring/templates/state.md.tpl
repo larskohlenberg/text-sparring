@@ -1,13 +1,26 @@
 # Challenge State
 
+**Sparring-Name:** {SPARRING_NAME}
+**Sparring-Pfad:** {SPARRING_PATH}
+
 **Initiator (Agent A):** {AGENT_A}
 **Zweiter Agent (Agent B):** {AGENT_B}
 
-**Aktuelle Runde:** 1 von 10
+**Artifact-Typ:** {ARTIFACT_TYPE}
+**Artifact-Pfad:** {ARTIFACT_PATH}
+**Sparring-Typ:** {SPARRING_TYPE}
+**Erkannter Sparring-Typ:** {RESOLVED_SPARRING_TYPE}
+
+**Aktuelle Runde:** 1 von {TOTAL_ROUNDS}
 **Aktueller Schritt:** 1 (These)
 **Status:** waiting_for_output
 **Dran:** {AGENT_A}
 **Rolle in diesem Schritt:** These
+**Ausführungsmodus:** {EXECUTION_MODE}
+**Step-Ausführung:** {STEP_EXECUTION}
+**Subagent-Qualität:** {SUBAGENT_QUALITY}
+**Measurement:** {MEASUREMENT}
+**Measurement-Qualität:** {MEASUREMENT_QUALITY}
 
 **Nächster Schritt nach dir:** {AGENT_B} übernimmt Antithese in Runde 1
 

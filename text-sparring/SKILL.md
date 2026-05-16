@@ -1,32 +1,74 @@
 ---
 name: text-sparring
-description: Set up an autonomous multi-agent text sparring loop where two AI agents (typically Claude + Codex/ChatGPT) iteratively refine a text artifact over 10 rounds using Thesis → Antithesis → Synthesis. Use this skill whenever the user wants two agents to "spar" over a text, mutually challenge or refine a draft, or run a dialectical improvement loop. Trigger on requests like "starte ein Text-Sparring", "lass zwei Agenten meinen Text gegenseitig schärfen", "richte einen dialektischen Loop ein", "set up a text sparring", "I want Claude and Codex to spar on this draft", or any mention of "Text-Sparring", "Agent-Sparring", "Multi-Agent-Refinement". Also trigger when an agent is asked to JOIN an existing sparring ("steig ins Sparring ein", "join the running sparring", "Codex, übernimm Schritt 2"). The skill is harness-agnostic — works in Claude Code, Cowork, and Codex CLI — and requires no external tools beyond bash and standard Unix utilities.
+description: Setze ein dialektisches Text-Sparring zwischen zwei AI-Agenten auf oder steige in ein laufendes ein — These → Antithese → Synthese über mehrere Runden. Triggert auf "starte ein Text-Sparring", "lass zwei Agenten meinen Text schärfen", "steig ins Sparring ein", "Multi-Agent-Refinement", sowie auf Turbo-, Pre-Check- und Resize-Varianten. Nicht für einfache Reviews oder Proofreading.
 ---
 
 # Text Sparring
 
-Ein harness-agnostischer Skill zum Aufsetzen und Mitwirken an einem **Text-Sparring zwischen zwei AI-Agenten**. Zwei Agenten (z. B. Claude + Codex) durchlaufen 10 Runden mit den Rollen **These → Antithese → Synthese**, wobei beide Agenten alle Rollen in Vollrotation durchlaufen.
+Ein harness-agnostischer Skill zum Aufsetzen und Mitwirken an einem **Text-Sparring zwischen zwei AI-Agenten**. Zwei Agenten durchlaufen eine konfigurierbare Anzahl von Runden mit den Rollen **These → Antithese → Synthese**.
 
 Es geht **nicht ums Gewinnen**, sondern um gegenseitiges Schärfen — wie zwei Sparringspartner im Training. Der Skill kennt keinen Inhalt; er orchestriert nur den **Prozess**. Der zu sparrende Text liegt außerhalb des Skills im Projektverzeichnis.
 
-## Wann triggern
+## Was diese Skill ist (und was nicht)
 
-Triggere diesen Skill in zwei Situationen:
+Diese Skill ist **Prozess-Orchestrierung**, keine kreative Exploration. Die Arbeit pro Aktivierung ist immer dasselbe enge Muster: lies `state.md`, erledige genau einen Schritt nach Rollen-Definition aus `CHALLENGE.md`, aktualisiere `state.md`, zurück in den Wait-Loop. Es gibt nichts zu brainstormen, nichts zu planen, nichts zu debuggen — der Plan steht in `state.md`, die Rolle steht in `CHALLENGE.md`, der Output-Pfad steht im Step-Kontext.
 
-1. **INIT** — Der User möchte ein neues Sparring starten ("Lass meinen Text sparren", "Setup Text-Sparring für draft.md").
-2. **JOIN** — Der User sagt einem zweiten Agent, dass er in ein laufendes Sparring einsteigen soll ("Steig ins Sparring ein", "Codex, übernimm").
+Wenn andere Workflow-Skills (brainstorming, TDD, systematic-debugging, writing-plans usw.) sich beim Lesen der User-Phrase aufdrängen: das ist ein Mismatch zwischen ihrer Trigger-Logik und der Worker-Natur dieses Schritts. Folge dem Sparring-Workflow; andere Skills nur dann hinzuziehen, wenn der User sie im aktuellen Prompt **explizit** für diesen Schritt benennt.
 
-Erkenne den Modus automatisch: Existiert `sparring/state.md` im aktuellen Projektverzeichnis → JOIN. Ansonsten → INIT.
+## Modus-Erkennung
 
-## INIT-Modus (erste Aktivierung)
+Erkenne den Modus automatisch aus Trigger-Phrase und Projektzustand:
+
+| Bedingung | Modus | Details in |
+|---|---|---|
+| Trigger enthält `pre-check`, `precheck`, `lohnt sich sparring` o.ä. | **Pre-Check** | `references/precheck.md` |
+| Trigger enthält Resize-Wörter (`verlängere`, `verkürze`, `extend`, `shorten`, `nach Runde X beenden` etc.) | **RESIZE** | `references/resize.md` |
+| Trigger enthält `Turbo`, `Schnellstart`, `ohne Fragen`, `auto`, `quick` | **INIT (Turbo)** | `references/turbo.md` |
+| Keine `sparring/*/state.md` vorhanden | **INIT** | unten |
+| Genau eine `sparring/*/state.md` mit Status ≠ `completed` | **JOIN** für genau dieses Sparring | unten |
+| Mehrere aktive `sparring/*/state.md` | Stoppen, liste aktive Sparrings (Name + Runde + wer dran ist), frage User. Bei explizitem Slug in Trigger: direkt nehmen. | — |
+| Nur abgeschlossene Sparrings + JOIN-Phrase | Stoppen, melde dass kein laufendes Sparring existiert | — |
+| Nur abgeschlossene Sparrings + INIT-Phrase | INIT für neues Sparring | unten |
+
+Pre-Check hat Vorrang vor allen anderen — er legt nur eine `precheck.md` an und kollidiert nicht mit laufendem State, prüft das aber explizit.
+
+### Notation
+
+Jedes Sparring lebt in einem benannten Unterordner unter `sparring/`, zum Beispiel `sparring/readme-v1/`. `<NAME>` ist der konkrete Slug. **Ersetze `<NAME>` immer durch den konkreten Slug aus dem Interview (INIT) bzw. aus dem erkannten aktiven Sparring (JOIN).**
+
+## Vor jeder Schreibaktion: Vier Gates
+
+Vor jedem Output vier Prüfungen durchlaufen (Role, Input, Output, Execution-Mode). Bei Fehler: nichts schreiben, dem User melden. Details in `references/gates.md` — vor der ersten Schreibaktion einer Sitzung einmal lesen.
+
+## INIT-Modus
+
+**Turbo-Variante:** Wenn die Trigger-Phrase Worte wie "Turbo", "Schnellstart", "ohne Fragen", "auto", "quick" enthält, folge `references/turbo.md` statt dem Interview unten.
 
 ### Schritt 1: Interview
 
-Stelle dem User exakt diese Fragen — eine nach der anderen, kompakt:
+**Vor dem Interview:** Sieh dir das aktuelle Projektverzeichnis kurz an (Top-Level-Dateien und -Ordner, ggf. eine `README.md` oder `CLAUDE.md`). Das ist die Grundlage für deine konkreten Vorschläge — du musst sie nicht im Detail lesen, nur Kontext sammeln.
 
-1. **Welchen Text soll ich sparren?** Erwarte einen Dateipfad (z. B. `draft.md`, `texte/kapitel_03.md`).
-2. **Welches zweite Tool kommt rein?** Optionen: `Codex CLI`, `ChatGPT (Web)`, `Cowork`, `andere Claude Code Session`. Frag nach dem Namen, wie er später in `state.md` referenziert werden soll (z. B. "Codex", "GPT-5").
-3. **Mein eigener Name im Sparring?** Default: `Claude`. Akzeptiere Abweichungen.
+**Format pro Frage:** Stelle die Frage, gib einen **konkreten Vorschlag** und eine **knappe Begründung in 1 Satz**. Dann warte auf Bestätigung oder Korrektur. Eine Frage nach der anderen, nicht alles auf einmal.
+
+Beispiel: *"**Welches Artefakt?** — Ich schlage `README.md` vor. Begründung: das ist die einzige Markdown-Datei im Root und sieht nach dem Hauptartefakt aus. Passt das, oder soll es etwas anderes sein?"*
+
+Fünf Pflichtfragen — der Rest kommt aus Smart-Defaults und Projekt-Scan, die du in der Zusammenfassung am Ende zur Bestätigung mit-präsentierst:
+
+1. **Welches Artefakt soll gechallenged werden?** Schlage konkret eine Datei oder ein Verzeichnis vor, das du im Projekt siehst. Mehrere Kandidaten → nenne 2–3 und empfiehl einen. Nichts Naheliegendes → offen nach einem Pfad fragen.
+2. **Wie soll dieses Sparring heißen?** Leite einen Slug aus dem Artefakt-Basename ab (z. B. `draft.md` → `draft`). Bei Kollision unter `sparring/` automatisch `-v2`, `-v3` anhängen. Normalisiere: nur Kleinbuchstaben, Ziffern, Bindestriche. Im weiteren Verlauf heißt dieser Slug `<NAME>`.
+3. **Welches zweite Tool kommt rein?** Default `Codex CLI` oder `andere Claude Code Session` (vollautonom, Wait-Loop funktioniert). `ChatGPT (Web)` nur, wenn der User explizit kein lokales Tool hat. Frag dann nach dem Namen, wie er später in `state.md` stehen soll (z. B. "Codex", "GPT-5").
+4. **Wie viele Runden?** Schnelltest → `3`, realer Verbesserungsdurchlauf → `5`, tiefe Schärfung → `10`. Begründung soll auf Artefaktgröße und User-Ziel basieren.
+5. **Ausführungsmodus?** Default `Subagent`, wenn die Umgebung Subagents erkennbar unterstützt; sonst `Inline`. `Auto` nur bei Unsicherheit. Subagent isoliert Step-Kontexte sauberer.
+
+Smart-Defaults (in der Zusammenfassung zur Bestätigung zeigen, nicht einzeln fragen):
+
+- **Mein Name im Sparring** → `Claude`
+- **Sparring-Typ** → aus Artefakt abgeleitet: README/Essay → `Text`, Post-Sammlung → `Campaign`, SKILL.md mit Templates → `Skill`, Quellcode → `Code`, sonst `Auto`
+- **Subagent-Qualität** → `Inherit`
+- **Measurement** → `Off` (für `On` siehe Sibling-Skill `text-sparring-measurement`; aktivieren nur, wenn der User explizit Messung anfordert)
+- **Projektkontext-Dateien** → automatischer Scan nach Style-Guides, Redaktionsplänen, Briefings, Tone-of-Voice (Suchmuster DE/EN: `*redaktionsplan*`, `*editorial*`, `*style[-_ ]guide*`, `*styleguide*`, `*briefing*`, `*brand[-_ ]voice*`, `*tone[-_ ]of[-_ ]voice*`, `*content[-_ ]strategy*`, `*personas*`, `*messaging*`, `*positioning*`). Gefundene Dateien als Liste in der Zusammenfassung zeigen, User streicht oder ergänzt. Default leer bei Nichtfund — nicht raten. Werden in `artifact.md` als **referenzierte** Pfade eingetragen (nicht kopiert).
+
+Nach den 5 Antworten fasse die komplette Konfiguration (5 Antworten + alle Defaults) in 6–8 Zeilen zusammen und hol dir ein finales "Los" vom User, bevor du das Scaffolding anlegst. Der User kann jeden Default in dieser Zusammenfassung noch korrigieren.
 
 ### Schritt 2: Scaffolding anlegen
 
@@ -34,32 +76,41 @@ Lege im aktuellen Projektverzeichnis (NICHT im Skill-Verzeichnis) folgende Struk
 
 ```
 sparring/
-├── CHALLENGE.md
-├── state.md
-├── watch_loop.sh
-├── chatgpt_codex_instructions.md
-└── rounds/
-    └── round_01/
-        └── artifact.md          ← Kopie des Ausgangstexts
+└── <NAME>/                       ← der konkrete Slug aus Frage 2
+    ├── CHALLENGE.md
+    ├── artifact.md
+    ├── state.md
+    ├── watch_loop.sh
+    ├── chatgpt_codex_instructions.md
+    ├── context/
+    └── rounds/
+        └── round_01/
+            └── artifact.md|artifact/ ← Kopie des Ausgangsartefakts
 ```
 
 Vorgehen:
 
-- Lies `templates/CHALLENGE.md.tpl` und ersetze die Platzhalter mit den konkreten Agent-Namen und dem unten beschriebenen Rotationsplan. Schreibe das Ergebnis nach `sparring/CHALLENGE.md`.
-- Lies `templates/state.md.tpl`, befülle die Platzhalter, schreibe nach `sparring/state.md`. Setze den initialen Status auf: Runde 1, Schritt 1, dran ist der **Initiator** (also du selbst), Rolle ist **These**.
-- Kopiere `templates/watch_loop.sh` 1:1 nach `sparring/watch_loop.sh`. Mache sie nicht ausführbar — sie wird mit `bash watch_loop.sh ...` aufgerufen.
-- Lies `templates/chatgpt_codex_instructions.md`, befülle die Platzhalter mit dem Projektpfad und dem Namen des zweiten Agents, schreibe nach `sparring/chatgpt_codex_instructions.md`.
-- Kopiere den vom User benannten Ausgangstext nach `sparring/rounds/round_01/artifact.md`.
+- Prüfe den Artefaktpfad: Datei → `Artifact-Typ: file`, Verzeichnis → `Artifact-Typ: directory`. Weder noch → erneut fragen.
+- Bei User-Wahl `Auto`: leite `Erkannter Sparring-Typ` aus Artefakt und Projektkontext ab.
+- Lege `sparring/<NAME>/` an. Existiert bereits: stoppe und frage den User.
+- Lies `templates/CHALLENGE.md.tpl`, ersetze Platzhalter (Agent-Namen, Gesamtrundenzahl, Rotationsplan, Sparring-Pfad), schreibe nach `sparring/<NAME>/CHALLENGE.md`.
+- Lies `templates/artifact.md.tpl`, befülle, schreibe nach `sparring/<NAME>/artifact.md`. `Initiale Kopie` zeigt auf `rounds/round_01/artifact.md` (bei file) bzw. `rounds/round_01/artifact/` (bei directory). Projektkontext-Pfade als Bulletliste eintragen (relativ vom Projekt-Root), bei keinen: `(keine)`.
+- Lies `templates/state.md.tpl`, befülle, schreibe nach `sparring/<NAME>/state.md`. Initialer Status: Runde 1, Schritt 1, dran ist der **Initiator** (du), Rolle **These**. Setze alle Felder inkl. `Measurement` und `Measurement-Qualität` (bei `Measurement: off` setze letzteres auf `-`).
+- Kopiere `templates/watch_loop.sh` 1:1 nach `sparring/<NAME>/watch_loop.sh`. Nicht ausführbar machen — Aufruf via `bash sparring/<NAME>/watch_loop.sh ...`.
+- Lies `templates/chatgpt_codex_instructions.md`, befülle (Projektpfad, Name des zweiten Agents, Sparring-Pfad), schreibe nach `sparring/<NAME>/chatgpt_codex_instructions.md`.
+- Lege `sparring/<NAME>/context/` an. `templates/step_context.md.tpl` ist Vorlage für Schritt-Kontexte im Subagent-Modus.
+- **Bei `file`**: Kopiere das benannte Artefakt nach `rounds/round_01/artifact.md`.
+- **Bei `directory`**: Kopiere nach `rounds/round_01/artifact/`. **Schließe immer aus**: `sparring/`, `.git/`, `node_modules/`, `dist/`, `build/`, `.venv/`, `__pycache__/`, `.DS_Store`. Falls das Artefakt ein Projekt-Root ist und nach Ausschluss noch mehr als drei Top-Level-Einträge bleiben: stoppe und frag nach expliziter Include-Liste. Trage die verwendete Ausschluss-/Include-Liste in `artifact.md` unter `Boundary` ein. Bei Folgerunden gelten die Excludes nicht erneut (dort wird schon das gefilterte Artefakt kopiert).
 
 ### Schritt 3: CLAUDE.md erweitern (nur wenn du Claude bist)
 
-Falls eine `CLAUDE.md` im Projektroot existiert: hänge den Inhalt von `templates/claude_md_snippet.md` am Ende an. Falls keine existiert: lege eine neue mit diesem Inhalt an.
+Falls eine `CLAUDE.md` im Projektroot existiert: hänge `templates/claude_md_snippet.md` am Ende an. Sonst: neue anlegen mit diesem Inhalt. Ersetze `{MY_NAME}`, `{OTHER_NAME}`, `{SPARRING_PATH}` (= `sparring/<NAME>`).
 
-Ersetze im Snippet die Platzhalter `{MY_NAME}` und `{OTHER_NAME}` mit den konkreten Werten aus dem Interview.
+Wenn schon ein Snippet von einem früheren Sparring drin steht: das neue zusätzlich anhängen, das alte nicht entfernen. Mehrere Snippets nebeneinander sind erlaubt; sie unterscheiden sich durch `{SPARRING_PATH}`.
 
 ### Schritt 4: Rotationsplan generieren
 
-Der Plan ist **fest und deterministisch** — er gilt für jedes Setup gleich, nur die Namen werden eingesetzt. Verwende exakt diese Tabelle (A = Initiator, B = zweiter Agent):
+Der Plan ist **fest und deterministisch**. Verwende exakt diese Tabelle als 10-Runden-Muster (A = Initiator, B = zweiter Agent):
 
 | Runde | These | Antithese | Synthese |
 |-------|-------|-----------|----------|
@@ -74,65 +125,105 @@ Der Plan ist **fest und deterministisch** — er gilt für jedes Setup gleich, n
 | 9 | A | B | B |
 | 10 | B | A | A |
 
-Diese Verteilung ist exakt ausbalanciert: jeder Agent macht jede Rolle genau 5× über 10 Runden.
+Bei weniger als 10 Runden gilt nur der Präfix bis zur gewählten Gesamtrundenzahl. Bei genau 10 Runden ist die Verteilung exakt ausbalanciert: jeder Agent macht jede Rolle genau 5×. Schreibe sie in `state.md` mit den echten Namen.
 
-Schreibe sie in `state.md` mit den echten Namen statt A/B.
+### Schritt 4.5: Baseline-Measurement (nur bei `Measurement: on`)
 
-### Schritt 5: Schritt 1 (These der Runde 1) selbst erledigen
+Bei `Measurement: off` überspringen. Bei `Measurement: on` siehe der `text-sparring-measurement`-Skill, Abschnitt "Baseline" — vor Schritt 5 ausführen.
 
-Lies `sparring/rounds/round_01/artifact.md` und produziere die These gemäß den Regeln in `CHALLENGE.md`. Schreibe nach `sparring/rounds/round_01/step_1_thesis.md`.
+### Schritt 5: Schritt 1 (These der Runde 1) erledigen
+
+**Bei `Step-Ausführung: subagent`**: Erzeuge `sparring/<NAME>/context/round_01_step_1_prompt.md` aus `templates/step_context.md.tpl` (mit `{SPARRING_PATH}` = `sparring/<NAME>`), beauftrage einen frischen Subagent mit genau diesem Kontext, warte auf Abschluss und prüfe, dass `rounds/round_01/step_1_thesis.md` (bzw. `.../step_1_thesis/`) und `rounds/round_01/step_1_handoff.md` existieren.
+
+**Bei `Step-Ausführung: inline`**: Lies bei `file` `rounds/round_01/artifact.md`; bei `directory` `rounds/round_01/artifact/`. Produziere die These gemäß `CHALLENGE.md`. Schreibe bei `file` nach `rounds/round_01/step_1_thesis.md`, bei `directory` nach `rounds/round_01/step_1_thesis/`, und den Übergabeimpuls immer nach `rounds/round_01/step_1_handoff.md`.
 
 ### Schritt 6: state.md aktualisieren
 
-Setze in `state.md`:
-- Aktueller Schritt-Status: ✅ Schritt 1 erledigt
+- Schritt-Status: ✅ Schritt 1 erledigt
 - `Dran:` auf den zweiten Agent (Name aus Interview)
-- Aktualisiere die Verlauf-Sektion
+- Verlauf-Sektion aktualisieren
 
-### Schritt 7: Wait-Loop starten
+### Schritt 7: Handover-Prompt ausgeben und Wait-Loop starten
 
-Führe aus: `bash sparring/watch_loop.sh "{MY_NAME}"` mit deinem konkreten Namen.
+**Vor** dem Wait-Loop musst du dem User einen fertigen, copy-paste-fähigen Handover-Prompt für den zweiten Agenten ausgeben. Format:
 
-Erkläre dem User **vor** dem Aufruf in einem kurzen Satz:
+> Setup für Sparring **`<NAME>`** steht. Schritt 1 (These) ist fertig. Ich gehe gleich in den Wait-Loop.
+>
+> **Handover-Prompt für {OTHER_NAME}:**
+>
+> Starte eine Session in **{OTHER_NAME}** im selben Projektverzeichnis (`{PROJECT_PATH}`) und kopiere genau diesen Text als ersten Prompt:
+>
+> ````
+> Du bist "{OTHER_NAME}" im laufenden Text-Sparring "<NAME>"
+> (Sparring-Pfad: sparring/<NAME>/) im aktuellen Projektverzeichnis.
+> Steig ins Sparring ein: lies sparring/<NAME>/state.md und
+> sparring/<NAME>/CHALLENGE.md, folge dem JOIN-Modus der
+> text-sparring-Skill, und übernimm den ausstehenden Schritt.
+> Falls die Skill nicht automatisch lädt, lies ihre SKILL.md
+> explizit.
+> ````
 
-> *"Setup steht. Schritt 1 (These) ist fertig. Ich gehe jetzt in den Wait-Loop und prüfe alle 30 Sekunden, ob ich wieder dran bin. Bitte starte jetzt eine Session in **{OTHER_NAME}** im selben Projektverzeichnis und sag dort: 'Steig ins Sparring ein'."*
+Setze die Platzhalter `{OTHER_NAME}`, `<NAME>` und `{PROJECT_PATH}` mit den konkreten Werten ein, bevor du den Block ausgibst. Der innere Codeblock (mit den vier Backticks außen) muss exakt diese Form behalten, damit der User ihn als einen Block markieren und kopieren kann.
 
-Dann den Loop aufrufen. Reagiere auf den Exit-Code (siehe unten "Reaktion auf watch_loop").
+Führe danach aus: `bash sparring/<NAME>/watch_loop.sh "{MY_NAME}"`.
 
-## JOIN-Modus (zweiter Agent steigt ein)
+Ab Aufruf des Loops gilt Silent Wait Mode (siehe unten).
 
-### Schritt 1: State lesen
+## JOIN-Modus
 
-Lies `sparring/state.md` vollständig. Identifiziere:
-- Wer der Initiator ist
-- Welche Runde und welcher Schritt aktuell offen ist
-- Welche Rolle du in diesem Schritt hast
+### Schritt 1: Aktives Sparring identifizieren und State lesen
 
-Falls `Dran:` nicht **dich** zeigt: melde *"Im laufenden Sparring ist gerade {OTHER} dran, nicht ich. Soll ich trotzdem in den Wait-Loop gehen und warten, bis ich dran bin?"* — auf User-Bestätigung dann Schritt 4 (Wait-Loop) ohne vorherige Arbeit.
+Scanne `sparring/*/state.md` nach Status ≠ `completed`. Folge der Modus-Erkennung oben. Merke dir `<NAME>` als den konkret gewählten Slug.
+
+Lies `sparring/<NAME>/state.md` vollständig. Identifiziere: `Sparring-Name`, Initiator, aktuelle Runde + Schritt, deine Rolle, `Artifact-Typ`, `Artifact-Pfad`, `Sparring-Typ`, `Erkannter Sparring-Typ`, `Ausführungsmodus`, `Step-Ausführung`, `Subagent-Qualität`.
+
+- `Dran:` zeigt den bekannten anderen Agenten → starte direkt Wait-Loop mit deinem Namen. Keine Rückfrage.
+- `Dran:` zeigt weder dich noch den anderen → stoppe und frage den User (State inkonsistent oder Agent-Name unbekannt).
 
 ### Schritt 2: Deinen Schritt erledigen
 
-- **These**: Lies `rounds/round_NN/artifact.md`, schreibe nach `step_1_thesis.md`
-- **Antithese**: Lies `rounds/round_NN/step_1_thesis.md` (und `artifact.md` als Bezug), schreibe nach `step_2_antithesis.md`
-- **Synthese**: Lies sowohl `step_1_thesis.md` als auch `step_2_antithesis.md`, schreibe nach `step_3_synthesis.md`
+**Bei `Ausführungsmodus: Subagent`** und du kannst keinen starten: stoppe und frage den User. Kein stiller Fallback.
 
-Befolge dabei zwingend die Rollen-Definitionen aus `CHALLENGE.md`.
+**Bei `Ausführungsmodus: Auto`**: Subagent wenn dein Tool das erkennbar unterstützt; sonst inline. Aktualisiere `Step-Ausführung` in `state.md`, falls die tatsächliche Umsetzung von der gespeicherten abweicht.
+
+**Bei `Step-Ausführung: subagent`**: Erzeuge vor dem Schritt eine Kontextdatei `sparring/<NAME>/context/round_NN_step_M_prompt.md`, beauftrage einen frischen Subagent mit genau diesem Kontext und prüfe danach, dass die erwarteten Output-Dateien geschrieben wurden. Der Subagent darf `state.md` nicht aktualisieren, keine neue Runde anlegen und keinen Wait-Loop starten.
+
+Übersetze `Subagent-Qualität` in dein Tool: `Inherit` (keine Overrides), `Balanced` (mittlere Qualität), `High` (stärkste verfügbare), `Role-based` (These Balanced, Antithese+Synthese High). Wenn dein Tool keine Subagent-Qualitätswahl erlaubt: faktisch `Inherit`.
+
+**Bei `Step-Ausführung: inline`**: Erledige direkt in der Hauptsession. Alle Pfade unten relativ zu `sparring/<NAME>/`.
+
+- **These**: Bei `file`: Lies `rounds/round_NN/artifact.md`; bei `directory`: lies `rounds/round_NN/artifact/`. Falls `NN > 1`, lies zusätzlich `rounds/round_{NN-1}/step_3_handoff.md`. Schreibe bei `file` nach `rounds/round_NN/step_1_thesis.md`, bei `directory` nach `rounds/round_NN/step_1_thesis/`, und immer nach `rounds/round_NN/step_1_handoff.md`.
+- **Antithese**: Bei `file`: Lies `rounds/round_NN/artifact.md`, `rounds/round_NN/step_1_thesis.md` und `rounds/round_NN/step_1_handoff.md`; bei `directory`: Verzeichnis-Varianten. Schreibe immer nach `rounds/round_NN/step_2_antithesis.md` und `rounds/round_NN/step_2_handoff.md`. Auch bei Directory-Artefakten bleibt die Antithese eine Markdown-Datei (strukturierte Kritik, keine neue Artefaktfassung).
+- **Synthese**: Lies `rounds/round_NN/step_1_thesis` (Datei oder Verzeichnis), `rounds/round_NN/step_2_antithesis.md` und `rounds/round_NN/step_2_handoff.md`. Schreibe bei `file` nach `rounds/round_NN/step_3_synthesis.md`, bei `directory` nach `rounds/round_NN/step_3_synthesis/`, und immer nach `rounds/round_NN/step_3_handoff.md`.
+
+Befolge dabei zwingend die Rollen-Definitionen aus `sparring/<NAME>/CHALLENGE.md`.
+
+### Schritt 2.5: Measurement nach Synthese (nur bei `Measurement: on` UND erledigter Synthese)
+
+Bei `Measurement: off` ODER der gerade erledigte Step war nicht die Synthese: überspringen. Sonst siehe der `text-sparring-measurement`-Skill, Abschnitt "Nach Synthese" — vor Schritt 3 ausführen.
 
 ### Schritt 3: State und ggf. neue Runde aktualisieren
 
+Alle Pfade unten relativ zu `sparring/<NAME>/`.
+
 - Aktualisiere `state.md`: Schritt-Status, `Dran:`, Verlauf.
-- **Falls du gerade Schritt 3 (Synthese) erledigt hast** UND die aktuelle Runde < 10 ist:
+- **Falls du gerade Synthese (Schritt 3) erledigt hast** UND aktuelle Runde < Gesamtrundenzahl:
   - Lege `rounds/round_{NN+1}/` an
-  - Kopiere `step_3_synthesis.md` nach `rounds/round_{NN+1}/artifact.md`
-  - Inkrementiere die Runden-Nummer in `state.md`
-  - Setze `Dran:` und Rolle laut Rotationsplan für die neue Runde
-- **Falls du gerade Schritt 3 der Runde 10 erledigt hast**:
-  - Setze in `state.md` den Status auf `completed`
-  - Kopiere `step_3_synthesis.md` nach `sparring/FINAL_ARTIFACT.md`
+  - Bei `file`: Kopiere `rounds/round_NN/step_3_synthesis.md` → `rounds/round_{NN+1}/artifact.md`
+  - Bei `directory`: Kopiere `rounds/round_NN/step_3_synthesis/` → `rounds/round_{NN+1}/artifact/`
+  - `step_3_handoff.md` bleibt im abgeschlossenen Rundenordner; die These der nächsten Runde liest ihn dort als Übergabeimpuls.
+  - Inkrementiere Runden-Nummer in `state.md`. Setze `Dran:` und Rolle laut Rotationsplan.
+- **Falls du gerade Synthese der letzten Runde erledigt hast**:
+  - Setze `state.md`-Status auf `completed`
+  - Bei `file`: Kopiere `rounds/round_NN/step_3_synthesis.md` → `sparring/<NAME>/FINAL_ARTIFACT.md`
+  - Bei `directory`: Kopiere `rounds/round_NN/step_3_synthesis/` → `sparring/<NAME>/FINAL_ARTIFACT/`
+  - **Bei `Measurement: on`**: Kopiere zusätzlich `rounds/round_NN/measurement_cumulative.md` → `sparring/<NAME>/MEASUREMENT.md` (siehe der `text-sparring-measurement`-Skill).
 
 ### Schritt 4: Wait-Loop starten
 
-Wie im INIT-Modus Schritt 7. Falls dieser Agent zum ersten Mal ins Sparring einsteigt: kein Hinweis an den User mehr nötig, der erste Hinweis kam vom Initiator.
+Wie im INIT-Modus Schritt 7. Falls dieser Agent zum ersten Mal einsteigt: kein Hinweis an den User mehr nötig, der erste Hinweis kam vom Initiator.
+
+Auch hier gilt Silent Wait Mode: Nach Start von `bash sparring/<NAME>/watch_loop.sh "{MY_NAME}"` bleibt der Agent stumm, bis der Prozess mit WAKE, DONE oder TIMEOUT endet.
 
 ## Reaktion auf watch_loop
 
@@ -141,25 +232,44 @@ Der Bash-Loop blockiert und beendet sich mit drei möglichen Exit-Codes. Reagier
 | Exit | Output enthält | Reaktion |
 |------|----------------|----------|
 | 0 | `WAKE:` und state.md-Inhalt | Du bist wieder dran. Gehe zu JOIN-Modus Schritt 2 (deinen Schritt erledigen). Danach erneut watch_loop aufrufen. |
-| 1 | `DONE:` | Alle 10 Runden durch. Melde dem User: *"Sparring abgeschlossen — finales Artefakt liegt in `sparring/FINAL_ARTIFACT.md`."* Beende sauber, kein neuer Loop. |
+| 1 | `DONE:` | Alle gewählten Runden durch. Melde dem User: *"Sparring `<NAME>` abgeschlossen — finales Artefakt liegt in `sparring/<NAME>/FINAL_ARTIFACT.md` bzw. `sparring/<NAME>/FINAL_ARTIFACT/`."* Beende sauber, kein neuer Loop. |
 | 2 | `TIMEOUT:` | Der andere Agent hat sich 30 Min nicht gemeldet. Frage den User: *"{OTHER_NAME} meldet sich seit 30 Min nicht. Weiter warten, oder Sparring pausieren?"* Bei "weiter": watch_loop erneut starten. |
 
-## Wichtige Verhaltensregeln
+### Silent Wait Mode
 
-- **Nicht den Inhalt bewerten** — der Skill befolgt nur den Prozess. Die Rollen in CHALLENGE.md geben vor, wie zu denken ist (radikal hinterfragen, integrieren ohne Kompromiss usw.). Verlass dich darauf.
-- **state.md ist die einzige Wahrheit** — vor jeder Aktion erneut lesen. Kein Caching im Kopf.
-- **Niemals Schritte überspringen** oder mehrere Schritte in einer Aktivierung erledigen. Pro Aufwachen genau ein Schritt, dann zurück in den Loop.
-- **Bei Konflikten**: Wenn state.md inkonsistent wirkt (z. B. Verlauf sagt Schritt 2 fertig, aber Datei fehlt), melde es dem User statt zu raten.
+Sobald ein Agent den Wait-Loop startet, bleibt er stumm, bis der Prozess endet.
+
+Erlaubte Reaktionen gibt es nur auf Exit 0 / WAKE, Exit 1 / DONE, Exit 2 / TIMEOUT. Während des Wartens: keine Zwischenberichte, keine Spekulation über den anderen Agenten, keine Plananalyse, keine erneute Zusammenfassung, keine UI-Kommentare wie "weiter wartend" oder "noch kein Wake".
+
+## Spezialmodi
+
+- **Pre-Check** (lohnt sich ein Sparring überhaupt? 3-Dim-Scoring + Vetos) → `references/precheck.md`
+- **Turbo** (INIT ohne Interview, AI-defaultet alles) → `references/turbo.md`
+- **RESIZE** (laufendes oder abgeschlossenes Sparring verlängern/verkürzen) → `references/resize.md`
+- **Measurement** (optional, pro Runde dialektischer Delta-Score gegen Baseline) → der `text-sparring-measurement`-Skill
+
+## Verhaltensregeln (Pflichtlektüre)
+
+Siehe `references/conventions.md` — vor der ersten Aktion einmal lesen. Kurzfassung: Pflichtabschluss nach jedem Schritt (Watch-Loop oder Final-Meldung), nicht den Inhalt bewerten, state.md ist einzige Wahrheit, nie Schritte überspringen, Silent Wait Mode, Hauptoutput und Übergabe trennen, Subagenten nur für Step-Arbeit, keine programmatische Messung/Sektionsextraktion während Step-Arbeit.
 
 ## Dateien in diesem Skill
 
 | Datei | Zweck |
 |-------|-------|
+| `SKILL.md` | Kern-Workflow: Modus-Erkennung, INIT, JOIN, Wait-Loop |
+| `references/gates.md` | Vier-Gates-Checkliste vor jeder Schreibaktion |
+| `references/turbo.md` | INIT ohne Interview |
+| `references/precheck.md` | Sparring-Fit-Bewertung vor Setup |
+| `references/resize.md` | Runden nachträglich ändern |
+| `references/conventions.md` | Verhaltensregeln und Verbote |
 | `templates/CHALLENGE.md.tpl` | Regelwerk + Rollen-Definitionen + Rotationsplan-Schema |
 | `templates/state.md.tpl` | Status-Datei mit Platzhaltern |
+| `templates/artifact.md.tpl` | Stabile Definition des gechallengten Artefakts |
 | `templates/claude_md_snippet.md` | Anhang für CLAUDE.md im Projekt |
-| `templates/chatgpt_codex_instructions.md` | Instructions für den zweiten Agent (Custom Instructions o. Ä.) |
+| `templates/chatgpt_codex_instructions.md` | Instructions für den zweiten Agent |
+| `templates/step_context.md.tpl` | Vorlage für isolierte Subagent-Step-Kontexte |
 | `templates/watch_loop.sh` | Bash-Polling-Script, pure POSIX |
-| `templates/round_artifact.md.tpl` | (Reserve, derzeit ungenutzt — Ausgangstext wird direkt kopiert) |
+| `templates/precheck_rubric.md` | 3-Dim-Rubric für Pre-Check, inkl. Vetos und Größen-Cap |
+| `templates/precheck_context.md.tpl` | Vorlage für inline Pre-Check der Hauptsession |
 
-Platzhalter in den Templates haben die Form `{NAME}` und werden beim Scaffolding ersetzt.
+Für die optionale Qualitätsmessung siehe den Sibling-Skill **`text-sparring-measurement`**.
