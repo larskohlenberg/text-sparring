@@ -52,20 +52,23 @@ Vor jedem Output vier Prüfungen durchlaufen (Role, Input, Output, Execution-Mod
 
 Beispiel: *"**Welches Artefakt?** — Ich schlage `README.md` vor. Begründung: das ist die einzige Markdown-Datei im Root und sieht nach dem Hauptartefakt aus. Passt das, oder soll es etwas anderes sein?"*
 
-Die zehn Fragen:
+Fünf Pflichtfragen — der Rest kommt aus Smart-Defaults und Projekt-Scan, die du in der Zusammenfassung am Ende zur Bestätigung mit-präsentierst:
 
-1. **Welches Artefakt soll gechallenged werden?** Schlage konkret eine Datei oder ein Verzeichnis vor, das du im Projekt siehst. Wenn mehrere plausibel sind, nenne 2–3 Kandidaten und empfiehl einen. Wenn nichts Naheliegendes da ist, frag offen nach einem Pfad.
+1. **Welches Artefakt soll gechallenged werden?** Schlage konkret eine Datei oder ein Verzeichnis vor, das du im Projekt siehst. Mehrere Kandidaten → nenne 2–3 und empfiehl einen. Nichts Naheliegendes → offen nach einem Pfad fragen.
 2. **Wie soll dieses Sparring heißen?** Leite einen Slug aus dem Artefakt-Basename ab (z. B. `draft.md` → `draft`). Bei Kollision unter `sparring/` automatisch `-v2`, `-v3` anhängen. Normalisiere: nur Kleinbuchstaben, Ziffern, Bindestriche. Im weiteren Verlauf heißt dieser Slug `<NAME>`.
-3. **Welche Projektkontext-Dateien gelten?** Scanne nach Style-Guides, Redaktionsplänen, Briefings, Tone-of-Voice-Dokumenten (Suchmuster DE/EN: `*redaktionsplan*`, `*editorial*`, `*style[-_ ]guide*`, `*styleguide*`, `*briefing*`, `*brand[-_ ]voice*`, `*tone[-_ ]of[-_ ]voice*`, `*content[-_ ]strategy*`, `*personas*`, `*messaging*`, `*positioning*`, plus typspezifisch). Schlage gefundene Dateien als Liste relativer Pfade vor, jeweils mit halbsatziger Begründung. Default leer, wenn nichts gefunden — nicht raten. Diese werden in `artifact.md` unter `Projektkontext` als **referenzierte** Pfade eingetragen (nicht kopiert).
-4. **Welches zweite Tool kommt rein?** Default `Codex CLI` oder `andere Claude Code Session` (vollautonom, Wait-Loop funktioniert). `ChatGPT (Web)` nur, wenn der User explizit kein lokales Tool hat. Frag dann nach dem Namen, wie er später in `state.md` stehen soll (z. B. "Codex", "GPT-5").
-5. **Mein eigener Name im Sparring?** Default `Claude`.
-6. **Sparring-Typ?** Schlage konkret einen der vier Typen vor (`Text`, `Campaign`, `Skill`, `Code`) basierend auf Artefakt: README/Essay → `Text`, Post-Sammlung → `Campaign`, SKILL.md mit Templates → `Skill`, Quellcode → `Code`. Bei Unklarheit `Auto`.
-7. **Wie viele Runden?** Schnelltest → `3`, realer Verbesserungsdurchlauf → `5`, tiefe Schärfung → `10`. Begründung soll auf Artefaktgröße und User-Ziel basieren.
-8. **Ausführungsmodus?** Default `Subagent`, wenn die Umgebung Subagents erkennbar unterstützt; sonst `Inline`. `Auto` nur bei Unsicherheit. Subagent isoliert Step-Kontexte sauberer und vermeidet Rollenvermischung.
-9. **Subagent-Qualität?** Default `Inherit` (keine unnötigen Overrides). `High` oder `Role-based` (These Balanced, Antithese+Synthese High) bei besonders wichtigen Artefakten.
-10. **Messung aktivieren?** Default `Off`. Bei `On` siehe der `text-sparring-measurement`-Skill — kostet bei 5 Runden ca. 11 zusätzliche Evaluator-Subagent-Aufrufe. Bei `On` Folgefrage nach `Measurement-Qualität` (Default `High`).
+3. **Welches zweite Tool kommt rein?** Default `Codex CLI` oder `andere Claude Code Session` (vollautonom, Wait-Loop funktioniert). `ChatGPT (Web)` nur, wenn der User explizit kein lokales Tool hat. Frag dann nach dem Namen, wie er später in `state.md` stehen soll (z. B. "Codex", "GPT-5").
+4. **Wie viele Runden?** Schnelltest → `3`, realer Verbesserungsdurchlauf → `5`, tiefe Schärfung → `10`. Begründung soll auf Artefaktgröße und User-Ziel basieren.
+5. **Ausführungsmodus?** Default `Subagent`, wenn die Umgebung Subagents erkennbar unterstützt; sonst `Inline`. `Auto` nur bei Unsicherheit. Subagent isoliert Step-Kontexte sauberer.
 
-Nach allen 10 Antworten fasse die Konfiguration in 4–6 Zeilen zusammen und hol dir ein finales "Los" vom User, bevor du das Scaffolding anlegst.
+Smart-Defaults (in der Zusammenfassung zur Bestätigung zeigen, nicht einzeln fragen):
+
+- **Mein Name im Sparring** → `Claude`
+- **Sparring-Typ** → aus Artefakt abgeleitet: README/Essay → `Text`, Post-Sammlung → `Campaign`, SKILL.md mit Templates → `Skill`, Quellcode → `Code`, sonst `Auto`
+- **Subagent-Qualität** → `Inherit`
+- **Measurement** → `Off` (für `On` siehe Sibling-Skill `text-sparring-measurement`; aktivieren nur, wenn der User explizit Messung anfordert)
+- **Projektkontext-Dateien** → automatischer Scan nach Style-Guides, Redaktionsplänen, Briefings, Tone-of-Voice (Suchmuster DE/EN: `*redaktionsplan*`, `*editorial*`, `*style[-_ ]guide*`, `*styleguide*`, `*briefing*`, `*brand[-_ ]voice*`, `*tone[-_ ]of[-_ ]voice*`, `*content[-_ ]strategy*`, `*personas*`, `*messaging*`, `*positioning*`). Gefundene Dateien als Liste in der Zusammenfassung zeigen, User streicht oder ergänzt. Default leer bei Nichtfund — nicht raten. Werden in `artifact.md` als **referenzierte** Pfade eingetragen (nicht kopiert).
+
+Nach den 5 Antworten fasse die komplette Konfiguration (5 Antworten + alle Defaults) in 6–8 Zeilen zusammen und hol dir ein finales "Los" vom User, bevor du das Scaffolding anlegst. Der User kann jeden Default in dieser Zusammenfassung noch korrigieren.
 
 ### Schritt 2: Scaffolding anlegen
 
