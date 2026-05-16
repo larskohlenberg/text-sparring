@@ -28,6 +28,10 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der
 
 **Silent Wait Mode**: Während ein Agent im Wait-Loop ist, bleibt er stumm. Er schreibt keine Zwischenberichte oder Spekulationen, sondern reagiert erst wieder auf WAKE, DONE oder TIMEOUT.
 
+**Pre-Check-Modus**: Vor dem INIT kannst du das Artefakt auf Sparring-Eignung prüfen lassen. Der Skill bewertet drei Dimensionen (Headroom, Konfliktfläche, Zielklarheit) auf einer 1–5-Skala und empfiehlt 0–10 Runden. Absolute Vetos (kein lesbares Artefakt, kein Zielzustand erkennbar) führen zur Empfehlung 0 Runden. Der Turbo-Modus liest die Pre-Check-Empfehlung als Default für die Rundenzahl ein.
+
+**Opt-in Qualitätsmessung**: Wenn Messung aktiviert ist (im INIT-Interview oder per Trigger-Phrase *"mit Messung"*), erzeugt ein Evaluator-Subagent nach jedem Schritt Messdaten in `MEASUREMENT.md`. Vier rubrikspezifische Profile je nach Sparring-Typ (Text, Campaign, Skill, Code), 5 Dimensionen pro Profil auf 1–5-Skala. Baseline am Artefaktstart, Round-Delta pro Runde, kumulative Kurve am Ende. Default: ausgeschaltet.
+
 ## Was das Besondere ist
 
 - **Harness-agnostisch**: Funktioniert mit lokalen Agenten, die Dateizugriff haben, und semi-manuell auch mit webbasierten Chat-Tools.
@@ -133,6 +137,10 @@ Der Skill triggert auf eine breite Palette von Formulierungen:
 
 **EN**: `set up a text sparring`, `let two agents spar on this`, `join the running sparring`
 
+**Pre-Check**: `pre-check`, `sparring-check`, `lohnt sich das Sparring`, `sparring fit`, `vor dem Start prüfen`, `is this worth sparring`
+
+**Messung**: `mit Messung`, `Messung einschalten`, `measure quality`, `dialektische Qualitätsmessung`
+
 ## Konfiguration
 
 Standard-Werte im Skill (können in `state.md` pro Projekt überschrieben werden):
@@ -144,6 +152,7 @@ Standard-Werte im Skill (können in `state.md` pro Projekt überschrieben werden
 | Anzahl Runden | `10` | Wählbar von 1 bis 10 |
 | `Sparring-Typ` | `Auto` | `Auto`, `Text`, `Campaign`, `Skill` oder `Code`; wird in `state.md` gespeichert |
 | `Ausführungsmodus` | `Auto` | `Auto`, `Subagent` oder `Inline`; wird in `state.md` gespeichert |
+| `Messung` | `Aus` | Opt-in Qualitätsmessung: `Aus` oder `An`; Aktivierung im INIT-Interview oder per Trigger-Phrase |
 
 ### Artefakte
 
