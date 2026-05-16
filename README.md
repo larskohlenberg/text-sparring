@@ -28,9 +28,9 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der
 
 **Silent Wait Mode**: Während ein Agent im Wait-Loop ist, bleibt er stumm. Er schreibt keine Zwischenberichte oder Spekulationen, sondern reagiert erst wieder auf WAKE, DONE oder TIMEOUT.
 
-**Pre-Check-Modus**: Vor dem INIT kannst du das Artefakt auf Sparring-Eignung prüfen lassen. Der Skill bewertet drei Dimensionen (Headroom, Konfliktfläche, Zielklarheit) auf einer 1–5-Skala und empfiehlt 0–10 Runden. Absolute Vetos (kein lesbares Artefakt, kein Zielzustand erkennbar) führen zur Empfehlung 0 Runden. Der Turbo-Modus liest die Pre-Check-Empfehlung als Default für die Rundenzahl ein.
+**Pre-Check-Modus**: Vor dem INIT kannst du das Artefakt auf Sparring-Eignung prüfen lassen. Der Skill bewertet drei Dimensionen (Headroom, Konfliktfläche, Zielklarheit) auf einer 0/1/2-Skala (Max-Score 6/6) und empfiehlt 0–10 Runden, gedeckelt durch einen Größen-Cap. Absolute Vetos (kein lesbares Artefakt, kein Zielzustand erkennbar) führen zur Empfehlung 0 Runden. Der Turbo-Modus liest die Pre-Check-Empfehlung als Default für die Rundenzahl ein.
 
-**Opt-in Qualitätsmessung (separater Skill)**: Die optionale dialektische Qualitätsmessung lebt ab v0.3.0 im Sibling-Skill **`text-sparring-measurement`** (eigenes Bundle in `dist/text-sparring-measurement.skill`). Wenn aktiviert, erzeugt ein Evaluator-Subagent nach jedem Schritt Messdaten in `MEASUREMENT.md`. Vier rubrikspezifische Profile je nach Sparring-Typ (Text, Campaign, Skill, Code), 5 Dimensionen pro Profil auf 1–5-Skala. Baseline am Artefaktstart, Round-Delta pro Runde, kumulative Kurve am Ende. Default: ausgeschaltet. Wer Sparring ohne Messung will, braucht den Measurement-Skill nicht zu installieren.
+**Opt-in Qualitätsmessung (separater Skill)**: Die optionale dialektische Qualitätsmessung lebt im Sibling-Skill **`text-sparring-measurement`** (eigenes Bundle in `dist/text-sparring-measurement.skill`). Wenn aktiviert, erzeugt ein Evaluator-Subagent nach jedem Schritt Messdaten in `MEASUREMENT.md`. Vier rubrikspezifische Profile je nach Sparring-Typ (Text, Campaign, Skill, Code), 5 Dimensionen pro Profil auf 1–5-Skala. Baseline am Artefaktstart, Round-Delta pro Runde, kumulative Kurve am Ende. Default: ausgeschaltet. Wer Sparring ohne Messung will, braucht den Measurement-Skill nicht zu installieren.
 
 ## Was das Besondere ist
 
@@ -133,15 +133,19 @@ Du kannst auf dasselbe Artefakt mehrere Sparrings legen (z. B. `readme-v1`, `rea
 
 ## Trigger-Phrasen
 
-Der Skill triggert auf eine breite Palette von Formulierungen:
+Der Skill triggert auf eine breite Palette von Formulierungen.
 
-**DE**: `Text-Sparring starten`, `lass zwei Agenten meinen Text schärfen`, `dialektischer Loop`, `Steig ins Sparring ein`, `Multi-Agent-Refinement`
+**Hauptskill `text-sparring`** (INIT + JOIN):
+- **DE**: `Text-Sparring starten`, `lass zwei Agenten meinen Text schärfen`, `dialektischer Loop`, `Steig ins Sparring ein`, `Multi-Agent-Refinement`
+- **EN**: `set up a text sparring`, `let two agents spar on this`, `join the running sparring`
 
-**EN**: `set up a text sparring`, `let two agents spar on this`, `join the running sparring`
+**Turbo-Modus** (INIT ohne Interview): `Turbo-Modus`, `Schnellstart`, `ohne Fragen`, `auto-init`, `quick`
 
 **Pre-Check**: `pre-check`, `sparring-check`, `lohnt sich das Sparring`, `sparring fit`, `vor dem Start prüfen`, `is this worth sparring`
 
-**Messung**: `mit Messung`, `Messung einschalten`, `measure quality`, `dialektische Qualitätsmessung`
+**RESIZE** (laufendes oder abgeschlossenes Sparring verlängern/verkürzen): `verlängere Sparring <NAME> um X Runden`, `erweitere auf X Runden`, `extend by X`, `verkürze auf X Runden`, `kürze um X Runden`, `nach Runde X beenden`, `shorten to X`
+
+**Sibling-Skill `text-sparring-measurement`** (optionale Qualitätsmessung — eigene Aktivierung, nicht der Hauptskill): `mit Messung`, `Messung einschalten`, `with measurement`, `measure quality`, `Baseline-Score`, `Round-Delta`, `dialektische Qualitätsmessung`
 
 ## Konfiguration
 
@@ -154,7 +158,7 @@ Standard-Werte im Skill (können in `state.md` pro Projekt überschrieben werden
 | Anzahl Runden | `10` | Wählbar von 1 bis 10 |
 | `Sparring-Typ` | `Auto` | `Auto`, `Text`, `Campaign`, `Skill` oder `Code`; wird in `state.md` gespeichert |
 | `Ausführungsmodus` | `Auto` | `Auto`, `Subagent` oder `Inline`; wird in `state.md` gespeichert |
-| `Messung` | `Aus` | Opt-in Qualitätsmessung: `Aus` oder `An`; Aktivierung im INIT-Interview oder per Trigger-Phrase |
+| `Messung` | `Aus` | Opt-in Qualitätsmessung über den Sibling-Skill `text-sparring-measurement`: `Aus` oder `An`; Aktivierung per Trigger-Phrase oder explizit beim INIT |
 
 ### Artefakte
 
@@ -196,9 +200,8 @@ Keine zusätzlichen Tools nötig. Keine Python-Dependencies. Kein `brew install`
 
 ## Erweiterungs-Ideen
 
-Aktuell fokussiert auf **Texte**. Mögliche Erweiterungen:
+Mögliche Erweiterungen:
 
-- **Code-Sparring**: Rollen-Definitionen für Refactoring-Reviews
 - **Image-Prompt-Sparring**: Iterative Verbesserung von Bildgenerierungs-Prompts
 - **Erweiterte Rundenzahl**: 20+ Runden mit wiederholbarem oder neu balanciertem Rotationsplan
 - **Intelligentes Exit-Kriterium**: Stopp wenn Antithese keinen substanziellen Punkt mehr findet
