@@ -1,6 +1,11 @@
+---
+name: text-sparring-measurement
+description: Optionale dialektische Qualitätsmessung für ein laufendes oder neu aufzusetzendes Text-Sparring. Triggert auf "mit Messung", "with measurement", "mit Qualitätsmessung", "Sparring messen", "Baseline-Score", "Round-Delta", oder wenn in `sparring/<NAME>/state.md` `Measurement: on` steht und ein Schritt eine Baseline- oder Synthese-Messung anstoßen muss. Erweitert die text-sparring-Skill; ohne diese ist sie nicht eigenständig nutzbar.
+---
+
 # Measurement (dialektische Qualitätsmessung)
 
-Diese Datei beschreibt die optionale Qualitätsmessung pro Sparring. Wird nur gelesen, wenn `Measurement: on` in `state.md` steht.
+Diese Skill ergänzt `text-sparring` um eine optionale Qualitätsmessung. Wird nur aktiviert, wenn `Measurement: on` in `sparring/<NAME>/state.md` steht oder der User explizit Messung anfordert.
 
 ## Worum es geht
 
@@ -22,7 +27,7 @@ Lasse einen neutralen Evaluator-Subagent eine einmalige Eingangs-Bewertung des O
    - `{MEASUREMENT_TYPE_LABEL}` = `Baseline`
    - `{SPARRING_NAME}`, `{SPARRING_PATH}` = entsprechend
    - `{RESOLVED_SPARRING_TYPE}`, `{ARTIFACT_TYPE}` = aus state.md
-   - `{RUBRIC_PATH}` = die gewählte Rubric (z. B. `text-sparring/templates/measurement_rubric_text.md`)
+   - `{RUBRIC_PATH}` = die gewählte Rubric (z. B. `text-sparring-measurement/templates/measurement_rubric_text.md`)
    - `{INPUT_FILES}` = bei `file`: `sparring/<NAME>/rounds/round_01/artifact.md` plus `sparring/<NAME>/artifact.md`; bei `directory`: `sparring/<NAME>/rounds/round_01/artifact/` plus `sparring/<NAME>/artifact.md`
    - `{INPUT_ARTIFACT_LABEL}` = `Original (rounds/round_01/artifact)`
    - `{OUTPUT_FILE}` = `sparring/<NAME>/rounds/round_01/measurement_baseline.md`

@@ -63,7 +63,7 @@ Die zehn Fragen:
 7. **Wie viele Runden?** Schnelltest → `3`, realer Verbesserungsdurchlauf → `5`, tiefe Schärfung → `10`. Begründung soll auf Artefaktgröße und User-Ziel basieren.
 8. **Ausführungsmodus?** Default `Subagent`, wenn die Umgebung Subagents erkennbar unterstützt; sonst `Inline`. `Auto` nur bei Unsicherheit. Subagent isoliert Step-Kontexte sauberer und vermeidet Rollenvermischung.
 9. **Subagent-Qualität?** Default `Inherit` (keine unnötigen Overrides). `High` oder `Role-based` (These Balanced, Antithese+Synthese High) bei besonders wichtigen Artefakten.
-10. **Messung aktivieren?** Default `Off`. Bei `On` siehe `references/measurement.md` — kostet bei 5 Runden ca. 11 zusätzliche Evaluator-Subagent-Aufrufe. Bei `On` Folgefrage nach `Measurement-Qualität` (Default `High`).
+10. **Messung aktivieren?** Default `Off`. Bei `On` siehe der `text-sparring-measurement`-Skill — kostet bei 5 Runden ca. 11 zusätzliche Evaluator-Subagent-Aufrufe. Bei `On` Folgefrage nach `Measurement-Qualität` (Default `High`).
 
 Nach allen 10 Antworten fasse die Konfiguration in 4–6 Zeilen zusammen und hol dir ein finales "Los" vom User, bevor du das Scaffolding anlegst.
 
@@ -126,7 +126,7 @@ Bei weniger als 10 Runden gilt nur der Präfix bis zur gewählten Gesamtrundenza
 
 ### Schritt 4.5: Baseline-Measurement (nur bei `Measurement: on`)
 
-Bei `Measurement: off` überspringen. Bei `Measurement: on` siehe `references/measurement.md`, Abschnitt "Baseline" — vor Schritt 5 ausführen.
+Bei `Measurement: off` überspringen. Bei `Measurement: on` siehe der `text-sparring-measurement`-Skill, Abschnitt "Baseline" — vor Schritt 5 ausführen.
 
 ### Schritt 5: Schritt 1 (These der Runde 1) erledigen
 
@@ -197,7 +197,7 @@ Befolge dabei zwingend die Rollen-Definitionen aus `sparring/<NAME>/CHALLENGE.md
 
 ### Schritt 2.5: Measurement nach Synthese (nur bei `Measurement: on` UND erledigter Synthese)
 
-Bei `Measurement: off` ODER der gerade erledigte Step war nicht die Synthese: überspringen. Sonst siehe `references/measurement.md`, Abschnitt "Nach Synthese" — vor Schritt 3 ausführen.
+Bei `Measurement: off` ODER der gerade erledigte Step war nicht die Synthese: überspringen. Sonst siehe der `text-sparring-measurement`-Skill, Abschnitt "Nach Synthese" — vor Schritt 3 ausführen.
 
 ### Schritt 3: State und ggf. neue Runde aktualisieren
 
@@ -214,7 +214,7 @@ Alle Pfade unten relativ zu `sparring/<NAME>/`.
   - Setze `state.md`-Status auf `completed`
   - Bei `file`: Kopiere `rounds/round_NN/step_3_synthesis.md` → `sparring/<NAME>/FINAL_ARTIFACT.md`
   - Bei `directory`: Kopiere `rounds/round_NN/step_3_synthesis/` → `sparring/<NAME>/FINAL_ARTIFACT/`
-  - **Bei `Measurement: on`**: Kopiere zusätzlich `rounds/round_NN/measurement_cumulative.md` → `sparring/<NAME>/MEASUREMENT.md` (siehe `references/measurement.md`).
+  - **Bei `Measurement: on`**: Kopiere zusätzlich `rounds/round_NN/measurement_cumulative.md` → `sparring/<NAME>/MEASUREMENT.md` (siehe der `text-sparring-measurement`-Skill).
 
 ### Schritt 4: Wait-Loop starten
 
@@ -243,7 +243,7 @@ Erlaubte Reaktionen gibt es nur auf Exit 0 / WAKE, Exit 1 / DONE, Exit 2 / TIMEO
 - **Pre-Check** (lohnt sich ein Sparring überhaupt? 3-Dim-Scoring + Vetos) → `references/precheck.md`
 - **Turbo** (INIT ohne Interview, AI-defaultet alles) → `references/turbo.md`
 - **RESIZE** (laufendes oder abgeschlossenes Sparring verlängern/verkürzen) → `references/resize.md`
-- **Measurement** (optional, pro Runde dialektischer Delta-Score gegen Baseline) → `references/measurement.md`
+- **Measurement** (optional, pro Runde dialektischer Delta-Score gegen Baseline) → der `text-sparring-measurement`-Skill
 
 ## Verhaltensregeln (Pflichtlektüre)
 
@@ -258,7 +258,6 @@ Siehe `references/conventions.md` — vor der ersten Aktion einmal lesen. Kurzfa
 | `references/turbo.md` | INIT ohne Interview |
 | `references/precheck.md` | Sparring-Fit-Bewertung vor Setup |
 | `references/resize.md` | Runden nachträglich ändern |
-| `references/measurement.md` | Optionale dialektische Qualitätsmessung |
 | `references/conventions.md` | Verhaltensregeln und Verbote |
 | `templates/CHALLENGE.md.tpl` | Regelwerk + Rollen-Definitionen + Rotationsplan-Schema |
 | `templates/state.md.tpl` | Status-Datei mit Platzhaltern |
@@ -267,8 +266,7 @@ Siehe `references/conventions.md` — vor der ersten Aktion einmal lesen. Kurzfa
 | `templates/chatgpt_codex_instructions.md` | Instructions für den zweiten Agent |
 | `templates/step_context.md.tpl` | Vorlage für isolierte Subagent-Step-Kontexte |
 | `templates/watch_loop.sh` | Bash-Polling-Script, pure POSIX |
-| `templates/measurement_context.md.tpl` | Vorlage für isolierten Evaluator-Subagent-Kontext |
 | `templates/precheck_rubric.md` | 3-Dim-Rubric für Pre-Check, inkl. Vetos und Größen-Cap |
 | `templates/precheck_context.md.tpl` | Vorlage für inline Pre-Check der Hauptsession |
-| `templates/measurement_rubric_*.md` | 5-Dim-Rubrics für Sparring-Typen Text/Campaign/Skill/Code |
-| `templates/MEASUREMENT.md.tpl` | Referenz-Layout für finalen Mess-Report |
+
+Für die optionale Qualitätsmessung siehe den Sibling-Skill **`text-sparring-measurement`**.

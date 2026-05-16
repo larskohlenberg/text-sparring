@@ -8,7 +8,7 @@ Wenn die Trigger-Phrase des Users Worte wie **"Turbo"**, **"Schnellstart"**, **"
 3. Wenn die Trigger-Phrase einen konkreten Artefaktpfad enthält, nimm den; sonst leite ihn aus dem Projektkontext ab.
 4. **Bei `precheck_rounds == 0`** (Sparring nicht empfohlen) UND keine User-Zahl in der Trigger-Phrase: Gib dem User die Empfehlung in 2–3 Zeilen (Score + Veto-Begründung + Pfad zur `precheck.md`) und frage einmal nach: *"Trotzdem starten? Wenn ja, mit wievielen Runden? (Empfehlung im Skipping-Fall: 3, oder Abbruch)"*. Bei Abbruch: stoppe, kein Scaffolding. Bei Bestätigung mit Rundenzahl: weiter mit dieser Zahl statt `precheck_rounds`.
 5. Fasse die gewählte Konfiguration in 4–6 Zeilen zusammen und sage dem User in einem Satz, dass du jetzt loslegst.
-6. Lege direkt das Scaffolding an, führe (falls `Measurement: on`) Baseline-Measurement aus (siehe `references/measurement.md`), und erledige Schritt 1 (These) — ohne weitere Rückfrage.
+6. Lege direkt das Scaffolding an, führe (falls `Measurement: on`) Baseline-Measurement aus (siehe Sibling-Skill `text-sparring-measurement`), und erledige Schritt 1 (These) — ohne weitere Rückfrage.
 7. Gib am Ende den Handover-Prompt für den zweiten Agenten aus (siehe Haupt-SKILL.md INIT Schritt 7) und starte den Wait-Loop.
 
 **Ausnahme:** Wenn du für einen einzelnen Punkt keinen vertretbaren Default ableiten kannst (z. B. mehrere gleichwertige Artefakt-Kandidaten und keiner in der Trigger-Phrase, oder der Name des zweiten Tools ist nicht erkennbar), frag **nur diese eine Frage** zurück und mach dann mit dem Rest direkt weiter. Kein vollständiges Interview.
