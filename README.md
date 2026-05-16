@@ -30,7 +30,7 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der
 
 **Pre-Check-Modus**: Vor dem INIT kannst du das Artefakt auf Sparring-Eignung prüfen lassen. Der Skill bewertet drei Dimensionen (Headroom, Konfliktfläche, Zielklarheit) auf einer 1–5-Skala und empfiehlt 0–10 Runden. Absolute Vetos (kein lesbares Artefakt, kein Zielzustand erkennbar) führen zur Empfehlung 0 Runden. Der Turbo-Modus liest die Pre-Check-Empfehlung als Default für die Rundenzahl ein.
 
-**Opt-in Qualitätsmessung**: Wenn Messung aktiviert ist (im INIT-Interview oder per Trigger-Phrase *"mit Messung"*), erzeugt ein Evaluator-Subagent nach jedem Schritt Messdaten in `MEASUREMENT.md`. Vier rubrikspezifische Profile je nach Sparring-Typ (Text, Campaign, Skill, Code), 5 Dimensionen pro Profil auf 1–5-Skala. Baseline am Artefaktstart, Round-Delta pro Runde, kumulative Kurve am Ende. Default: ausgeschaltet.
+**Opt-in Qualitätsmessung (separater Skill)**: Die optionale dialektische Qualitätsmessung lebt ab v0.3.0 im Sibling-Skill **`text-sparring-measurement`** (eigenes Bundle in `dist/text-sparring-measurement.skill`). Wenn aktiviert, erzeugt ein Evaluator-Subagent nach jedem Schritt Messdaten in `MEASUREMENT.md`. Vier rubrikspezifische Profile je nach Sparring-Typ (Text, Campaign, Skill, Code), 5 Dimensionen pro Profil auf 1–5-Skala. Baseline am Artefaktstart, Round-Delta pro Runde, kumulative Kurve am Ende. Default: ausgeschaltet. Wer Sparring ohne Messung will, braucht den Measurement-Skill nicht zu installieren.
 
 ## Was das Besondere ist
 
@@ -77,9 +77,10 @@ Der Sparring-Name wird im INIT-Interview gewählt und in `state.md` als `Sparrin
 
 ### Als Skill-Bundle
 
-1. Lade das gepackte Bundle: [`dist/text-sparring.skill`](dist/text-sparring.skill)
-2. Importiere es in eine Skill-fähige Agent-Umgebung.
-3. Starte das Sparring in einem Projekt, auf dessen Dateien der Agent zugreifen darf.
+1. Lade das Haupt-Bundle: [`dist/text-sparring.skill`](dist/text-sparring.skill)
+2. Optional für Qualitätsmessung: [`dist/text-sparring-measurement.skill`](dist/text-sparring-measurement.skill) — eigenständig importierbar.
+3. Importiere die Bundles in eine Skill-fähige Agent-Umgebung.
+4. Starte das Sparring in einem Projekt, auf dessen Dateien der Agent zugreifen darf.
 
 ### Direkt aus dem Source-Verzeichnis
 
@@ -100,7 +101,8 @@ Du in Agent A: "Starte ein Text-Sparring über README.md"
 ```
 
 Agent A:
-- Fragt nach: Artefaktpfad, Sparring-Name, zweiter Agent (Name + Tool), dein Name im Sparring, Sparring-Typ, Rundenzahl und Ausführungsmodus
+- Stellt **fünf Pflichtfragen** (Artefakt, Sparring-Name, zweites Tool, Rundenzahl, Ausführungsmodus) und schlägt für jede einen konkreten Default vor
+- Errät den Rest aus Projekt-Scan und Smart-Defaults (eigener Name, Sparring-Typ, Subagent-Qualität, Projektkontext-Dateien, Measurement) und zeigt ihn in der Zusammenfassung zur Bestätigung
 - Legt `sparring/<NAME>/` an und erzeugt die Projektdateien für das Sparring
 - Ergänzt, falls passend, eine Tool-spezifische Startanweisung
 - Erledigt **Schritt 1 (These) in Runde 1** plus Übergabeimpuls
