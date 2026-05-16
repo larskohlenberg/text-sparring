@@ -7,6 +7,8 @@ Versionierung nach [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-16
+
 ### Added
 - **Pre-Check-Modus (Sparring-Fit-Einschätzung vor dem Start):** Neuer Modus neben INIT, JOIN und RESIZE. Trigger-Phrasen wie *"pre-check"*, *"sparring-check"*, *"lohnt sich das Sparring"*, *"sparring fit"*, *"vor dem Start prüfen"* rufen einen Evaluator-Agenten auf, der das Artefakt auf Sparring-Eignung bewertet. Drei Dimensionen werden auf einer 1–5-Skala bewertet: **Headroom** (Ist noch Entwicklungspotenzial da?), **Konfliktfläche** (Gibt es angreifbare Stellen?), **Zielklarheit** (Ist der gewünschte Zielzustand klar genug?). Absolute Vetos (z. B. kein lesbares Artefakt, kein Projektkontext) stoppen mit Empfehlung 0 Runden. Ohne Veto ergibt sich eine Empfehlung von 1–10 Runden. Der Turbo-Modus liest das Pre-Check-Ergebnis (`precheck_rounds`) als Default für die Rundenzahl ein. Ergebnis wird als `MEASUREMENT.md`-Vorläufer in `sparring/` abgelegt, falls schon ein Sparring-Ordner existiert.
 - **Opt-in dialektische Qualitätsmessung pro Runde:** Evaluator-Subagent nach jedem Schritt (Steps 2.5a und 2.5b) erzeugt Messdaten in `MEASUREMENT.md`. Vier Rubrik-Typen passend zum Sparring-Typ: **Text** (5 Dimensionen: Integrative Complexity, Argumentation, Idea Density, Klarheit, Constraint-Treue), **Campaign**, **Skill**, **Code** (je 5 Dimensionen auf 1–5-Skala). Baseline-Messung am Artefaktstart, Round-Delta nach jeder Runde, kumulative Gesamtkurve am Ende. Default: ausgeschaltet. Aktivierung im INIT-Interview oder per Trigger-Phrase *"mit Messung"*, *"Messung einschalten"*, *"measure quality"*.
