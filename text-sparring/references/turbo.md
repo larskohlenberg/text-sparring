@@ -1,6 +1,6 @@
 # Turbo-Modus
 
-Wenn die Trigger-Phrase des Users Worte wie **"Turbo"**, **"Schnellstart"**, **"ohne Fragen"**, **"auto"** oder **"quick"** im INIT-Kontext enthält (z. B. *"Starte ein Text-Sparring im Turbo-Modus über draft.md"*), überspringe das Interview komplett:
+Wenn die Trigger-Phrase des Users Worte wie **"Auto-Sparring"**, **"Autosparring"**, **"Turbo"**, **"Turbo-Modus"**, **"Schnellstart"**, **"ohne Fragen"**, **"auto-init"**, **"auto init"**, **"quickstart"** oder **"quick"** im INIT-Kontext enthält (z. B. *"Starte ein Text-Sparring im Turbo-Modus über draft.md"*), überspringe das Interview komplett. Das generische Wort **"auto"** allein ist kein Turbo-Signal:
 
 0. **Pre-Check ausführen** (inline, vor allem Weiteren): Führe Pre-Check-Modus Schritte 1, 2, **3**, 6, 7 aus (Artefakt parsen, Slug ableiten, **State-Konflikt-Check**, Sparring-Typ ableiten, `precheck.md` schreiben). State-Konflikt-Check (Schritt 3) bleibt auch im Turbo-Modus verbindlich — ein versehentlicher Turbo-Start in einem Projekt mit laufendem Sparring muss stoppen, nicht still kollidieren. Übersprungen wird nur Schritt 4 (Precheck-Existiert-Handling), weil Turbo eine ggf. existierende `precheck.md` beim Re-Run bewusst überschreibt. Lies die finale Empfehlung aus der erzeugten `precheck.md` und merke sie als `precheck_rounds`.
 1. Sieh dir das Projektverzeichnis an (wie im Interview beschrieben).

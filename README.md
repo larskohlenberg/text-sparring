@@ -136,10 +136,10 @@ Du kannst auf dasselbe Artefakt mehrere Sparrings legen (z. B. `readme-v1`, `rea
 Der Skill triggert auf eine breite Palette von Formulierungen.
 
 **Hauptskill `text-sparring`** (INIT + JOIN):
-- **DE**: `Text-Sparring starten`, `lass zwei Agenten meinen Text schärfen`, `dialektischer Loop`, `Steig ins Sparring ein`, `Multi-Agent-Refinement`
+- **DE**: `Text-Sparring starten`, `Auto-Sparring`, `Autosparring`, `Sparring über Dateien/Ordner`, `lass zwei Agenten meinen Text schärfen`, `dialektischer Loop`, `Steig ins Sparring ein`, `Multi-Agent-Refinement`
 - **EN**: `set up a text sparring`, `let two agents spar on this`, `join the running sparring`
 
-**Turbo-Modus** (INIT ohne Interview): `Turbo-Modus`, `Schnellstart`, `ohne Fragen`, `auto-init`, `quick`
+**Turbo-Modus** (INIT ohne Interview): `Auto-Sparring`, `Autosparring`, `Turbo-Modus`, `Schnellstart`, `ohne Fragen`, `auto-init`, `auto init`, `quickstart`, `quick`
 
 **Pre-Check**: `pre-check`, `sparring-check`, `lohnt sich das Sparring`, `sparring fit`, `vor dem Start prüfen`, `is this worth sparring`
 

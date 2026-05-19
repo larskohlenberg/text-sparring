@@ -1,6 +1,6 @@
 ---
 name: text-sparring
-description: Setze ein dialektisches Text-Sparring zwischen zwei AI-Agenten auf oder steige in ein laufendes ein — These → Antithese → Synthese über mehrere Runden. Triggert auf "starte ein Text-Sparring", "lass zwei Agenten meinen Text schärfen", "steig ins Sparring ein", "Multi-Agent-Refinement", sowie auf Turbo-, Pre-Check- und Resize-Varianten. Nicht für einfache Reviews oder Proofreading.
+description: Use when the user asks for Text-Sparring, Auto-Sparring, Autosparring, Sparring ueber Dateien/Ordner, two agents challenging work, or multi-agent refinement across rounds; also JOIN, Turbo, Pre-Check, and Resize variants. Not for simple reviews or proofreading.
 ---
 
 # Text Sparring
@@ -15,6 +15,8 @@ Diese Skill ist **Prozess-Orchestrierung**, keine kreative Exploration. Die Arbe
 
 Wenn andere Workflow-Skills (brainstorming, TDD, systematic-debugging, writing-plans usw.) sich beim Lesen der User-Phrase aufdrängen: das ist ein Mismatch zwischen ihrer Trigger-Logik und der Worker-Natur dieses Schritts. Folge dem Sparring-Workflow; andere Skills nur dann hinzuziehen, wenn der User sie im aktuellen Prompt **explizit** für diesen Schritt benennt.
 
+**Trigger-Pflicht:** Wenn der User ein `Sparring`, `Text-Sparring`, `Auto-Sparring`, `Autosparring`, `Sparring über Dateien/Ordner` oder mehrere Runden mit gegenseitigem Challengen verlangt, ist dies ein Sparring-Workflow. Dann darfst du **keine finale Analyse-Datei** oder andere Einzeldatei als Abkürzung schreiben. Du musst INIT/JOIN/RESIZE/Pre-Check wählen und die `sparring/<NAME>/`-Struktur mit `state.md`, `CHALLENGE.md`, Rundenordnern und Handover/Wait-Loop verwenden.
+
 ## Modus-Erkennung
 
 Erkenne den Modus automatisch aus Trigger-Phrase und Projektzustand:
@@ -23,7 +25,7 @@ Erkenne den Modus automatisch aus Trigger-Phrase und Projektzustand:
 |---|---|---|
 | Trigger enthält `pre-check`, `precheck`, `lohnt sich sparring` o.ä. | **Pre-Check** | `references/precheck.md` |
 | Trigger enthält Resize-Wörter (`verlängere`, `verkürze`, `extend`, `shorten`, `nach Runde X beenden` etc.) | **RESIZE** | `references/resize.md` |
-| Trigger enthält `Turbo`, `Schnellstart`, `ohne Fragen`, `auto`, `quick` | **INIT (Turbo)** | `references/turbo.md` |
+| Trigger enthält `Auto-Sparring`, `Autosparring`, `Turbo`, `Turbo-Modus`, `Schnellstart`, `ohne Fragen`, `auto-init`, `auto init`, `quickstart` oder `quick` | **INIT (Turbo)** | `references/turbo.md` |
 | Keine `sparring/*/state.md` vorhanden | **INIT** | unten |
 | Genau eine `sparring/*/state.md` mit Status ≠ `completed` | **JOIN** für genau dieses Sparring | unten |
 | Mehrere aktive `sparring/*/state.md` | Stoppen, liste aktive Sparrings (Name + Runde + wer dran ist), frage User. Bei explizitem Slug in Trigger: direkt nehmen. | — |
@@ -42,7 +44,7 @@ Vor jedem Output vier Prüfungen durchlaufen (Role, Input, Output, Execution-Mod
 
 ## INIT-Modus
 
-**Turbo-Variante:** Wenn die Trigger-Phrase Worte wie "Turbo", "Schnellstart", "ohne Fragen", "auto", "quick" enthält, folge `references/turbo.md` statt dem Interview unten.
+**Turbo-Variante:** Wenn die Trigger-Phrase Worte wie "Auto-Sparring", "Autosparring", "Turbo", "Turbo-Modus", "Schnellstart", "ohne Fragen", "auto-init", "auto init", "quickstart" oder "quick" enthält, folge `references/turbo.md` statt dem Interview unten.
 
 ### Schritt 1: Interview
 
