@@ -26,6 +26,7 @@ Erkenne den Modus automatisch aus Trigger-Phrase und Projektzustand:
 | Trigger enthält `pre-check`, `precheck`, `lohnt sich sparring` o.ä. | **Pre-Check** | `references/precheck.md` |
 | Trigger enthält Resize-Wörter (`verlängere`, `verkürze`, `extend`, `shorten`, `nach Runde X beenden` etc.) | **RESIZE** | `references/resize.md` |
 | Trigger enthält Resume-Wörter (`resume sparring`, `sparring fortsetzen`, `wieder aufnehmen`, `abgebrochen`, `context-limit`, `context limit`, `Session neu gestartet`) | **RESUME** | unten |
+| Trigger enthält New-Run-Intent (`neues Sparring`, `neuen Lauf`, `starte ein Text-Sparring`, `Text-Sparring starten`, `set up a text sparring`) | **INIT** für neues Sparring, auch wenn aktive Sparrings existieren | unten |
 | Trigger enthält `Auto-Sparring`, `Autosparring`, `Turbo`, `Turbo-Modus`, `Schnellstart`, `ohne Fragen`, `auto-init`, `auto init`, `quickstart` oder `quick` | **INIT (Turbo)** | `references/turbo.md` |
 | Keine `sparring/*/state.md` vorhanden | **INIT** | unten |
 | Genau eine `sparring/*/state.md` mit Status ≠ `completed` | **JOIN** für genau dieses Sparring | unten |
@@ -34,6 +35,8 @@ Erkenne den Modus automatisch aus Trigger-Phrase und Projektzustand:
 | Nur abgeschlossene Sparrings + INIT-Phrase | INIT für neues Sparring | unten |
 
 Pre-Check hat Vorrang vor allen anderen — er legt nur eine `precheck.md` an und kollidiert nicht mit laufendem State, prüft das aber explizit.
+
+**New-Run-Intent hat Vorrang vor JOIN.** Wenn der User ein neues Sparring starten will, blockieren bestehende aktive Sparrings den INIT-Modus nicht. Nutze aktive/abgeschlossene Sparrings nur für Kontext und Namensvergabe. Auch im Turbo-Modus dürfen aktive Sparrings ein neues Sparring nicht abbrechen. JOIN/RESUME greifen nur bei Einstiegs- oder Fortsetzungs-Triggern wie `Steig ein`, `weiter`, `resume`, `fortsetzen`, `wieder aufnehmen`.
 
 ### Notation
 
@@ -58,7 +61,7 @@ Beispiel: *"**Welches Artefakt?** — Ich schlage `README.md` vor. Begründung: 
 Fünf Pflichtfragen — der Rest kommt aus Smart-Defaults und Projekt-Scan, die du in der Zusammenfassung am Ende zur Bestätigung mit-präsentierst:
 
 1. **Welches Artefakt soll gechallenged werden?** Schlage konkret eine Datei oder ein Verzeichnis vor, das du im Projekt siehst. Mehrere Kandidaten → nenne 2–3 und empfiehl einen. Nichts Naheliegendes → offen nach einem Pfad fragen.
-2. **Wie soll dieses Sparring heißen?** Leite einen Slug aus dem Artefakt-Basename ab (z. B. `draft.md` → `draft`). Bei Kollision unter `sparring/` automatisch `-v2`, `-v3` anhängen. Normalisiere: nur Kleinbuchstaben, Ziffern, Bindestriche. Im weiteren Verlauf heißt dieser Slug `<NAME>`.
+2. **Wie soll dieses Sparring heißen?** Leite einen Slug aus dem Artefakt-Basename ab (z. B. `draft.md` → `draft`). Bei Kollision unter `sparring/` automatisch den nächsten freien Slug wählen (`-v2`, `-v3`, ...). Das gilt auch bei laufenden Sparrings und auch dann, wenn Artefakt oder Kontext identisch sind. Normalisiere: nur Kleinbuchstaben, Ziffern, Bindestriche. Im weiteren Verlauf heißt dieser Slug `<NAME>`.
 3. **Welches zweite Tool kommt rein?** Default `Codex CLI` oder `andere Claude Code Session` (vollautonom, Wait-Loop funktioniert). `ChatGPT (Web)` nur, wenn der User explizit kein lokales Tool hat. Frag dann nach dem Namen, wie er später in `state.md` stehen soll (z. B. "Codex", "GPT-5").
 4. **Wie viele Runden?** Schnelltest → `3`, realer Verbesserungsdurchlauf → `5`, tiefe Schärfung → `10`. Begründung soll auf Artefaktgröße und User-Ziel basieren.
 5. **Ausführungsmodus?** Default `Subagent`, wenn die Umgebung Subagents erkennbar unterstützt; sonst `Inline`. `Auto` nur bei Unsicherheit. Subagent isoliert Step-Kontexte sauberer.
@@ -95,7 +98,7 @@ Vorgehen:
 
 - Prüfe den Artefaktpfad: Datei → `Artifact-Typ: file`, Verzeichnis → `Artifact-Typ: directory`. Weder noch → erneut fragen.
 - Bei User-Wahl `Auto`: leite `Erkannter Sparring-Typ` aus Artefakt und Projektkontext ab.
-- Lege `sparring/<NAME>/` an. Existiert bereits: stoppe und frage den User.
+- Lege `sparring/<NAME>/` an. Existiert bereits: stoppe nicht, sondern erhöhe den Slug auf den nächsten freien Namen (`<NAME>-v2`, `<NAME>-v3`, ...), aktualisiere `<NAME>` in der Konfiguration und fahre fort. Bestehende aktive Sparrings blockieren INIT nicht.
 - Lies `templates/CHALLENGE.md.tpl`, ersetze Platzhalter (Agent-Namen, Gesamtrundenzahl, Rotationsplan, Sparring-Pfad), schreibe nach `sparring/<NAME>/CHALLENGE.md`.
 - Lies `templates/artifact.md.tpl`, befülle, schreibe nach `sparring/<NAME>/artifact.md`. `Initiale Kopie` zeigt auf `rounds/round_01/artifact.md` (bei file) bzw. `rounds/round_01/artifact/` (bei directory). Projektkontext-Pfade als Bulletliste eintragen (relativ vom Projekt-Root), bei keinen: `(keine)`.
 - Lies `templates/state.md.tpl`, befülle, schreibe nach `sparring/<NAME>/state.md`. Initialer Status: Runde 1, Schritt 1, dran ist der **Initiator** (du), Rolle **These**. Setze alle Felder inkl. `Measurement` und `Measurement-Qualität` (bei `Measurement: off` setze letzteres auf `-`).

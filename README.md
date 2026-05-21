@@ -75,6 +75,8 @@ dein-projekt/
 
 Der Sparring-Name wird im INIT-Interview gewählt und in `state.md` als `Sparring-Name` festgehalten. Bei mehreren aktiven Sparrings erkennt der JOIN-Modus automatisch das gemeinte; ist es mehrdeutig, fragt der Skill nach.
 
+Ein neues Sparring darf parallel zu bestehenden laufenden oder abgeschlossenen Sparrings starten. Start-Phrasen wie `neues Sparring`, `Text-Sparring starten` oder `Auto-Sparring über ...` erzeugen immer einen neuen Lauf; vorhandene `sparring/*/state.md` dienen nur zur Orientierung und Namensvergabe. Wenn der gewünschte Name schon existiert, wählt der Skill automatisch den nächsten freien Slug (`-v2`, `-v3`, ...).
+
 ## Installation
 
 ### Als Skill-Bundle
