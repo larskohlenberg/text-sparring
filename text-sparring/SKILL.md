@@ -1,6 +1,6 @@
 ---
 name: text-sparring
-description: Use when the user asks for Text-Sparring, Auto-Sparring, Autosparring, Sparring ueber Dateien/Ordner, two agents challenging work, or multi-agent refinement across rounds; also JOIN, Turbo, Pre-Check, and Resize variants. Not for simple reviews or proofreading.
+description: Use when the user asks for Text-Sparring, Auto-Sparring, Autosparring, Sparring ueber Dateien/Ordner, Resume Sparring after context-limit/session abort, two agents challenging work, or multi-agent refinement across rounds; also JOIN, Turbo, Pre-Check, and Resize variants. Not for simple reviews or proofreading.
 ---
 
 # Text Sparring
@@ -15,7 +15,7 @@ Diese Skill ist **Prozess-Orchestrierung**, keine kreative Exploration. Die Arbe
 
 Wenn andere Workflow-Skills (brainstorming, TDD, systematic-debugging, writing-plans usw.) sich beim Lesen der User-Phrase aufdrängen: das ist ein Mismatch zwischen ihrer Trigger-Logik und der Worker-Natur dieses Schritts. Folge dem Sparring-Workflow; andere Skills nur dann hinzuziehen, wenn der User sie im aktuellen Prompt **explizit** für diesen Schritt benennt.
 
-**Trigger-Pflicht:** Wenn der User ein `Sparring`, `Text-Sparring`, `Auto-Sparring`, `Autosparring`, `Sparring über Dateien/Ordner` oder mehrere Runden mit gegenseitigem Challengen verlangt, ist dies ein Sparring-Workflow. Dann darfst du **keine finale Analyse-Datei** oder andere Einzeldatei als Abkürzung schreiben. Du musst INIT/JOIN/RESIZE/Pre-Check wählen und die `sparring/<NAME>/`-Struktur mit `state.md`, `CHALLENGE.md`, Rundenordnern und Handover/Wait-Loop verwenden.
+**Trigger-Pflicht:** Wenn der User ein `Sparring`, `Text-Sparring`, `Auto-Sparring`, `Autosparring`, `Sparring über Dateien/Ordner`, `Resume Sparring`, `Sparring fortsetzen`, `Sparring wieder aufnehmen` oder mehrere Runden mit gegenseitigem Challengen verlangt, ist dies ein Sparring-Workflow. Dann darfst du **keine finale Analyse-Datei** oder andere Einzeldatei als Abkürzung schreiben. Du musst INIT/JOIN/RESIZE/Pre-Check wählen und die `sparring/<NAME>/`-Struktur mit `state.md`, `CHALLENGE.md`, Rundenordnern und Handover/Wait-Loop verwenden.
 
 ## Modus-Erkennung
 
@@ -25,6 +25,7 @@ Erkenne den Modus automatisch aus Trigger-Phrase und Projektzustand:
 |---|---|---|
 | Trigger enthält `pre-check`, `precheck`, `lohnt sich sparring` o.ä. | **Pre-Check** | `references/precheck.md` |
 | Trigger enthält Resize-Wörter (`verlängere`, `verkürze`, `extend`, `shorten`, `nach Runde X beenden` etc.) | **RESIZE** | `references/resize.md` |
+| Trigger enthält Resume-Wörter (`resume sparring`, `sparring fortsetzen`, `wieder aufnehmen`, `abgebrochen`, `context-limit`, `context limit`, `Session neu gestartet`) | **RESUME** | unten |
 | Trigger enthält `Auto-Sparring`, `Autosparring`, `Turbo`, `Turbo-Modus`, `Schnellstart`, `ohne Fragen`, `auto-init`, `auto init`, `quickstart` oder `quick` | **INIT (Turbo)** | `references/turbo.md` |
 | Keine `sparring/*/state.md` vorhanden | **INIT** | unten |
 | Genau eine `sparring/*/state.md` mit Status ≠ `completed` | **JOIN** für genau dieses Sparring | unten |
@@ -170,6 +171,49 @@ Setze die Platzhalter `{OTHER_NAME}`, `<NAME>` und `{PROJECT_PATH}` mit den konk
 Führe danach aus: `bash sparring/<NAME>/watch_loop.sh "{MY_NAME}"`.
 
 Ab Aufruf des Loops gilt Silent Wait Mode (siehe unten).
+
+## RESUME-Modus
+
+Für abgebrochene Sessions, Context-Limit, Neustart oder verlorenen Chatverlauf reicht ein kurzer Prompt wie:
+
+```text
+Resume Sparring
+```
+
+Der Agent rekonstruiert **nicht** aus dem Chatverlauf. `state.md` ist die einzige Wahrheit; alle nötigen Informationen liegen im Projektverzeichnis.
+
+### Schritt 1: Aktiven Lauf finden
+
+Scanne `sparring/*/state.md` nach Status ≠ `completed`.
+
+- **Genau eine aktive** `state.md`: nimm dieses Sparring automatisch.
+- **Mehrere aktive** Sparrings: liste Name, Runde, Schritt und `Dran:` aus jeder `state.md`; frage den User, welches fortgesetzt werden soll. Bei explizitem Slug im Prompt direkt nehmen.
+- **Keine aktive** `state.md`: melde, dass kein laufendes Sparring gefunden wurde. Wenn abgeschlossene Sparrings existieren, nenne sie knapp mit Pfad zu `FINAL_ARTIFACT`.
+
+### Schritt 2: Recovery-Check
+
+Lies `sparring/<NAME>/state.md`, `sparring/<NAME>/artifact.md` und `sparring/<NAME>/CHALLENGE.md`. Prüfe nur die Dateien, die für den aktuellen Schritt laut `state.md` zwingend gebraucht werden:
+
+- These: aktuelles `rounds/round_NN/artifact.md` bzw. `artifact/`, plus vorheriger `step_3_handoff.md` wenn `NN > 1`.
+- Antithese: aktuelles Artefakt, `step_1_thesis` und `step_1_handoff.md`.
+- Synthese: `step_1_thesis`, `step_2_antithesis.md` und `step_2_handoff.md`.
+
+Fehlt etwas oder widersprechen Verlauf und Dateien einander, stoppe und zeige eine kurze Recovery-Karte:
+
+```text
+Sparring: <NAME>
+State: Runde N, Schritt M, Dran: <AGENT>, Rolle: <ROLLE>
+Problem: <fehlende/inkonsistente Datei>
+Optionen: fehlende Datei nachreichen, Schritt manuell neu starten, oder state.md korrigieren.
+```
+
+Rate nicht und überspringe keinen Schritt.
+
+### Schritt 3: Fortsetzen
+
+- Wenn `Dran:` dein Agent-Name ist: gehe direkt zu **JOIN-Modus Schritt 2** und erledige genau den ausstehenden Schritt. Danach `state.md` aktualisieren und den Wait-Loop starten.
+- Wenn `Dran:` der bekannte andere Agent ist: starte direkt `bash sparring/<NAME>/watch_loop.sh "{MY_NAME}"`. Keine lange Zusammenfassung.
+- Wenn `Dran:` weder du noch der bekannte andere Agent ist: frage nach dem korrekten Agent-Namen oder nach manueller Korrektur von `state.md`.
 
 ## JOIN-Modus
 

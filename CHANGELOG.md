@@ -10,6 +10,7 @@ Versionierung nach [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 - **Auto-Sparring-Trigger gehärtet:** `Auto-Sparring`, `Autosparring` und `Sparring über Dateien/Ordner` sind jetzt explizite Hauptskill-Trigger. Der Skill verbietet bei angefordertem Sparring die Abkürzung in eine einzelne finale Analyse-Datei und muss stattdessen `sparring/<NAME>/` mit `state.md`, `CHALLENGE.md`, Rundenordnern, Handover und Wait-Loop anlegen.
 - **Turbo-Erkennung entschärft:** Das generische Wort `auto` triggert nicht mehr den Turbo-Modus. Turbo hört jetzt auf explizite Phrasen wie `Auto-Sparring`, `Autosparring`, `auto-init`, `auto init`, `Turbo-Modus`, `Schnellstart`, `ohne Fragen`, `quickstart` oder `quick`.
+- **Resume-Modus nach Context-Limit:** Kurze Prompts wie `Resume Sparring`, `Sparring fortsetzen` oder `Sparring wieder aufnehmen` rekonstruieren einen abgebrochenen Lauf aus `sparring/*/state.md` statt aus Chatverlauf. Bei genau einem aktiven Sparring setzt der Agent automatisch fort; bei Mehrdeutigkeit oder fehlenden Schrittdateien zeigt er eine knappe Recovery-Karte.
 
 ### Changed (Simplification Pass)
 - **SKILL.md auf Kern-Workflow eingedampft** (525 → 275 Zeilen, ~48 % weniger). Detail-Sektionen leben jetzt in `text-sparring/references/` (Pre-Check, Turbo, RESIZE, Gates, Conventions) und werden bei Bedarf gelesen. Lädt damit beim Triggern ein deutlich kleineres Stück Kontext.

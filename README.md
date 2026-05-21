@@ -28,6 +28,8 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der
 
 **Silent Wait Mode**: Während ein Agent im Wait-Loop ist, bleibt er stumm. Er schreibt keine Zwischenberichte oder Spekulationen, sondern reagiert erst wieder auf WAKE, DONE oder TIMEOUT.
 
+**Resume nach Context-Limit**: Wenn eine Session abbricht oder der Chatverlauf verloren geht, reicht ein kurzer Prompt wie `Resume Sparring`. Der Agent liest `sparring/*/state.md`, erkennt den aktiven Lauf und setzt genau am nächsten Schritt fort oder startet wieder den Wait-Loop. Bei mehreren aktiven Läufen fragt er nach dem Namen.
+
 **Pre-Check-Modus**: Vor dem INIT kannst du das Artefakt auf Sparring-Eignung prüfen lassen. Der Skill bewertet drei Dimensionen (Headroom, Konfliktfläche, Zielklarheit) auf einer 0/1/2-Skala (Max-Score 6/6) und empfiehlt 0–10 Runden, gedeckelt durch einen Größen-Cap. Absolute Vetos (kein lesbares Artefakt, kein Zielzustand erkennbar) führen zur Empfehlung 0 Runden. Der Turbo-Modus liest die Pre-Check-Empfehlung als Default für die Rundenzahl ein.
 
 **Opt-in Qualitätsmessung (separater Skill)**: Die optionale dialektische Qualitätsmessung lebt im Sibling-Skill **`text-sparring-measurement`** (eigenes Bundle in `dist/text-sparring-measurement.skill`). Wenn aktiviert, erzeugt ein Evaluator-Subagent nach jedem Schritt Messdaten in `MEASUREMENT.md`. Vier rubrikspezifische Profile je nach Sparring-Typ (Text, Campaign, Skill, Code), 5 Dimensionen pro Profil auf 1–5-Skala. Baseline am Artefaktstart, Round-Delta pro Runde, kumulative Kurve am Ende. Default: ausgeschaltet. Wer Sparring ohne Messung will, braucht den Measurement-Skill nicht zu installieren.
@@ -136,8 +138,8 @@ Du kannst auf dasselbe Artefakt mehrere Sparrings legen (z. B. `readme-v1`, `rea
 Der Skill triggert auf eine breite Palette von Formulierungen.
 
 **Hauptskill `text-sparring`** (INIT + JOIN):
-- **DE**: `Text-Sparring starten`, `Auto-Sparring`, `Autosparring`, `Sparring über Dateien/Ordner`, `lass zwei Agenten meinen Text schärfen`, `dialektischer Loop`, `Steig ins Sparring ein`, `Multi-Agent-Refinement`
-- **EN**: `set up a text sparring`, `let two agents spar on this`, `join the running sparring`
+- **DE**: `Text-Sparring starten`, `Auto-Sparring`, `Autosparring`, `Sparring über Dateien/Ordner`, `Resume Sparring`, `Sparring fortsetzen`, `Sparring wieder aufnehmen`, `lass zwei Agenten meinen Text schärfen`, `dialektischer Loop`, `Steig ins Sparring ein`, `Multi-Agent-Refinement`
+- **EN**: `set up a text sparring`, `let two agents spar on this`, `resume sparring`, `continue sparring`, `join the running sparring`
 
 **Turbo-Modus** (INIT ohne Interview): `Auto-Sparring`, `Autosparring`, `Turbo-Modus`, `Schnellstart`, `ohne Fragen`, `auto-init`, `auto init`, `quickstart`, `quick`
 
