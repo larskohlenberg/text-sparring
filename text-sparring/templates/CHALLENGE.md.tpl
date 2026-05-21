@@ -10,33 +10,12 @@
 
 ---
 
-## Zweck
-
-Zwei Agenten verbessern ein Artefakt iterativ über die in `state.md` festgelegte Rundenzahl. Jede Runde besteht aus drei Schritten — **These**, **Antithese**, **Synthese**. Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der letzten Runde endet die Challenge automatisch; das Ergebnis liegt in `FINAL_ARTIFACT.md` beziehungsweise `FINAL_ARTIFACT/`.
-
-Es geht **nicht um einen Gewinner**. Es geht um akkumulierte Qualität durch Widerspruch und Integration.
-
-Wenn in `state.md` `Measurement: on` gesetzt ist, läuft nach jeder Synthese ein dritter, neutraler Evaluator-Subagent, der einen deskriptiven Delta-Score erzeugt (`measurement_round.md`, `measurement_cumulative.md`). Diese Bewertung ist **kein Sieg-Kriterium** und beeinflusst die Rollenarbeit nicht — sie ist nur ein Anhaltspunkt für den User. These-, Antithese- und Synthese-Agents arbeiten unverändert nach ihren Rollen-Definitionen, ohne den Score zu optimieren.
-
----
-
 ## Sparring-Gegenstand
 
 Der konkrete Gegenstand steht in `{SPARRING_PATH}/artifact.md` und zusätzlich in `{SPARRING_PATH}/state.md`.
 
 - `Artifact-Typ: file` bedeutet: Die Arbeitsfassung ist eine einzelne Datei (`artifact.md`, `step_1_thesis.md`, `step_3_synthesis.md`).
 - `Artifact-Typ: directory` bedeutet: Die Arbeitsfassung ist ein Verzeichnis (`artifact/`, `step_1_thesis/`, `step_3_synthesis/`).
-- `Sparring-Typ` ist die User-Wahl: `Auto`, `Text`, `Campaign`, `Skill` oder `Code`.
-- `Erkannter Sparring-Typ` ist die konkrete Interpretation für diesen Lauf.
-
-Bei `Sparring-Typ: Auto` leite den erkannten Typ aus Artefakt und Projektkontext ab:
-
-- `Text`: generische Text-, README-, Essay- oder Konzeptarbeit.
-- `Campaign`: mehrere Posts, Kampagnenplaene, Content-Serien oder Redaktionsmaterial.
-- `Skill`: Skills, Agent-Workflows, Prompt-/Template-Systeme oder `.skill`-Bundles.
-- `Code`: Quellcode, Tests, Build-Dateien oder technische Implementierungen.
-
-Bei explizitem `Sparring-Typ` uebernimm diesen als erkannten Typ. Frage nur nach, wenn Artefakt und Typ offensichtlich widersprechen.
 
 Bei `Artifact-Typ: directory` erzeugen nur These und Synthese Verzeichnisse. Die Antithese bleibt immer `step_2_antithesis.md`, weil sie keine neue Artefaktfassung ist, sondern strukturierte Kritik.
 
@@ -154,32 +133,7 @@ Regeln:
 
 ---
 
-## Ausführungsmodus
-
-Das Sparring kann Schritte inline oder in isolierten Subagent-Kontexten ausführen. Die aktive Einstellung steht in `{SPARRING_PATH}/state.md`:
-
-- `Ausführungsmodus` ist die User-Wahl: `Auto`, `Subagent` oder `Inline`.
-- `Step-Ausführung` ist die tatsächliche Umsetzung im aktuellen Tool: `subagent` oder `inline`.
-- `Subagent-Qualität` ist die Qualitäts-Policy für Step-Subagents: `Inherit`, `Balanced`, `High` oder `Role-based`.
-
-Im Subagent-Modus erzeugt die Hauptsession vor jedem Schritt eine Datei unter `{SPARRING_PATH}/context/round_NN_step_M_prompt.md`. Der Subagent/Worker/Workstream erhält nur diesen Step-Kontext und schreibt nur die dort genannten Output-Dateien.
-
-Wichtig:
-
-- Nur die Hauptsession aktualisiert `state.md`.
-- Nur die Hauptsession legt neue Runden an.
-- Nur die Hauptsession startet den Wait-Loop.
-- Subagents dürfen keine Orchestrierung übernehmen.
-- Wenn `Ausführungsmodus: Subagent` gesetzt ist und ein Tool keine Subagents starten kann, muss der Agent stoppen und den User fragen. Kein stiller Fallback.
-- Bei `Ausführungsmodus: Auto` darf ein Agent auf inline zurückfallen, wenn keine Subagent-Ausführung verfügbar ist.
-- Bei `Subagent-Qualität: Inherit` werden keine Modell- oder Reasoning-Overrides gesetzt.
-- Bei `Balanced`, `High` oder `Role-based` übersetzt der Agent die Policy in die beste verfügbare lokale Modell-/Reasoning-Einstellung. Wenn das Tool keine Qualitätswahl erlaubt, verwende faktisch `Inherit`.
-
----
-
-## Rotationsplan (Vollrotation)
-
-Der Rotationsplan ist als 10-Runden-Muster definiert. Wenn weniger als 10 Runden gewählt wurden, gilt nur der Präfix bis zur gewählten Gesamtrundenzahl. Bei genau 10 Runden ist die Rollenverteilung exakt ausbalanciert (5×5 je Rolle).
+## Rotationsplan
 
 | Runde | These | Antithese | Synthese |
 |-------|-------|-----------|----------|
@@ -213,40 +167,9 @@ Nach der letzten Runde wird `step_3_synthesis.md` beziehungsweise `step_3_synthe
 
 ---
 
-## Exit-Bedingungen
+## Verhaltensregeln
 
-- Nach Schritt 3 der letzten Runde: Challenge beendet, `state.md` zeigt `completed`.
-- Während des Wait-Loops: Falls 30 Min Timeout → der wartende Agent fragt den User nach.
-- Manueller Abbruch: User kann jederzeit einer Session sagen "stoppen", dann beendet der Agent den Loop und schreibt nichts mehr.
-
----
-
-## Silent Wait Mode
-
-Sobald ein Agent den Wait-Loop startet, bleibt er stumm, bis der Prozess endet.
-
-Erlaubte Reaktionen gibt es nur auf:
-
-- Exit 0 / WAKE
-- Exit 1 / DONE
-- Exit 2 / TIMEOUT
-
-Während des Wartens:
-
-- Keine Zwischenberichte.
-- Keine Spekulation über den anderen Agenten.
-- Keine Plananalyse.
-- Keine erneute Zusammenfassung.
-- Keine UI-Kommentare wie "weiter wartend" oder "noch kein Wake".
-
----
-
-## Verhaltensregeln für beide Agenten
-
-1. **state.md ist die einzige Wahrheit.** Vor jeder Aktion lesen — kein Vertrauen ins eigene Gedächtnis.
-2. **Genau ein Schritt pro Aufwachen.** Nach Erledigung zurück in den Wait-Loop.
-3. **Silent Wait Mode.** Während `watch_loop.sh` läuft, keine Zwischenkommentare oder Statusmeldungen ausgeben.
-4. **Keine Meta-Kommentare in den Output-Dateien.** Reine Inhalts-Outputs.
-5. **Übergabeimpulse getrennt halten.** Prüfimpulse gehören in `*_handoff.md`, nicht in die Hauptoutput-Dateien.
-6. **Bei Inkonsistenz**: Stop, frag den User. Nicht raten.
-7. **Rollentreue**: Wenn du als Antithese-Agent versucht bist, "konstruktiv zu sein" — widerstehe. Die Rolle braucht die Schärfe.
+1. **Keine Meta-Kommentare in den Output-Dateien.** Reine Inhalts-Outputs.
+2. **Übergabeimpulse getrennt halten.** Prüfimpulse gehören in `*_handoff.md`, nicht in die Hauptoutput-Dateien.
+3. **Bei Inkonsistenz**: Stop, frag den User. Nicht raten.
+4. **Rollentreue**: Wenn du als Antithese-Agent versucht bist, "konstruktiv zu sein" — widerstehe. Die Rolle braucht die Schärfe.
