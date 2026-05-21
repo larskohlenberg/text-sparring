@@ -110,7 +110,7 @@ Agent A:
 - Legt `sparring/<NAME>/` an und erzeugt die Projektdateien für das Sparring
 - Ergänzt, falls passend, eine Tool-spezifische Startanweisung
 - Erledigt **Schritt 1 (These) in Runde 1** plus Übergabeimpuls
-- Geht in den Wait-Loop
+- Fährt je nach Ausführungsmodus fort: `VollAutoSubagent` orchestriert alle weiteren Schritte in derselben Session bis zum Finalartefakt; `Subagent` und `Inline` geben den Handover-Prompt aus und gehen danach in den Wait-Loop
 
 ### Zweites Tool starten
 
@@ -187,6 +187,15 @@ Bei Directory-Artefakten bleibt die Antithese trotzdem immer eine Markdown-Datei
 - `Auto`: Subagent-Ausführung verwenden, wenn das aktuelle Tool sie erkennbar unterstützt; sonst inline.
 - `Subagent`: Zwei-Session-Architektur — jeder Agent führt seinen eigenen Schritt als Subagent aus; Koordination läuft via Watch-Loop und `state.md`. Wenn das Tool Subagents nicht kann, stoppt der Agent und fragt nach.
 - `Inline`: Der aktive Agent erledigt seine Schritte direkt in der Hauptsession.
+
+Kurzentscheidung:
+
+| Situation | Empfohlener Modus |
+|-----------|-------------------|
+| Ein Claude-kompatibles Tool soll beide Rollen in einer Session bis zum Ende orchestrieren | `VollAutoSubagent` |
+| Zwei lokale Agent-Sessions sollen sich autonom über Dateien abwechseln | `Subagent` |
+| Das aktuelle Tool kann keine Subagents oder das Sparring soll bewusst direkt in der Hauptsession laufen | `Inline` |
+| Unsicher, ob Subagents verfügbar sind | `Auto` |
 
 ### Subagent-Qualität
 
