@@ -40,7 +40,7 @@ Die Synthese einer Runde wird zum Ausgangsartefakt der nächsten Runde. Nach der
 - **Kein externer Daemon**: Kein `fswatch`, kein `cron`, kein `launchd`. Pures Bash + Markdown.
 - **Self-polling Agents**: Nach jedem erledigten Schritt geht der Agent in einen blockierenden Bash-Loop (`watch_loop.sh`), prüft alle 30 Sekunden `state.md` und übernimmt automatisch, sobald er wieder dran ist.
 - **Stummes Warten**: Der Wait-Loop erzeugt keine laufenden UI-Kommentare. Das spart Tokens und hält die Hauptsession sauber.
-- **Nur zwei manuelle Starts nötig**: einmal im initiierenden Tool ("Setup Sparring"), einmal im zweiten Tool ("Steig ein"). Danach läuft der Wechsel automatisch bis zur gewählten letzten Runde.
+- **Minimal ein manueller Start nötig**: Im `VollAutoSubagent`-Modus reicht ein einziger Start — der INIT-Agent orchestriert beide Rollen als Subagenten bis zum Finalartefakt. Im `Subagent`-Modus sind zwei Starts nötig (einmal pro Agent); danach läuft der Wechsel automatisch via Watch-Loop.
 
 ## Architektur
 
@@ -161,7 +161,7 @@ Standard-Werte im Skill (können in `state.md` pro Projekt überschrieben werden
 | `MAX_WAIT_MIN` | `30` | Max. Wartezeit bevor Timeout-Alarm |
 | Anzahl Runden | `10` | Wählbar von 1 bis 10 |
 | `Sparring-Typ` | `Auto` | `Auto`, `Text`, `Campaign`, `Skill` oder `Code`; wird in `state.md` gespeichert |
-| `Ausführungsmodus` | `Auto` | `Auto`, `Subagent` oder `Inline`; wird in `state.md` gespeichert |
+| `Ausführungsmodus` | `Auto` | `Auto`, `VollAutoSubagent`, `Subagent` oder `Inline`; wird in `state.md` gespeichert |
 | `Messung` | `Aus` | Opt-in Qualitätsmessung über den Sibling-Skill `text-sparring-measurement`: `Aus` oder `An`; Aktivierung per Trigger-Phrase oder explizit beim INIT |
 
 ### Artefakte
@@ -183,8 +183,9 @@ Bei Directory-Artefakten bleibt die Antithese trotzdem immer eine Markdown-Datei
 
 ### Ausführungsmodi
 
+- `VollAutoSubagent`: Ein INIT-Agent orchestriert **beide Rollen** vollautomatisch als Subagenten-Loop. Kein Handover, keine zweite Session, kein Wait-Loop. Empfohlen, wenn beide Agenten Claude sind und alles in einer Session laufen soll.
 - `Auto`: Subagent-Ausführung verwenden, wenn das aktuelle Tool sie erkennbar unterstützt; sonst inline.
-- `Subagent`: Jeden Schritt in einem frischen Subagent/Worker/Workstream ausführen. Wenn das Tool das nicht kann, stoppt der Agent und fragt nach.
+- `Subagent`: Zwei-Session-Architektur — jeder Agent führt seinen eigenen Schritt als Subagent aus; Koordination läuft via Watch-Loop und `state.md`. Wenn das Tool Subagents nicht kann, stoppt der Agent und fragt nach.
 - `Inline`: Der aktive Agent erledigt seine Schritte direkt in der Hauptsession.
 
 ### Subagent-Qualität

@@ -64,7 +64,12 @@ Fünf Pflichtfragen — der Rest kommt aus Smart-Defaults und Projekt-Scan, die 
 2. **Wie soll dieses Sparring heißen?** Leite einen Slug aus dem Artefakt-Basename ab (z. B. `draft.md` → `draft`). Bei Kollision unter `sparring/` automatisch den nächsten freien Slug wählen (`-v2`, `-v3`, ...). Das gilt auch bei laufenden Sparrings und auch dann, wenn Artefakt oder Kontext identisch sind. Normalisiere: nur Kleinbuchstaben, Ziffern, Bindestriche. Im weiteren Verlauf heißt dieser Slug `<NAME>`.
 3. **Welches zweite Tool kommt rein?** Default `Codex CLI` oder `andere Claude Code Session` (vollautonom, Wait-Loop funktioniert). `ChatGPT (Web)` nur, wenn der User explizit kein lokales Tool hat. Frag dann nach dem Namen, wie er später in `state.md` stehen soll (z. B. "Codex", "GPT-5").
 4. **Wie viele Runden?** Schnelltest → `3`, realer Verbesserungsdurchlauf → `5`, tiefe Schärfung → `10`. Begründung soll auf Artefaktgröße und User-Ziel basieren.
-5. **Ausführungsmodus?** Default `Subagent`, wenn die Umgebung Subagents erkennbar unterstützt; sonst `Inline`. `Auto` nur bei Unsicherheit. Subagent isoliert Step-Kontexte sauberer.
+5. **Ausführungsmodus?** Drei Optionen:
+   - `VollAutoSubagent`: Du orchestrierst BEIDE Agenten vollautomatisch — kein Handover, keine zweite Session. Wählen, wenn beide Agenten Claude sind und alles in dieser Session laufen soll.
+   - `Subagent` (Default wenn Subagents verfügbar): Jeder Agent führt seinen eigenen Schritt als Subagent aus; die zwei Sessions koordinieren sich via Wait-Loop.
+   - `Inline`: Kein Subagenten-Support — direkt in der Hauptsession, ohne Wait-Loop.
+   
+   `Auto` nur bei Unsicherheit über Subagent-Support.
 
 Smart-Defaults (in der Zusammenfassung zur Bestätigung zeigen, nicht einzeln fragen):
 
@@ -149,9 +154,18 @@ Bei `Measurement: off` überspringen. Bei `Measurement: on` siehe der `text-spar
 - `Dran:` auf den zweiten Agent (Name aus Interview)
 - Verlauf-Sektion aktualisieren
 
-### Schritt 7: Handover-Prompt ausgeben und Wait-Loop starten
+### Schritt 7: Handover oder VollAuto-Orchestrierung
 
-**Vor** dem Wait-Loop musst du dem User einen fertigen, copy-paste-fähigen Handover-Prompt für den zweiten Agenten ausgeben. Format:
+**Bei `Ausführungsmodus: VollAutoSubagent`**: Kein Handover-Prompt, kein Wait-Loop. Führe stattdessen einen vollautomatischen Orchestrierungs-Loop aus bis alle Runden abgeschlossen sind:
+
+1. Lies `state.md`: identifiziere aktuelle Runde, Schritt, Rolle und den dran seienden Agenten.
+2. Erzeuge `sparring/<NAME>/context/round_NN_step_M_prompt.md` aus `templates/step_context.md.tpl` mit der korrekten Rolle (These/Antithese/Synthese) und dem Agenten-Namen laut Rotationsplan.
+3. Beauftrage einen frischen Subagent mit genau diesem Kontext. Warte auf Abschluss. Prüfe, dass die erwarteten Output-Dateien geschrieben wurden.
+4. Aktualisiere `state.md`: Schritt als ✅ markieren, `Dran:` auf den nächsten Schritt/Agenten setzen, Verlauf aktualisieren.
+5. Falls Synthese der letzten Runde abgeschlossen: Final-Artefakt kopieren (`rounds/round_NN/step_3_synthesis.md` → `sparring/<NAME>/FINAL_ARTIFACT.md` bzw. Directory-Variante), Status auf `completed` setzen. Ausgabe: *"Sparring `<NAME>` abgeschlossen — finales Artefakt liegt in `sparring/<NAME>/FINAL_ARTIFACT.md`."* Fertig.
+6. Sonst: zurück zu Schritt 1 des Loops (nächster Schritt oder neue Runde anlegen wie in JOIN-Modus Schritt 3 beschrieben).
+
+**Bei `Ausführungsmodus: Subagent` oder `Inline`**: Gib dem User einen fertigen, copy-paste-fähigen Handover-Prompt für den zweiten Agenten aus. Format:
 
 > Setup für Sparring **`<NAME>`** steht. Schritt 1 (These) ist fertig. Ich gehe gleich in den Wait-Loop.
 >
