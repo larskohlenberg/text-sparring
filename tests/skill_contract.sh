@@ -54,6 +54,14 @@ require 'Kollision.*-v2|-v3|kollisionsfrei' \
 require 'State-Konflikt.*nicht.*bei.*neuen|neuer.*Lauf.*State-Konflikt|Turbo.*aktive.*Sparrings.*nicht.*abbrechen' \
   "Turbo/new-run flow must not abort just because another sparring state exists."
 
+if grep -Eq 'Hauptskill `text-sparring`.*\(INIT \+ JOIN\):' README.md; then
+  echo "FAIL: README must not describe the main skill as INIT + JOIN only." >&2
+  exit 1
+fi
+
+require 'SKILL\.md.*INIT.*JOIN.*RESUME|SKILL\.md.*RESUME.*INIT.*JOIN' \
+  "Skill file overview must mention RESUME alongside INIT/JOIN."
+
 reject 'Trigger-Phrase Worte wie "Turbo", "Schnellstart", "ohne Fragen", "auto", "quick"' \
   "Generic 'auto' must not route to Turbo mode; it catches Auto-Sparring."
 

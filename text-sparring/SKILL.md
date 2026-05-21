@@ -293,6 +293,7 @@ Erlaubte Reaktionen gibt es nur auf Exit 0 / WAKE, Exit 1 / DONE, Exit 2 / TIMEO
 ## Spezialmodi
 
 - **Pre-Check** (lohnt sich ein Sparring überhaupt? 3-Dim-Scoring + Vetos) → `references/precheck.md`
+- **RESUME** (nach Context-Limit, Session-Abbruch oder Neustart) → RESUME-Modus oben
 - **Turbo** (INIT ohne Interview, AI-defaultet alles) → `references/turbo.md`
 - **RESIZE** (laufendes oder abgeschlossenes Sparring verlängern/verkürzen) → `references/resize.md`
 - **Measurement** (optional, pro Runde dialektischer Delta-Score gegen Baseline) → der `text-sparring-measurement`-Skill
@@ -305,7 +306,7 @@ Siehe `references/conventions.md` — vor der ersten Aktion einmal lesen. Kurzfa
 
 | Datei | Zweck |
 |-------|-------|
-| `SKILL.md` | Kern-Workflow: Modus-Erkennung, INIT, JOIN, Wait-Loop |
+| `SKILL.md` | Kern-Workflow: Modus-Erkennung, INIT, JOIN, RESUME, Wait-Loop |
 | `references/gates.md` | Vier-Gates-Checkliste vor jeder Schreibaktion |
 | `references/turbo.md` | INIT ohne Interview |
 | `references/precheck.md` | Sparring-Fit-Bewertung vor Setup |

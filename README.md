@@ -139,7 +139,7 @@ Du kannst auf dasselbe Artefakt mehrere Sparrings legen (z. B. `readme-v1`, `rea
 
 Der Skill triggert auf eine breite Palette von Formulierungen.
 
-**Hauptskill `text-sparring`** (INIT + JOIN):
+**Hauptskill `text-sparring`** (INIT + JOIN + RESUME):
 - **DE**: `Text-Sparring starten`, `Auto-Sparring`, `Autosparring`, `Sparring über Dateien/Ordner`, `Resume Sparring`, `Sparring fortsetzen`, `Sparring wieder aufnehmen`, `lass zwei Agenten meinen Text schärfen`, `dialektischer Loop`, `Steig ins Sparring ein`, `Multi-Agent-Refinement`
 - **EN**: `set up a text sparring`, `let two agents spar on this`, `resume sparring`, `continue sparring`, `join the running sparring`
 
